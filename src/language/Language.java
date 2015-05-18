@@ -41,11 +41,11 @@ public class Language {
 		}
 		return result;
 	}
-	public static Nonterminal let(String label) {
-		return Nonterminal.getInstance(label);
+	public static Identifier let(String label) {
+		return Identifier.getInstance(label);
 	}
-	public static Nonterminal nonterm(String label) {
-		return Nonterminal.getInstance(label);
+	public static Identifier id(String label) {
+		return Identifier.getInstance(label);
 	}
 	// Match language*
 	public static Node many(Node regex) {

@@ -8,6 +8,6 @@ public interface Visitor<T> {
 	T visit(Sequence node);
 	T visit(Or node);
 	T visit(Star node);
-	T visit(Nonterminal nonterminal);
+	T visit(Identifier nonterminal);
 	T visit(Rule rule);
 }

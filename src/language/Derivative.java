@@ -44,7 +44,7 @@ public class Derivative implements Visitor<Node> {
 	}
 
 	@Override
-	public Node visit(Nonterminal nonterminal) {
+	public Node visit(Identifier nonterminal) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -13,15 +13,16 @@ public class RegexExample {
 		System.out.println(asString(regex2));
 		System.out.println(matches(regex2, "foofoobar"));
 		
-		let("regex").derive(nonterm("term"),symbol('|'),nonterm("regex"));
-		let("regex").derive(nonterm("term"));
-		let("term").derive(many(nonterm("factor")));
-		let("factor").derive(nonterm("base"), option(symbol('*')));
+		let("regex").derive(id("term"),symbol('|'),id("regex"));
+		let("regex").derive(id("term"));
+		let("term").derive(many(id("factor")));
+		let("factor").derive(id("base"), option(symbol('*')));
 		let("base").derive(symbol('.'));
 		let("base").derive(symbol('\\'), symbol('.'));
-		let("base").derive(symbol('('), nonterm("regex"), symbol(')'));
+		let("base").derive(symbol('('), id("regex"), symbol(')'));
 
-//		let("hello").derive(nonterm("hello"), string("world"), nonterm("hello"));
-		System.out.println(asString(nonterm("regex")));
+		let("hello").derive(id("hello"), string("world"), id("hello"));
+		System.out.println(asString(id("regex")));
+		System.out.println(asString(id("hello")));
 	}
 }

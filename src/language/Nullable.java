@@ -34,7 +34,7 @@ public class Nullable implements Visitor<Boolean> {
 	}
 
 	@Override
-	public Boolean visit(Nonterminal nonterminal) {
+	public Boolean visit(Identifier nonterminal) {
 		// TODO Auto-generated method stub
 		return false;
 	}

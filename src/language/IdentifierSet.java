@@ -3,46 +3,46 @@ package language;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NonterminalSet implements Visitor<Set<Nonterminal>>{
-	Set<Nonterminal> result = new HashSet<Nonterminal>();
+public class IdentifierSet implements Visitor<Set<Identifier>>{
+	Set<Identifier> result = new HashSet<Identifier>();
 
 	@Override
-	public Set<Nonterminal> visit(EmptySet node) {
+	public Set<Identifier> visit(EmptySet node) {
 		return result;
 	}
 
 	@Override
-	public Set<Nonterminal> visit(EmptyString node) {
+	public Set<Identifier> visit(EmptyString node) {
 		return result;
 	}
 
 	@Override
-	public Set<Nonterminal> visit(Symbol node) {
+	public Set<Identifier> visit(Symbol node) {
 		return result;
 	}
 
 	@Override
-	public Set<Nonterminal> visit(Sequence node) {
+	public Set<Identifier> visit(Sequence node) {
 		node.child.left.accept(this);
 		node.child.right.accept(this);
 		return result;
 	}
 
 	@Override
-	public Set<Nonterminal> visit(Or node) {
+	public Set<Identifier> visit(Or node) {
 		node.child.left.accept(this);
 		node.child.right.accept(this);
 		return result;
 	}
 
 	@Override
-	public Set<Nonterminal> visit(Star node) {
+	public Set<Identifier> visit(Star node) {
 		node.child.accept(this);
 		return result;
 	}
 
 	@Override
-	public Set<Nonterminal> visit(Nonterminal nonterminal) {
+	public Set<Identifier> visit(Identifier nonterminal) {
 		if (!result.contains(nonterminal)) {
 			result.add(nonterminal);
 			nonterminal.rule.accept(this);
@@ -51,7 +51,7 @@ public class NonterminalSet implements Visitor<Set<Nonterminal>>{
 	}
 
 	@Override
-	public Set<Nonterminal> visit(Rule rule) {
+	public Set<Identifier> visit(Rule rule) {
 		rule.child.right.accept(this);
 		return result;
 	}

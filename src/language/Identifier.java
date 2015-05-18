@@ -3,17 +3,17 @@ package language;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Nonterminal implements Node {
-	private static final Map<String, Nonterminal> instances = new HashMap<String, Nonterminal>();
+public class Identifier implements Node {
+	private static final Map<String, Identifier> instances = new HashMap<String, Identifier>();
 	public final String label;
 	protected Node rule;
-	private Nonterminal(String label) {
+	private Identifier(String label) {
 		this.label = label;
 		rule = EmptySet.getInstance();
 	}
-	public static Nonterminal getInstance(String label) {
+	public static Identifier getInstance(String label) {
 		if (! instances.containsKey(label)) {
-			instances.put(label, new Nonterminal(label));
+			instances.put(label, new Identifier(label));
 		}
 		return instances.get(label);
 	}
@@ -23,7 +23,7 @@ public class Nonterminal implements Node {
 	}
 	public void derive(Node... nodes) {
 		if (nodes.length == 0) {
-			rule = Or.getInstance(rule, EmptyString.getInstance());
+			rule = Or.getInstance(rule, Rule.getInstance(this, EmptyString.getInstance()));
 		} else if (nodes.length == 1) {
 			rule = Or.getInstance(rule, Rule.getInstance(this, nodes[0]));
 		} else {

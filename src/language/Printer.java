@@ -9,11 +9,11 @@ import java.util.Set;
 public class Printer implements Visitor<Void> {
 	StringBuilder builder = new StringBuilder();
 	public Printer(Node node) {
-		Set<Nonterminal> nonterminals = node.accept(new NonterminalSet());
+		Set<Identifier> nonterminals = node.accept(new IdentifierSet());
 		if (nonterminals.isEmpty()) {
 			node.accept(this);
 		} else {
-			for (Nonterminal nonterminal : nonterminals) {
+			for (Identifier nonterminal : nonterminals) {
 				nonterminal.rule.accept(this);
 			}
 		}
@@ -46,7 +46,9 @@ public class Printer implements Visitor<Void> {
 	@Override
 	public Void visit(Or node) {
 		node.child.left.accept(this);
-		builder.append('|');
+		if (!(node.child.left instanceof Rule || node.child.right instanceof Rule)) {
+			builder.append('|');
+		}
 		node.child.right.accept(this);
 		return null;
 	}
@@ -64,7 +66,7 @@ public class Printer implements Visitor<Void> {
 		return builder.toString();
 	}
 	@Override
-	public Void visit(Nonterminal nonterminal) {
+	public Void visit(Identifier nonterminal) {
 		builder.append("<");
 		builder.append(nonterminal.label);
 		builder.append(">");
