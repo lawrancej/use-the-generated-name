@@ -25,13 +25,13 @@ public class Nonterminal implements Node {
 		if (nodes.length == 0) {
 			rule = Or.getInstance(rule, EmptyString.getInstance());
 		} else if (nodes.length == 1) {
-			rule = Or.getInstance(rule, nodes[0]);
+			rule = Or.getInstance(rule, Rule.getInstance(this, nodes[0]));
 		} else {
 			Node result = Sequence.getInstance(nodes[0], nodes[1]);
 			for (int i = 2; i < nodes.length; i++) {
 				result = Sequence.getInstance(result, nodes[i]);
 			}
-			rule = Or.getInstance(rule, result);
+			rule = Or.getInstance(rule, Rule.getInstance(this, result));
 		}
 	}
 }

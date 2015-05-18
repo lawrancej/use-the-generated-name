@@ -3,14 +3,20 @@ package language;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 // Convert regex to a string
 public class Printer implements Visitor<Void> {
 	StringBuilder builder = new StringBuilder();
-	Queue<Nonterminal> toVisit = new LinkedList<Nonterminal>();
-	HashSet<Nonterminal> visited = new HashSet<Nonterminal>();
 	public Printer(Node node) {
-		node.accept(this);
+		Set<Nonterminal> nonterminals = node.accept(new NonterminalSet());
+		if (nonterminals.isEmpty()) {
+			node.accept(this);
+		} else {
+			for (Nonterminal nonterminal : nonterminals) {
+				nonterminal.rule.accept(this);
+			}
+		}
 	}
 	@Override
 	public Void visit(EmptySet node) {
@@ -59,17 +65,17 @@ public class Printer implements Visitor<Void> {
 	}
 	@Override
 	public Void visit(Nonterminal nonterminal) {
+		builder.append("<");
 		builder.append(nonterminal.label);
-		if (!visited.contains(nonterminal)) {
-			visited.add(nonterminal);
-			builder.append(" -> ");
-			nonterminal.rule.accept(this);
-			builder.append("\n");
-		}
+		builder.append(">");
 		return null;
 	}
 	@Override
 	public Void visit(Rule rule) {
+		rule.child.left.accept(this);
+		builder.append(" ::= ");
+		rule.child.right.accept(this);
+		builder.append("\n");
 		return null;
 	}
 }
