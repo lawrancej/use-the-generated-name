@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+// Language node representing an identifier (a terminal or nonterminal)
 public class Identifier implements Node {
 	private static final Map<String, Identifier> instances = new HashMap<String, Identifier>();
 	public final String label;

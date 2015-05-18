@@ -1,6 +1,6 @@
 package language;
 
-// Does the regular expression match the empty string?
+// Does the language match the empty string?
 public class Nullable implements Visitor<Boolean> {
 
 	@Override

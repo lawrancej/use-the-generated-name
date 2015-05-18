@@ -3,7 +3,7 @@ package language;
 import java.util.HashMap;
 import java.util.Map;
 
-// Regex node representing a character literal
+// Language node representing a character literal
 public class Symbol implements Node {
 	private static Map<Character, Symbol> instances = new HashMap<Character, Symbol>();
 	

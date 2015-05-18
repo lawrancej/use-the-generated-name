@@ -3,7 +3,7 @@ package language;
 import java.util.HashMap;
 import java.util.Map;
 
-// Equals operator in a grammar
+// Equals operator in a language
 public class Rule extends Operator<Pair<Identifier,Node>> {
 	private static Map<Identifier, Rule> instances = new HashMap<Identifier, Rule>();
 	private Rule(Pair<Identifier, Node> children) {

@@ -1,6 +1,6 @@
 package language;
 
-// Convert regex to a string
+// Convert language to a string
 public class Printer implements Visitor<Void> {
 	StringBuilder builder = new StringBuilder();
 	public Printer(Node node) {

@@ -3,7 +3,7 @@ package language;
 import java.util.HashMap;
 import java.util.Map;
 
-// Regex node representing a*
+// Language node representing a*
 public class Star extends Operator<Node> {
 	public static final Map<Node, Star> instances = new HashMap<Node, Star>();
 

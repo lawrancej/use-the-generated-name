@@ -1,6 +1,6 @@
 package language;
 
-// Computes the derivative of a regex with respect to a character.
+// Computes the derivative of a language with respect to a character.
 // See: http://matt.might.net/articles/parsing-with-derivatives/
 public class Derivative implements Visitor<Node> {
 	public char c;

@@ -3,6 +3,7 @@ package language;
 import java.util.HashMap;
 import java.util.Map;
 
+// Language node representing grouping
 public class Group extends Operator<Node> {
 	public static final Map<Node, Group> instances = new HashMap<Node, Group>();
 

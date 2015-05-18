@@ -3,7 +3,7 @@ package language;
 import java.util.HashMap;
 import java.util.Map;
 
-// Regex node representing a followed by b
+// Language node representing a followed by b
 public class Sequence extends Operator<Pair<Node,Node>> {
 
 	private static Map<Pair<Node, Node>, Sequence> instances = new HashMap<Pair<Node,Node>, Sequence>();

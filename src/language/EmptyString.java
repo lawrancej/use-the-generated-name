@@ -1,6 +1,6 @@
 package language;
 
-// Regex node representing the empty string
+// Language node representing the empty string
 public class EmptyString implements Node {
 	private static final EmptyString instance = new EmptyString();
 	private EmptyString() {}

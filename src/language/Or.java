@@ -3,7 +3,7 @@ package language;
 import java.util.HashMap;
 import java.util.Map;
 
-// Regex node representing a|b
+// Language node representing a|b
 public class Or extends Operator<Pair<Node,Node>> {
 	
 	private static Map<Pair<Node, Node>, Or> instances = new HashMap<Pair<Node,Node>, Or>();

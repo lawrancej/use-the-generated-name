@@ -1,6 +1,6 @@
 package language;
 
-// A visitor traverses a tree without placing code in the tree nodes themselves.
+// A visitor traverses nodes without mixing code in those nodes.
 public interface Visitor<T> {
 	T visit(EmptySet node);
 	T visit(EmptyString node);

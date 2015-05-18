@@ -1,6 +1,6 @@
 package language;
 
-// Regex node representing rejection
+// Language node representing rejection
 public class EmptySet implements Node {
 	
 	private static final EmptySet instance = new EmptySet();
