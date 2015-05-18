@@ -1,18 +1,15 @@
 package language;
 
-import java.util.Set;
-
 // Convert regex to a string
 public class Printer implements Visitor<Void> {
 	StringBuilder builder = new StringBuilder();
 	public Printer(Node node) {
-		Set<Identifier> nonterminals = node.accept(new IdentifierSet());
-		if (nonterminals.isEmpty()) {
-			node.accept(this);
-		} else {
-			for (Identifier nonterminal : nonterminals) {
-				nonterminal.rule.accept(this);
+		if (node instanceof Identifier) {
+			for (Identifier nonterminal : Identifier.list()) {
+				Rule.getInstance(nonterminal).accept(this);
 			}
+		} else {
+			node.accept(this);
 		}
 	}
 	@Override
@@ -43,9 +40,7 @@ public class Printer implements Visitor<Void> {
 	@Override
 	public Void visit(Or node) {
 		node.child.left.accept(this);
-		if (!(node.child.left instanceof Rule || node.child.right instanceof Rule)) {
-			builder.append('|');
-		}
+		builder.append('|');
 		node.child.right.accept(this);
 		return null;
 	}
