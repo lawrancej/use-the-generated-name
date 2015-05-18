@@ -82,4 +82,9 @@ public class Printer implements Visitor<Void> {
 		builder.append("<char>");
 		return null;
 	}
+	@Override
+	public Void visit(Group group) {
+		group.child.accept(this);
+		return null;
+	}
 }

@@ -61,4 +61,10 @@ public class IdentifierSet implements Visitor<Set<Identifier>>{
 		return result;
 	}
 
+	@Override
+	public Set<Identifier> visit(Group group) {
+		group.child.accept(this);
+		return null;
+	}
+
 }

@@ -11,4 +11,5 @@ public interface Visitor<T> {
 	T visit(Identifier nonterminal);
 	T visit(Rule rule);
 	T visit(Any any);
+	T visit(Group group);
 }

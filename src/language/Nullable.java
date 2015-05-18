@@ -49,4 +49,9 @@ public class Nullable implements Visitor<Boolean> {
 	public Boolean visit(Any any) {
 		return false;
 	}
+
+	@Override
+	public Boolean visit(Group group) {
+		return group.child.accept(this);
+	}
 }

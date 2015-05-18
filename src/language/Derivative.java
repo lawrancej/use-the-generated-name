@@ -59,4 +59,9 @@ public class Derivative implements Visitor<Node> {
 	public Node visit(Any any) {
 		return EmptyString.getInstance();
 	}
+
+	@Override
+	public Node visit(Group group) {
+		return Group.getInstance(group.child.accept(this));
+	}
 }
