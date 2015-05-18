@@ -1,8 +1,5 @@
 package language;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
 
 // Convert regex to a string
@@ -78,6 +75,11 @@ public class Printer implements Visitor<Void> {
 		builder.append(" ::= ");
 		rule.child.right.accept(this);
 		builder.append("\n");
+		return null;
+	}
+	@Override
+	public Void visit(Any any) {
+		builder.append("<char>");
 		return null;
 	}
 }

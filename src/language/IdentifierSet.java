@@ -56,4 +56,9 @@ public class IdentifierSet implements Visitor<Set<Identifier>>{
 		return result;
 	}
 
+	@Override
+	public Set<Identifier> visit(Any any) {
+		return result;
+	}
+
 }

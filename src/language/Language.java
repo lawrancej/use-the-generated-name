@@ -47,6 +47,9 @@ public class Language {
 	public static Identifier id(String label) {
 		return Identifier.getInstance(label);
 	}
+	public static Any any() {
+		return Any.getInstance();
+	}
 	// Match language*
 	public static Node many(Node regex) {
 		return Star.getInstance(regex);

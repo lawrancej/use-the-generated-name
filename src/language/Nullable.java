@@ -44,4 +44,9 @@ public class Nullable implements Visitor<Boolean> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Boolean visit(Any any) {
+		return false;
+	}
 }

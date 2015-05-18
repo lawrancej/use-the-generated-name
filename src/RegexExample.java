@@ -17,8 +17,8 @@ public class RegexExample {
 		let("regex").derive(id("term"));
 		let("term").derive(many(id("factor")));
 		let("factor").derive(id("base"), option(symbol('*')));
-		let("base").derive(symbol('.'));
-		let("base").derive(symbol('\\'), symbol('.'));
+		let("base").derive(any());
+		let("base").derive(symbol('\\'), any());
 		let("base").derive(symbol('('), id("regex"), symbol(')'));
 
 		let("hello").derive(id("hello"), string("world"), id("hello"));

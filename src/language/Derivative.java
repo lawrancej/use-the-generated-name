@@ -54,4 +54,9 @@ public class Derivative implements Visitor<Node> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Node visit(Any any) {
+		return EmptyString.getInstance();
+	}
 }

@@ -10,4 +10,5 @@ public interface Visitor<T> {
 	T visit(Star node);
 	T visit(Identifier nonterminal);
 	T visit(Rule rule);
+	T visit(Any any);
 }
