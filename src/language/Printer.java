@@ -26,22 +26,27 @@ public class Printer implements Visitor<Void> {
 
 	@Override
 	public Void visit(Symbol node) {
+		builder.append('\'');
 		builder.append(node.symbol);
+		builder.append('\'');
 		return null;
 	}
 
 	@Override
 	public Void visit(Sequence node) {
 		node.child.left.accept(this);
+		builder.append(" "); // FIXME
 		node.child.right.accept(this);
 		return null;
 	}
 
 	@Override
 	public Void visit(Or node) {
+		builder.append('(');
 		node.child.left.accept(this);
 		builder.append('|');
 		node.child.right.accept(this);
+		builder.append(')');
 		return null;
 	}
 

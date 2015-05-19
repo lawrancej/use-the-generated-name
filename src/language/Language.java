@@ -76,14 +76,19 @@ public class Language {
 	
 	// Is the language nullable?
 	public static boolean nullable(Node node) {
-		return node.accept(new Nullable());
+		return Nullable.nullable(node);
 	}
 	
+	// What appears first?
+	public static Node firstSet(Node node) {
+		return FirstSet.firstSet(node);
+	}
 	// Derivative matching
 	private static Derivative derivative = new Derivative();
 	// Compute Dc(regex)
 	public static Node derivative(Node regex, char c) {
 		derivative.c = c;
+		derivative.visited.clear();
 		return regex.accept(derivative);
 	}
 	// Does the language match the string?
@@ -91,7 +96,7 @@ public class Language {
 		for (int i = 0; i < s.length(); i++) {
 			regex = derivative(regex, s.charAt(i));
 			// FIXME: Uncomment to debug
-			// System.out.println(asString(regex));
+			System.out.println(asString(regex));
 		}
 		return nullable(regex);
 	}

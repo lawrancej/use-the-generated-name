@@ -11,6 +11,12 @@ public class Sequence extends Operator<Pair<Node,Node>> {
 		this.child = children;
 	}
 	public static Node getInstance(Node left, Node right) {
+		if (left == EmptySet.getInstance() || right == EmptySet.getInstance()) {
+			return EmptySet.getInstance();
+		}
+		if (left == EmptyString.getInstance()) {
+			return right;
+		}
 		Pair<Node, Node> children = new Pair<Node, Node>(left, right);
 		if (! instances.containsKey(children)) {
 			instances.put(children, new Sequence(children));

@@ -8,7 +8,7 @@ public interface Visitor<T> {
 	T visit(Sequence node);
 	T visit(Or node);
 	T visit(Star node);
-	T visit(Identifier nonterminal);
+	T visit(Identifier id);
 	T visit(Rule rule);
 	T visit(Any any);
 	T visit(Group group);

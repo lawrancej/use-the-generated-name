@@ -1,9 +1,13 @@
 package language;
 
+import java.util.HashSet;
+import java.util.Set;
+
 // Computes the derivative of a language with respect to a character.
 // See: http://matt.might.net/articles/parsing-with-derivatives/
 public class Derivative implements Visitor<Node> {
 	public char c;
+	public Set<Identifier> visited = new HashSet<Identifier>();
 
 	@Override
 	public Node visit(EmptySet node) {
@@ -44,14 +48,18 @@ public class Derivative implements Visitor<Node> {
 	}
 
 	@Override
-	public Node visit(Identifier nonterminal) {
-		// TODO Auto-generated method stub
-		return null;
+	public Node visit(Identifier id) {
+		Identifier derivative = Identifier.getInstance("D" + c + id.label);
+		
+		if (!visited.contains(id)) {
+			visited.add(id);
+			derivative.derive(Rule.getInstance(id).child.right.accept(this));
+		}
+		return derivative;
 	}
 
 	@Override
 	public Node visit(Rule rule) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
