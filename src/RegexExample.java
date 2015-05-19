@@ -1,21 +1,22 @@
 import static language.Language.*;
 import language.Node;
+import language.Rule;
 
 public class RegexExample {
 
-	public void helloTest() {
+	public static void helloTest() {
 		Node regex = string("Hello, world!");
 		System.out.println(asString(regex));
 		System.out.println(matches(regex,"Hello, world!"));
 	}
 
-	public void somethingTest() {
+	public static void somethingTest() {
 		Node regex2 = many(or(string("foo"),string("bar"),string("frak")));
 		System.out.println(asString(regex2));
 		System.out.println(matches(regex2, "foofoobar"));
 	}
 	
-	public void regexTest() {
+	public static void regexTest() {
 		let("regex").derive(id("term"),symbol('|'),id("regex"));
 		let("regex").derive(id("term"));
 		let("term").derive(many(id("factor")));
@@ -29,23 +30,29 @@ public class RegexExample {
 //		System.out.println(asString(id("hello")));
 	}
 	
-	public void leftRecursiveList() {
+	public static void leftRecursiveList() {
 		let("L").derive(id("L"),symbol('x'));
 		let("L").derive();
 		System.out.println(asString(id("L")));
 		System.out.println(nullable(id("L")));
-//		System.out.println(matches(id("L"), "x"));
+		System.out.println(matches(id("L"), "x"));
+		System.out.println(asString(firstSet(id("L"))));
 	}
 	
-	public void balancedParens() {
+	public static void balancedParens() {
 		let("S").derive(id("S"), symbol('('), id("S"), symbol(')'));
 		let("S").derive(empty());
+		System.out.print("Grammar: ");
 		System.out.println(asString(id("S")));
+		System.out.print("Nullable? ");
 		System.out.println(nullable(id("S")));
-//		System.out.println(matches(id("S"), "()"));
+		System.out.print("First set: ");
+		System.out.println(asString(firstSet(id("S"))));
+		System.out.println("Matches ()?");
+		System.out.println(matches(id("S"),"()()"));
 	}
 	
-	public void page148() {
+	public static void page148() {
 		let("S").derive(id("A"), id("C"));
 		let("C").derive(symbol('c'));
 		let("C").derive();
@@ -55,16 +62,13 @@ public class RegexExample {
 		let("B").derive();
 		let("Q").derive(symbol('q'));
 		let("Q").derive();
+		System.out.println(asString(id("S")));
 		System.out.println(asString(firstSet(id("Q"))));
+		System.out.println(nullable(id("S")));
 	}
 	
 	// Crazy complicated "Hello, world!"
 	public static void main(String[] args) {
-		let("S").derive(id("S"), symbol('('), id("S"), symbol(')'));
-		let("S").derive(empty());
-		System.out.println(asString(id("S")));
-		System.out.println(nullable(id("S")));
-		System.out.println(asString(firstSet(id("S"))));
-		System.out.println(matches(id("S"),"()"));
+		balancedParens();
 	}
 }

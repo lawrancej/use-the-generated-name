@@ -70,34 +70,31 @@ public class Language {
 	}
 
 	// Get the string representation of a language
-	public static String asString(Node node) {
-		return new Printer(node).toString();
+	public static String asString(Node language) {
+		return new Printer(language).toString();
 	}
 	
 	// Is the language nullable?
-	public static boolean nullable(Node node) {
-		return Nullable.nullable(node);
+	public static boolean nullable(Node language) {
+		return Nullable.nullable(language);
 	}
 	
 	// What appears first?
-	public static Node firstSet(Node node) {
-		return FirstSet.firstSet(node);
+	public static Node firstSet(Node language) {
+		return FirstSet.firstSet(language);
 	}
 	// Derivative matching
-	private static Derivative derivative = new Derivative();
 	// Compute Dc(regex)
-	public static Node derivative(Node regex, char c) {
-		derivative.c = c;
-		derivative.visited.clear();
-		return regex.accept(derivative);
+	public static Node derivative(Node language, char c) {
+		return Derivative.derivative(language, c);
 	}
 	// Does the language match the string?
-	public static boolean matches(Node regex, String s) {
+	public static boolean matches(Node language, String s) {
 		for (int i = 0; i < s.length(); i++) {
-			regex = derivative(regex, s.charAt(i));
+			language = derivative(language, s.charAt(i));
 			// FIXME: Uncomment to debug
-			System.out.println(asString(regex));
+			System.out.println(asString(language));
 		}
-		return nullable(regex);
+		return nullable(language);
 	}
 }

@@ -8,6 +8,17 @@ import java.util.Set;
 public class Derivative implements Visitor<Node> {
 	public char c;
 	public Set<Identifier> visited = new HashSet<Identifier>();
+	private static Derivative derivative = new Derivative();
+
+	private Derivative() {
+		
+	}
+	// Compute Dc(regex)
+	public static Node derivative(Node regex, char c) {
+		derivative.c = c;
+		derivative.visited.clear();
+		return regex.accept(derivative);
+	}
 
 	@Override
 	public Node visit(EmptySet node) {
@@ -53,14 +64,16 @@ public class Derivative implements Visitor<Node> {
 		
 		if (!visited.contains(id)) {
 			visited.add(id);
-			derivative.derive(Rule.getInstance(id).child.right.accept(this));
+			derivative.derive(Rule.getInstance(id).accept(this));
+			return derivative;
+		} else {
+			return derivative;
 		}
-		return derivative;
 	}
 
 	@Override
 	public Node visit(Rule rule) {
-		return null;
+		return rule.child.right.accept(this);
 	}
 
 	@Override

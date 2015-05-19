@@ -5,12 +5,14 @@ import java.util.Set;
 
 // Does the language match the empty string?
 public class Nullable implements Visitor<Boolean> {
-	Set<Identifier> visited = new HashSet<Identifier>();
+	public Set<Identifier> visited = new HashSet<Identifier>();
+	private static Nullable visitor = new Nullable();
 	private Nullable() {
 		
 	}
 	public static boolean nullable(Node node) {
-		return node.accept(new Nullable());
+		visitor.visited.clear();
+		return node.accept(visitor);
 	}
 
 	@Override

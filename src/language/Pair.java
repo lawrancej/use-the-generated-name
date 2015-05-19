@@ -2,8 +2,8 @@ package language;
 
 // A pair of two objects
 public class Pair<T1, T2> {
-	final T1 left;
-	final T2 right;
+	final public T1 left;
+	final public T2 right;
 	public Pair(T1 left, T2 right) {
 		this.left = left;
 		this.right = right;
