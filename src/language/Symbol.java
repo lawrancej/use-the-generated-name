@@ -10,7 +10,7 @@ public class Symbol implements Node {
 	public final char symbol;
 	private Symbol(char symbol) {
 		this.symbol = symbol;
-	}	
+	}
 	public static Symbol getInstance(char c) {
 		if (! instances.containsKey(c)) {
 			instances.put(c, new Symbol(c));

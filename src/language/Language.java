@@ -17,6 +17,10 @@ public class Language {
 	public static Symbol symbol(char c) {
 		return Symbol.getInstance(c);
 	}
+	// Match any character
+	public static Any any() {
+		return Any.getInstance();
+	}
 	
 	// Language operators
 	// Match left|right|extra...
@@ -30,41 +34,31 @@ public class Language {
 		}
 		return result;
 	}
-	// Match left followed by right followed by extra...
-	public static Node seq(Node left, Node right, Node... extra) {
-		Node result = Sequence.getInstance(left, right);
-		if (extra.length == 0) {
-			return result;
-		}
-		for (int i = 0; i < extra.length; i++) {
-			result = Sequence.getInstance(result, extra[i]);
-		}
-		return result;
-	}
-	public static Identifier let(String label) {
-		return Identifier.getInstance(label);
-	}
-	public static Identifier id(String label) {
-		return Identifier.getInstance(label);
-	}
-	public static Any any() {
-		return Any.getInstance();
+	// Match nodes in order
+	public static Node seq(Node... nodes) {
+		return Sequence.getInstance(nodes, 0);
 	}
 	// Match language*
 	public static Node many(Node regex) {
 		return Star.getInstance(regex);
 	}
+	// Declare/use identifier
+	public static Identifier let(String label) {
+		return Identifier.getInstance(label);
+	}
+	// Declare/use identifier
+	public static Identifier id(String label) {
+		return Identifier.getInstance(label);
+	}
 	// Match a string literally
 	public static Node string(String s) {
-		if (s.length() == 0) {
-			return EmptyString.getInstance();
+		Node[] array = new Node[s.length()];
+		for (int i = 0; i < s.length(); i++) {
+			array[i] = symbol(s.charAt(i));
 		}
-		Node result = symbol(s.charAt(0));
-		for (int i = 1; i < s.length(); i++) {
-			result = seq(result, symbol(s.charAt(i)));
-		}
-		return result;
+		return Sequence.getInstance(array, 0);
 	}
+	// Optionally match a node
 	public static Node option(Node node) {
 		return Or.getInstance(node, EmptyString.getInstance());
 	}
@@ -74,7 +68,7 @@ public class Language {
 		return new Printer(language).toString();
 	}
 	
-	// Is the language nullable?
+	// Does the language derive the empty string?
 	public static boolean nullable(Node language) {
 		return Nullable.nullable(language);
 	}

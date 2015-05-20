@@ -41,7 +41,7 @@ public class RegexExample {
 	
 	public static void balancedParens() {
 		let("S").derive(id("S"), symbol('('), id("S"), symbol(')'));
-		let("S").derive(empty());
+		let("S").derive();
 		System.out.print("Grammar: ");
 		System.out.println(asString(id("S")));
 		System.out.print("Nullable? ");
@@ -49,7 +49,7 @@ public class RegexExample {
 		System.out.print("First set: ");
 		System.out.println(asString(firstSet(id("S"))));
 		System.out.println("Matches ()?");
-		System.out.println(matches(id("S"),"()()"));
+		System.out.println(matches(id("S"),"()"));
 	}
 	
 	public static void page148() {
@@ -65,6 +65,15 @@ public class RegexExample {
 		System.out.println(asString(id("S")));
 		System.out.println(asString(firstSet(id("Q"))));
 		System.out.println(nullable(id("S")));
+	}
+	
+	public static void other() {
+		let("S").derive(id("S"),symbol('e'),id("S"));
+		let("S").derive(symbol('a'));
+		System.out.println(asString(id("S")));
+		System.out.println(asString(firstSet(id("S"))));
+		System.out.println(nullable(id("S")));
+		System.out.println(matches(id("S"),"aea"));
 	}
 	
 	// Crazy complicated "Hello, world!"

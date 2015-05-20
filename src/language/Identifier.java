@@ -28,16 +28,6 @@ public class Identifier implements Node {
 	}
 	public void derive(Node... nodes) {
 		Node rhs = Rule.getInstance(this).child.right;
-		if (nodes.length == 0) {
-			Rule.create(this, Or.getInstance(rhs, EmptyString.getInstance()));
-		} else if (nodes.length == 1) {
-			Rule.create(this, Or.getInstance(rhs, nodes[0]));
-		} else {
-			Node result = Sequence.getInstance(nodes[0], nodes[1]);
-			for (int i = 2; i < nodes.length; i++) {
-				result = Sequence.getInstance(result, nodes[i]);
-			}
-			Rule.create(this, Or.getInstance(rhs, result));
-		}
+		Rule.create(this, Or.getInstance(rhs, Sequence.getInstance(nodes, 0)));
 	}
 }

@@ -17,11 +17,21 @@ public class Sequence extends Operator<Pair<Node,Node>> {
 		if (left == EmptyString.getInstance()) {
 			return right;
 		}
+		if (right == EmptyString.getInstance()) {
+			return left;
+		}
 		Pair<Node, Node> children = new Pair<Node, Node>(left, right);
 		if (! instances.containsKey(children)) {
 			instances.put(children, new Sequence(children));
 		}
 		return instances.get(children);
+	}
+	public static Node getInstance(Node[] nodes, int i) {
+		if (i >= nodes.length) {
+			return EmptyString.getInstance();
+		} else {
+			return Sequence.getInstance(nodes[i], Sequence.getInstance(nodes, i+1));
+		}
 	}
 
 	@Override

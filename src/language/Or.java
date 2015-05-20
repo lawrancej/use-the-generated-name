@@ -13,6 +13,7 @@ public class Or extends Operator<Pair<Node,Node>> {
 	public static Node getInstance(Node left, Node right) {
 		if (left == EmptySet.getInstance()) return right;
 		if (right == EmptySet.getInstance()) return left;
+		if (left == right) return left;
 		Pair<Node, Node> children = new Pair<Node, Node>(left, right);
 		if (! instances.containsKey(children)) {
 			instances.put(children, new Or(children));
