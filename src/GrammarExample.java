@@ -12,5 +12,10 @@ public class GrammarExample {
 			}
 		};
 		System.out.println(g);
+		System.out.println(g.show(g.first()));
+		System.out.println(g.matches("()"));
+//		System.out.println(g);
+		
+//		System.out.println(g.show(g.derivative(')',g.derivative('('))));
 	}
 }
