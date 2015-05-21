@@ -30,7 +30,7 @@ public class GrammarExample {
 			}
 		};
 		System.out.println(page148);
-		System.out.println(page148.show(page148.first(page148.id("S"))));
+		System.out.println(page148.show(page148.first(page148.id("A"))));
 		System.out.println(page148.nullable());
 		
 		Grammar regex = new Grammar() {
@@ -47,6 +47,8 @@ public class GrammarExample {
 			}
 		};
 //		System.out.println(regex);
+		System.out.println(regex.show(regex.first()));
+		System.out.println(regex.matches("a|b"));
 		System.out.println(regex.matches("hello|world"));
 //		System.out.println(g);
 		

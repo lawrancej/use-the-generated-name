@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+// Or is still an issue: need to do proper union
+
 public abstract class Grammar {
 	public static enum Construct {
 		ANY /* . */, REJECT /* empty set */, SYMBOL /* c */,
@@ -113,7 +115,6 @@ public abstract class Grammar {
 		System.out.print(s);
 		System.out.println(s.hashCode());
 		System.out.println(lang.type.name());
-		System.out.println(show(lang));
 	}
 	private Language<?> listInstance(Language<?> left, Language <?> right) {
 		if (left == reject || right == reject) {
@@ -143,6 +144,20 @@ public abstract class Grammar {
 		}
 		return ids.get(s);
 	}
+	private Language<?> derives(String s, Language<?>... languages) {
+		Language<?> rhs = list(languages);
+		if (rhs == reject && !ids.containsKey(s)) {
+			return reject;
+		}
+		if (rhs == empty && !ids.containsKey(s)) {
+			return empty;
+		}
+		if (terminal(rhs)) {
+			return rhs;
+		}
+		id(s).derives(languages);
+		return id(s);
+	}
 	private static StringBuffer show(StringBuffer buffer, Language<?> language) {
 		switch(language.type) {
 		case ANY:
@@ -157,9 +172,11 @@ public abstract class Grammar {
 			buffer.append('>');
 			break;
 		case LIST:
+			buffer.append('(');
 			show(buffer,((BinaryOperator)language).data.left);
 			buffer.append(' ');
 			show(buffer,((BinaryOperator)language).data.right);
+			buffer.append(')');
 			break;
 		case OR:
 			buffer.append('(');
@@ -231,16 +248,46 @@ public abstract class Grammar {
 	public boolean nullable() {
 		return nullable(language());
 	}
+	// Is the identifier a terminal?
+	private boolean terminal(Set<Id> visited, Language<?> language) {
+		switch(language.type) {
+		case EMPTY: case REJECT: case ANY: case SYMBOL: default:
+			return true;
+		case ID:
+			if (!visited.contains((Id) language)) {
+				visited.add((Id) language);
+				return terminal(visited,((Id)language).data.right.current);
+			}
+			return false;
+		case LIST:
+			return terminal(visited, ((BinaryOperator)language).data.left) &&
+					terminal(visited, ((BinaryOperator)language).data.right);
+		case OR:
+			return terminal(visited, ((BinaryOperator)language).data.left) &&
+					terminal(visited, ((BinaryOperator)language).data.right);
+		case STAR:
+			return terminal(visited, ((UnaryOperator)language).data);
+		}
+	}
+	public boolean terminal(Language<?> language) {
+		return terminal(new HashSet<Id>(), language);
+	}
+	public boolean terminal() {
+		return terminal(language());
+	}
+
 	private Language<?> derivative(Set<Id> visited, char c, Language<?> language) {
 		switch(language.type) {
 		case ID:
 			Id id = (Id)language;
-			Id dc = id("D" + c + id.data.left);
+			String dc = "D" + c + id.data.left;
 			if (!visited.contains(id)) {
 				visited.add(id);
-				dc.derives(derivative(visited, c, id.data.right.current));
+				return derives(dc, derivative(visited, c, id.data.right.current));
+			} else if (ids.containsKey(dc)) {
+				return id(dc);
 			}
-			return dc;
+			return reject;
 		case LIST:
 			Language<?> result = list(derivative(visited, c, ((BinaryOperator)language).data.left),
 					((BinaryOperator)language).data.right);
@@ -269,6 +316,7 @@ public abstract class Grammar {
 	public Language<?> derivative(char c) {
 		return derivative(c, language());
 	}
+
 	private Language<?> first(HashSet<Id> visited, Language<?> language) {
 		switch(language.type) {
 		case ID:
@@ -305,6 +353,7 @@ public abstract class Grammar {
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(visited, s.charAt(i), language);
 			visited.clear();
+			debug("top: ", language);
 			// FIXME: Uncomment to debug
 			System.out.println(show(language));
 		}
