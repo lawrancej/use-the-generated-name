@@ -50,7 +50,7 @@ public abstract class Grammar {
 		Id(String label) {
 			super(Construct.ID, new Pair<String, Mutable<Language<?>>>(label, new Mutable<Language<?>>(reject)));
 		}
-		public void derive(Language<?>... languages) {
+		public void derives(Language<?>... languages) {
 			data.right.current = or(data.right.current, list(languages));
 		}
 	}
@@ -105,6 +105,9 @@ public abstract class Grammar {
 	}
 	public Language<?> or(Language<?>... nodes) {
 		return or(nodes, 0);
+	}
+	public Language<?> option(Language<?> language) {
+		return or(language, empty);
 	}
 	public void debug(String s, Language<?> lang) {
 		System.out.print(s);
@@ -225,15 +228,17 @@ public abstract class Grammar {
 	public boolean nullable(Language<?> language) {
 		return nullable(new HashSet<Id>(), language);
 	}
+	public boolean nullable() {
+		return nullable(language());
+	}
 	private Language<?> derivative(Set<Id> visited, char c, Language<?> language) {
 		switch(language.type) {
 		case ID:
 			Id id = (Id)language;
 			Id dc = id("D" + c + id.data.left);
-			
 			if (!visited.contains(id)) {
 				visited.add(id);
-				dc.derive(derivative(visited, c, id.data.right.current));
+				dc.derives(derivative(visited, c, id.data.right.current));
 			}
 			return dc;
 		case LIST:
@@ -247,7 +252,7 @@ public abstract class Grammar {
 			return or(derivative(visited, c, ((BinaryOperator)language).data.left),
 					derivative(visited, c, ((BinaryOperator)language).data.right));
 		case STAR:
-			return list(derivative(visited, c, language), language);
+			return list(derivative(visited, c, ((UnaryOperator)language).data), language);
 		case ANY:
 			return empty;
 		case SYMBOL:

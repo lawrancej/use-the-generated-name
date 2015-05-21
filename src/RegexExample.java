@@ -20,13 +20,14 @@ public class RegexExample {
 		let("regex").derive(id("term"),symbol('|'),id("regex"));
 		let("regex").derive(id("term"));
 		let("term").derive(many(id("factor")));
-		let("factor").derive(id("base"), option(symbol('*')));
+		let("factor").derive(id("base"), many(symbol('*')));
 		let("base").derive(any());
 		let("base").derive(symbol('\\'), any());
 		let("base").derive(symbol('('), id("regex"), symbol(')'));
 
 //		let("hello").derive(id("hello"), string("world"), id("hello"));
 		System.out.println(asString(id("regex")));
+		System.out.println(matches(id("regex"),"hello|world"));
 //		System.out.println(asString(id("hello")));
 	}
 	
@@ -78,6 +79,13 @@ public class RegexExample {
 	
 	// Crazy complicated "Hello, world!"
 	public static void main(String[] args) {
-		balancedParens();
+//		balancedParens();
+		let("S").derive(many(id("A")));
+		let("A").derive(symbol('a'));
+		System.out.println(matches(id("S"),""));
+		System.out.println(matches(id("S"),"a"));
+		System.out.println(matches(id("S"),"aa"));
+		System.out.println(matches(id("S"),"aaa"));
+//		regexTest();
 	}
 }
