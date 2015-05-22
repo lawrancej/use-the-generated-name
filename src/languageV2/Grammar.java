@@ -9,10 +9,10 @@ import java.util.Set;
 
 public abstract class Grammar {
 	public static enum Construct {
-		REJECT /* empty set */, EMPTY /* empty list */,
-		ANY /* . */, SYMBOL /* c */,
+		SYMBOL /* c */,
+		LIST /* abc... */,
+		SET /* a|b|c... */,
 		LOOP /* a* */,
-		SET /* a|b|c... */, LIST /* abc... */,
 		ID, /* id -> derivation */
 	};
 	public static class Language<T> {
@@ -58,9 +58,9 @@ public abstract class Grammar {
 		}
 	}
 	/* Singletons */
-	public static final Language<Void> any = new Language<Void>(Construct.ANY, null);
-	public static Language<Void> reject = new Language<Void>(Construct.REJECT, null);
-	public static Language<Void> empty = new Language<Void>(Construct.EMPTY, null);
+	public static final Language<Void> any = new Language<Void>(Construct.SYMBOL, null);
+	public static Language<Void> reject = new Language<Void>(Construct.SET, null);
+	public static Language<Void> empty = new Language<Void>(Construct.LIST, null);
 	/* Flyweights */
 	/* Pattern: map what's inside the language to the language */
 	private static Map<Character, Grammar.Symbol> symbols = new HashMap<Character, Grammar.Symbol>();
@@ -161,33 +161,32 @@ public abstract class Grammar {
 	}
 	private static StringBuffer show(StringBuffer buffer, Language<?> language) {
 		switch(language.type) {
-		case ANY:
-			buffer.append("<any character>");
-			break;
-		case EMPTY:
-			buffer.append("\u03b5");
-			break;
 		case ID:
 			buffer.append('<');
 			buffer.append(((Id)language).data.left);
 			buffer.append('>');
 			break;
 		case LIST:
-			buffer.append('(');
-			show(buffer,((BinaryOperator)language).data.left);
-			buffer.append(' ');
-			show(buffer,((BinaryOperator)language).data.right);
-			buffer.append(')');
+			if (language.data == null) {
+				buffer.append("\u03b5");
+			} else {
+				buffer.append('(');
+				show(buffer,((BinaryOperator)language).data.left);
+				buffer.append(' ');
+				show(buffer,((BinaryOperator)language).data.right);
+				buffer.append(')');
+			}
 			break;
 		case SET:
-			buffer.append('(');
-			show(buffer,((BinaryOperator)language).data.left);
-			buffer.append('|');
-			show(buffer,((BinaryOperator)language).data.right);
-			buffer.append(')');
-			break;
-		case REJECT:
-			buffer.append("\u2205");
+			if (language.data == null) {
+				buffer.append("\u2205");
+			} else {
+				buffer.append('(');
+				show(buffer,((BinaryOperator)language).data.left);
+				buffer.append('|');
+				show(buffer,((BinaryOperator)language).data.right);
+				buffer.append(')');
+			}
 			break;
 		case LOOP:
 			buffer.append('(');
@@ -196,7 +195,11 @@ public abstract class Grammar {
 			break;
 		case SYMBOL:
 			buffer.append('\'');
-			buffer.append(((Grammar.Symbol)language).data);
+			if (language.data == null) {
+				buffer.append("<any character>");
+			} else {
+				buffer.append(((Grammar.Symbol)language).data);
+			}
 			buffer.append('\'');
 			break;
 		default:
@@ -226,22 +229,31 @@ public abstract class Grammar {
 	// Does the language derive the empty string?
 	private boolean nullable(Set<Id> visited, Language<?> language) {
 		switch(language.type) {
-		case EMPTY:	case LOOP:
-			return true;
 		case ID:
 			if (!visited.contains((Id) language)) {
 				visited.add((Id) language);
 				return nullable(visited,((Id)language).data.right.current);
 			}
-		case REJECT: case ANY: case SYMBOL: default:
-			return false;
-		case LIST:
-			return nullable(visited, ((BinaryOperator)language).data.left) &&
-					nullable(visited, ((BinaryOperator)language).data.right);
+			break;
 		case SET:
-			return nullable(visited, ((BinaryOperator)language).data.left) ||
-					nullable(visited, ((BinaryOperator)language).data.right);
+			if (language.data != null) {
+				return nullable(visited, ((BinaryOperator)language).data.left) ||
+						nullable(visited, ((BinaryOperator)language).data.right);
+			}
+			break;
+		case SYMBOL: default:
+			break;
+		case LOOP:
+			return true;
+		case LIST:
+			if (language.data != null) {
+				return nullable(visited, ((BinaryOperator)language).data.left) &&
+						nullable(visited, ((BinaryOperator)language).data.right);
+			} else {
+				return true;
+			}
 		}
+		return false;
 	}
 	public boolean nullable(Language<?> language) {
 		return nullable(new HashSet<Id>(), language);
@@ -252,8 +264,14 @@ public abstract class Grammar {
 	// Is the identifier a terminal?
 	private boolean terminal(Set<Id> visited, Language<?> language) {
 		switch(language.type) {
-		case EMPTY: case REJECT: case ANY: case SYMBOL: default:
-			return true;
+		case SET:
+			if (language.data != null) {
+				return terminal(visited, ((BinaryOperator)language).data.left) &&
+						terminal(visited, ((BinaryOperator)language).data.right);
+			}
+			break;
+		case SYMBOL: default:
+			break;
 		case ID:
 			if (!visited.contains((Id) language)) {
 				visited.add((Id) language);
@@ -261,14 +279,15 @@ public abstract class Grammar {
 			}
 			return false;
 		case LIST:
-			return terminal(visited, ((BinaryOperator)language).data.left) &&
-					terminal(visited, ((BinaryOperator)language).data.right);
-		case SET:
-			return terminal(visited, ((BinaryOperator)language).data.left) &&
-					terminal(visited, ((BinaryOperator)language).data.right);
+			if (language.data != null) {
+				return terminal(visited, ((BinaryOperator)language).data.left) &&
+						terminal(visited, ((BinaryOperator)language).data.right);
+			}
+			break;
 		case LOOP:
 			return terminal(visited, ((Loop)language).data);
 		}
+		return true;
 	}
 	public boolean terminal(Language<?> language) {
 		return terminal(new HashSet<Id>(), language);
@@ -288,28 +307,31 @@ public abstract class Grammar {
 			} else if (ids.containsKey(dc)) {
 				return id(dc);
 			}
-			return reject;
+			break;
 		case LIST:
-			Language<?> result = list(derivative(visited, c, ((BinaryOperator)language).data.left),
-					((BinaryOperator)language).data.right);
-			if (nullable(((BinaryOperator)language).data.left)) {
-				return or(result, derivative(visited, c, ((BinaryOperator)language).data.right));
+			if (language.data != null) {
+				Language<?> result = list(derivative(visited, c, ((BinaryOperator)language).data.left),
+						((BinaryOperator)language).data.right);
+				if (nullable(((BinaryOperator)language).data.left)) {
+					return or(result, derivative(visited, c, ((BinaryOperator)language).data.right));
+				}
+				return result;
 			}
-			return result;
+			break;
 		case SET:
-			return or(derivative(visited, c, ((BinaryOperator)language).data.left),
-					derivative(visited, c, ((BinaryOperator)language).data.right));
+			if (language.data != null) {
+				return or(derivative(visited, c, ((BinaryOperator)language).data.left),
+						derivative(visited, c, ((BinaryOperator)language).data.right));
+			}
+			break;
 		case LOOP:
 			return list(derivative(visited, c, ((Loop)language).data), language);
-		case ANY:
-			return empty;
 		case SYMBOL:
-			if (((Symbol)language).data == c) {
+			if (language.data == null || ((Symbol)language).data == c) {
 				return empty;
 			}
-		case REJECT: case EMPTY: default:
-			return reject;
 		}
+		return reject;
 	}
 	public Language<?> derivative(char c, Language<?> language) {
 		return derivative(new HashSet<Id>(), c, language);
@@ -326,22 +348,28 @@ public abstract class Grammar {
 				visited.add(id);
 				return first(visited, id.data.right.current);
 			}
-		case EMPTY: case REJECT: default:
-			return reject;
+			break;
 		case LIST:
-			Language<?> result = first(visited, ((BinaryOperator)language).data.left);
-			if (nullable(((BinaryOperator)language).data.left)) {
-				result = or(result, first(visited, ((BinaryOperator)language).data.right));
+			if (language.data != null) {
+				Language<?> result = first(visited, ((BinaryOperator)language).data.left);
+				if (nullable(((BinaryOperator)language).data.left)) {
+					result = or(result, first(visited, ((BinaryOperator)language).data.right));
+				}
+				return result;
 			}
-			return result;
+			break;
 		case SET:
-			return or(first(visited, ((BinaryOperator)language).data.left),
-					first(visited, ((BinaryOperator)language).data.right));
+			if (language.data != null) {
+				return or(first(visited, ((BinaryOperator)language).data.left),
+						first(visited, ((BinaryOperator)language).data.right));
+			}
+			break;
 		case LOOP:
 			return first(visited, ((Loop)language).data);
-		case ANY: case SYMBOL:
+		case SYMBOL:
 			return language;
 		}
+		return reject;
 	}
 	public Language<?> first(Language<?> language) {
 		return first(new HashSet<Id>(), language);
