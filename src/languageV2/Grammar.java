@@ -9,10 +9,10 @@ import java.util.Set;
 
 public abstract class Grammar {
 	public static enum Construct {
-		REJECT /* empty set */, EMPTY /* empty string */,
+		REJECT /* empty set */, EMPTY /* empty list */,
 		ANY /* . */, SYMBOL /* c */,
 		LOOP /* a* */,
-		OR /* a|b */, LIST /* ab */,
+		SET /* a|b|c... */, LIST /* abc... */,
 		ID, /* id -> derivation */
 	};
 	public static class Language<T> {
@@ -85,17 +85,17 @@ public abstract class Grammar {
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
 		if (left == right) { return left; }
-		if (left.type == Construct.OR) {
+		if (left.type == Construct.SET) {
 			if (right == ((BinaryOperator)left).data.left) { return left; }
 			if (right == ((BinaryOperator)left).data.right) { return left; }
 		}
-		if (right.type == Construct.OR) {
+		if (right.type == Construct.SET) {
 			if (left == ((BinaryOperator)right).data.left) { return right; }
 			if (left == ((BinaryOperator)right).data.right) { return right; }
 		}
 		LanguagePair pair = new LanguagePair(left, right);
 		if (!ors.containsKey(pair)) {
-			ors.put(pair, new BinaryOperator(Construct.OR, pair));
+			ors.put(pair, new BinaryOperator(Construct.SET, pair));
 		}
 		return ors.get(pair);
 	}
@@ -179,7 +179,7 @@ public abstract class Grammar {
 			show(buffer,((BinaryOperator)language).data.right);
 			buffer.append(')');
 			break;
-		case OR:
+		case SET:
 			buffer.append('(');
 			show(buffer,((BinaryOperator)language).data.left);
 			buffer.append('|');
@@ -238,7 +238,7 @@ public abstract class Grammar {
 		case LIST:
 			return nullable(visited, ((BinaryOperator)language).data.left) &&
 					nullable(visited, ((BinaryOperator)language).data.right);
-		case OR:
+		case SET:
 			return nullable(visited, ((BinaryOperator)language).data.left) ||
 					nullable(visited, ((BinaryOperator)language).data.right);
 		}
@@ -263,7 +263,7 @@ public abstract class Grammar {
 		case LIST:
 			return terminal(visited, ((BinaryOperator)language).data.left) &&
 					terminal(visited, ((BinaryOperator)language).data.right);
-		case OR:
+		case SET:
 			return terminal(visited, ((BinaryOperator)language).data.left) &&
 					terminal(visited, ((BinaryOperator)language).data.right);
 		case LOOP:
@@ -296,7 +296,7 @@ public abstract class Grammar {
 				return or(result, derivative(visited, c, ((BinaryOperator)language).data.right));
 			}
 			return result;
-		case OR:
+		case SET:
 			return or(derivative(visited, c, ((BinaryOperator)language).data.left),
 					derivative(visited, c, ((BinaryOperator)language).data.right));
 		case LOOP:
@@ -334,7 +334,7 @@ public abstract class Grammar {
 				result = or(result, first(visited, ((BinaryOperator)language).data.right));
 			}
 			return result;
-		case OR:
+		case SET:
 			return or(first(visited, ((BinaryOperator)language).data.left),
 					first(visited, ((BinaryOperator)language).data.right));
 		case LOOP:
