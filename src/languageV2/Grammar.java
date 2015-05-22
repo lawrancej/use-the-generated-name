@@ -9,8 +9,9 @@ import java.util.Set;
 
 public abstract class Grammar {
 	public static enum Construct {
-		ANY /* . */, REJECT /* empty set */, SYMBOL /* c */,
-		EMPTY /* empty string */, STAR /* a* */,
+		REJECT /* empty set */, EMPTY /* empty string */,
+		ANY /* . */, SYMBOL /* c */,
+		LOOP /* a* */,
 		OR /* a|b */, LIST /* ab */,
 		ID, /* id -> derivation */
 	};
@@ -43,8 +44,8 @@ public abstract class Grammar {
 			super(type, data);
 		}
 	}
-	public static class UnaryOperator extends Language<Language<?>> {
-		UnaryOperator(Construct type, Language<?> data) {
+	public static class Loop extends Language<Language<?>> {
+		Loop(Construct type, Language<?> data) {
 			super(type, data);
 		}
 	}
@@ -57,13 +58,13 @@ public abstract class Grammar {
 		}
 	}
 	/* Singletons */
-	public static Language<Void> any = new Language<Void>(Construct.ANY, null);
+	public static final Language<Void> any = new Language<Void>(Construct.ANY, null);
 	public static Language<Void> reject = new Language<Void>(Construct.REJECT, null);
 	public static Language<Void> empty = new Language<Void>(Construct.EMPTY, null);
 	/* Flyweights */
 	/* Pattern: map what's inside the language to the language */
 	private static Map<Character, Grammar.Symbol> symbols = new HashMap<Character, Grammar.Symbol>();
-	private Map<Language<?>, UnaryOperator> stars = new HashMap<Language<?>, UnaryOperator>();
+	private Map<Language<?>, Loop> stars = new HashMap<Language<?>, Loop>();
 	private Map<LanguagePair, BinaryOperator> ors = new HashMap<LanguagePair, BinaryOperator>();
 	private Map<LanguagePair, BinaryOperator> lists = new HashMap<LanguagePair, BinaryOperator>();
 	private Map<String, Id> ids = new HashMap<String, Id>();
@@ -74,9 +75,9 @@ public abstract class Grammar {
 		return symbols.get(c);
 	}
 	public Language<?> many(Language<?> language) {
-		if (language.type == Construct.STAR) return language;
+		if (language.type == Construct.LOOP) return language;
 		if (!stars.containsKey(language)) {
-			stars.put(language, new UnaryOperator(Construct.STAR, language));
+			stars.put(language, new Loop(Construct.LOOP, language));
 		}
 		return stars.get(language);
 	}
@@ -188,9 +189,9 @@ public abstract class Grammar {
 		case REJECT:
 			buffer.append("\u2205");
 			break;
-		case STAR:
+		case LOOP:
 			buffer.append('(');
-			show(buffer,((UnaryOperator)language).data);
+			show(buffer,((Loop)language).data);
 			buffer.append(")*");
 			break;
 		case SYMBOL:
@@ -225,7 +226,7 @@ public abstract class Grammar {
 	// Does the language derive the empty string?
 	private boolean nullable(Set<Id> visited, Language<?> language) {
 		switch(language.type) {
-		case EMPTY:	case STAR:
+		case EMPTY:	case LOOP:
 			return true;
 		case ID:
 			if (!visited.contains((Id) language)) {
@@ -265,8 +266,8 @@ public abstract class Grammar {
 		case OR:
 			return terminal(visited, ((BinaryOperator)language).data.left) &&
 					terminal(visited, ((BinaryOperator)language).data.right);
-		case STAR:
-			return terminal(visited, ((UnaryOperator)language).data);
+		case LOOP:
+			return terminal(visited, ((Loop)language).data);
 		}
 	}
 	public boolean terminal(Language<?> language) {
@@ -298,8 +299,8 @@ public abstract class Grammar {
 		case OR:
 			return or(derivative(visited, c, ((BinaryOperator)language).data.left),
 					derivative(visited, c, ((BinaryOperator)language).data.right));
-		case STAR:
-			return list(derivative(visited, c, ((UnaryOperator)language).data), language);
+		case LOOP:
+			return list(derivative(visited, c, ((Loop)language).data), language);
 		case ANY:
 			return empty;
 		case SYMBOL:
@@ -336,8 +337,8 @@ public abstract class Grammar {
 		case OR:
 			return or(first(visited, ((BinaryOperator)language).data.left),
 					first(visited, ((BinaryOperator)language).data.right));
-		case STAR:
-			return first(visited, ((UnaryOperator)language).data);
+		case LOOP:
+			return first(visited, ((Loop)language).data);
 		case ANY: case SYMBOL:
 			return language;
 		}
