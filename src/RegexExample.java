@@ -37,6 +37,7 @@ public class RegexExample {
 		System.out.println(asString(id("L")));
 		System.out.println(nullable(id("L")));
 		System.out.println(matches(id("L"), "x"));
+		System.out.println(matches(id("L"), "xx"));
 		System.out.println(asString(firstSet(id("L"))));
 	}
 	
@@ -79,7 +80,9 @@ public class RegexExample {
 	
 	// Crazy complicated "Hello, world!"
 	public static void main(String[] args) {
+		leftRecursiveList();
 //		balancedParens();
+/*
 		let("S").derive(many(id("A")));
 		let("A").derive(symbol('a'));
 		System.out.println(matches(id("S"),""));
@@ -87,5 +90,7 @@ public class RegexExample {
 		System.out.println(matches(id("S"),"aa"));
 		System.out.println(matches(id("S"),"aaa"));
 //		regexTest();
+ * 
+ */
 	}
 }

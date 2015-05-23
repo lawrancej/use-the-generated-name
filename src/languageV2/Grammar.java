@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-// Or is still an issue: need to do proper union
-
 public abstract class Grammar {
 	public static enum Construct {
 		SYMBOL /* c */,
@@ -27,6 +25,13 @@ public abstract class Grammar {
 		public T current;
 		Mutable(T data) {
 			current = data;
+		}
+	}
+	@SuppressWarnings("serial")
+	public static class SetOfLanguages extends HashSet<Language<?>> {}
+	public static class LanguageSet extends Language<SetOfLanguages> {
+		public LanguageSet(Construct type, SetOfLanguages data) {
+			super(type, data);
 		}
 	}
 	public static class LanguagePair extends Pair<Language<?>,Language<?>> {
@@ -58,21 +63,29 @@ public abstract class Grammar {
 		}
 	}
 	/* Singletons */
-	public static final Language<Void> any = new Language<Void>(Construct.SYMBOL, null);
-	public static Language<Void> reject = new Language<Void>(Construct.SET, null);
+	public static final Symbol any = new Symbol(Construct.SYMBOL, null);
+	public static LanguageSet reject = new LanguageSet(Construct.SET, null);
 	public static Language<Void> empty = new Language<Void>(Construct.LIST, null);
 	/* Flyweights */
 	/* Pattern: map what's inside the language to the language */
 	private static Map<Character, Grammar.Symbol> symbols = new HashMap<Character, Grammar.Symbol>();
 	private Map<Language<?>, Loop> stars = new HashMap<Language<?>, Loop>();
-	private Map<LanguagePair, BinaryOperator> ors = new HashMap<LanguagePair, BinaryOperator>();
+	private Map<SetOfLanguages, LanguageSet> ors = new HashMap<SetOfLanguages, LanguageSet>();
 	private Map<LanguagePair, BinaryOperator> lists = new HashMap<LanguagePair, BinaryOperator>();
 	private Map<String, Id> ids = new HashMap<String, Id>();
-	public Language<Character> symbol(char c) {
+	public boolean debug = false;
+	public static Symbol symbol(char c) {
 		if (!symbols.containsKey(c)) {
 			symbols.put(c, new Grammar.Symbol(Construct.SYMBOL, c));
 		}
 		return symbols.get(c);
+	}
+	public Language<?> string(String s) {
+		Language<?>[] array = new Language<?>[s.length()];
+		for (int i = 0; i < s.length(); i++) {
+			array[i] = symbol(s.charAt(i));
+		}
+		return list(array, 0);
 	}
 	public Language<?> many(Language<?> language) {
 		if (language.type == Construct.LOOP) return language;
@@ -81,23 +94,54 @@ public abstract class Grammar {
 		}
 		return stars.get(language);
 	}
+	private Language<?> um(SetOfLanguages s) {
+		if (!ors.containsKey(s)) {
+			ors.put(s, new LanguageSet(Construct.SET, s));
+		}
+		return ors.get(s);
+	}
+	private Language<?> merge(LanguageSet set, Language<?> item) {
+		if (set.data.contains(item)) {
+			return set;
+		} else {
+			SetOfLanguages s = (SetOfLanguages)set.data.clone();
+			s.add(item);
+			return um(s);
+		}
+	}
+	private Language<?> mergeAll(LanguageSet set, LanguageSet set2) {
+		if (set.data.containsAll(set2.data)) {
+			return set;
+		} else {
+			SetOfLanguages s = (SetOfLanguages)set.data.clone();
+			s.addAll(set2.data);
+			return um(s);
+		}
+	}
 	private Language<?> orInstance(Language<?> left, Language <?> right) {
+		assert left != null;
+		assert right != null;
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
 		if (left == right) { return left; }
-		if (left.type == Construct.SET) {
-			if (right == ((BinaryOperator)left).data.left) { return left; }
-			if (right == ((BinaryOperator)left).data.right) { return left; }
+		SetOfLanguages setOfLanguages;
+		// Do the types differ?
+		if (left.type != right.type) {
+			if (left.type == Construct.SET) {
+				return merge((LanguageSet)left, right);
+			}
+			else if (right.type == Construct.SET) {
+				return merge((LanguageSet)right, left);
+			}
 		}
-		if (right.type == Construct.SET) {
-			if (left == ((BinaryOperator)right).data.left) { return right; }
-			if (left == ((BinaryOperator)right).data.right) { return right; }
+		// The types are the same, and they're both sets
+		else if (left.type == Construct.SET) {
+			return mergeAll((LanguageSet)left, (LanguageSet)right);
 		}
-		LanguagePair pair = new LanguagePair(left, right);
-		if (!ors.containsKey(pair)) {
-			ors.put(pair, new BinaryOperator(Construct.SET, pair));
-		}
-		return ors.get(pair);
+		setOfLanguages = new SetOfLanguages();
+		setOfLanguages.add(left);
+		setOfLanguages.add(right);
+		return um(setOfLanguages);
 	}
 	private Language<?> or(Language<?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -111,11 +155,6 @@ public abstract class Grammar {
 	}
 	public Language<?> option(Language<?> language) {
 		return or(language, empty);
-	}
-	public void debug(String s, Language<?> lang) {
-		System.out.print(s);
-		System.out.println(s.hashCode());
-		System.out.println(lang.type.name());
 	}
 	private Language<?> listInstance(Language<?> left, Language <?> right) {
 		if (left == reject || right == reject) {
@@ -150,12 +189,13 @@ public abstract class Grammar {
 		if (rhs == reject && !ids.containsKey(s)) {
 			return reject;
 		}
-		if (rhs == empty && !ids.containsKey(s)) {
+/*		if (rhs == empty && !ids.containsKey(s)) {
 			return empty;
 		}
 		if (terminal(rhs)) {
 			return rhs;
 		}
+		*/
 		id(s).derives(languages);
 		return id(s);
 	}
@@ -182,9 +222,15 @@ public abstract class Grammar {
 				buffer.append("\u2205");
 			} else {
 				buffer.append('(');
-				show(buffer,((BinaryOperator)language).data.left);
-				buffer.append('|');
-				show(buffer,((BinaryOperator)language).data.right);
+				boolean flag = false;
+				for (Language<?> l : ((LanguageSet)language).data) {
+					if (flag) {
+						buffer.append('|');
+					} else {
+						flag = true;
+					}
+					show(buffer, l);
+				}
 				buffer.append(')');
 			}
 			break;
@@ -237,8 +283,11 @@ public abstract class Grammar {
 			break;
 		case SET:
 			if (language.data != null) {
-				return nullable(visited, ((BinaryOperator)language).data.left) ||
-						nullable(visited, ((BinaryOperator)language).data.right);
+				boolean result = false;
+				for (Language<?> l : ((LanguageSet)language).data) {
+					result = result || nullable(visited, l);
+				}
+				return result;
 			}
 			break;
 		case SYMBOL: default:
@@ -266,8 +315,11 @@ public abstract class Grammar {
 		switch(language.type) {
 		case SET:
 			if (language.data != null) {
-				return terminal(visited, ((BinaryOperator)language).data.left) &&
-						terminal(visited, ((BinaryOperator)language).data.right);
+				boolean result = true;
+				for (Language<?> l : ((LanguageSet)language).data) {
+					result = result && terminal(visited, l);
+				}
+				return result;
 			}
 			break;
 		case SYMBOL: default:
@@ -320,8 +372,11 @@ public abstract class Grammar {
 			break;
 		case SET:
 			if (language.data != null) {
-				return or(derivative(visited, c, ((BinaryOperator)language).data.left),
-						derivative(visited, c, ((BinaryOperator)language).data.right));
+				Language<?> result = reject;
+				for (Language<?> l : ((LanguageSet)language).data) {
+					result = or(result, derivative(visited, c, l));
+				}
+				return result;
 			}
 			break;
 		case LOOP:
@@ -360,8 +415,11 @@ public abstract class Grammar {
 			break;
 		case SET:
 			if (language.data != null) {
-				return or(first(visited, ((BinaryOperator)language).data.left),
-						first(visited, ((BinaryOperator)language).data.right));
+				Language<?> result = reject;
+				for (Language<?> l : ((LanguageSet)language).data) {
+					result = or(result, first(visited, l));
+				}
+				return result;
 			}
 			break;
 		case LOOP:
@@ -378,13 +436,17 @@ public abstract class Grammar {
 		return first(language());
 	}
 	public boolean matches(Language<?> language, String s) {
+		if (debug) {
+			System.out.println(show(language));
+		}
 		Set<Id> visited = new HashSet<Id>();
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(visited, s.charAt(i), language);
 			visited.clear();
-			debug("top: ", language);
-			// FIXME: Uncomment to debug
-			System.out.println(show(language));
+			if (debug) {
+				System.out.println(s.charAt(i));
+				System.out.println(show(language));
+			}
 		}
 		return nullable(language);
 	}

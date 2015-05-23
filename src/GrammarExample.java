@@ -3,17 +3,6 @@ import languageV2.Grammar;
 
 public class GrammarExample {
 	public static void main(String[] args) {
-		Grammar parens = new Grammar() {
-			@Override
-			public Language<?> language() {
-				id("S").derives(id("S"),symbol('('),id("S"),symbol(')'));
-				id("S").derives();
-				return id("S");
-			}
-		};
-		System.out.println(parens);
-		System.out.println(parens.show(parens.first()));
-		System.out.println(parens.matches("()"));
 		Grammar page148 = new Grammar() {
 			@Override
 			public Language<?> language() {
@@ -49,7 +38,8 @@ public class GrammarExample {
 //		System.out.println(regex);
 		System.out.println(regex.show(regex.first()));
 		System.out.println(regex.matches("a|b"));
-		System.out.println(regex.matches("hello|world"));
+		System.out.println(regex.matches("(hello)|(world)"));
+		
 //		System.out.println(g);
 		
 //		System.out.println(g.show(g.derivative(')',g.derivative('('))));
