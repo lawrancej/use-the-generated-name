@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class Grammar {
+public class Grammar {
 	public static enum Construct {
 		SYMBOL /* c */,
 		LIST /* abc... */,
@@ -76,6 +76,10 @@ public abstract class Grammar {
 	private Set<Language<?>> nulls = new HashSet<Language<?>>();
 	private Set<Language<?>> terms = new HashSet<Language<?>>();
 	public boolean debug = false;
+	public Language<?> definition = reject;
+	public Grammar() {
+		
+	}
 	public static Symbol symbol(char c) {
 		if (!symbols.containsKey(c)) {
 			symbols.put(c, new Grammar.Symbol(Construct.SYMBOL, c));
@@ -181,10 +185,15 @@ public abstract class Grammar {
 		return list(nodes, 0);
 	}
 	public Id id(String s) {
+		Id result;
 		if (!ids.containsKey(s)) {
 			ids.put(s, new Id(s));
 		}
-		return ids.get(s);
+		result = ids.get(s);
+		if (definition == reject) {
+			definition = result;
+		}
+		return result;
 	}
 	private Language<?> derives(String s, Language<?>... languages) {
 		Language<?> rhs = list(languages);
@@ -274,7 +283,7 @@ public abstract class Grammar {
 		}
 	}
 	public String toString() {
-		return show(language());
+		return show(definition);
 	}
 	// Does the language derive the empty string?
 	private boolean nullable(Set<Id> visited, Language<?> language) {
@@ -321,7 +330,7 @@ public abstract class Grammar {
 		return nullable(new HashSet<Id>(), language);
 	}
 	public boolean nullable() {
-		return nullable(language());
+		return nullable(definition);
 	}
 	// Is the identifier a terminal?
 	private boolean terminal(Set<Id> visited, Language<?> language) {
@@ -364,7 +373,7 @@ public abstract class Grammar {
 		return terminal(new HashSet<Id>(), language);
 	}
 	public boolean terminal() {
-		return terminal(language());
+		return terminal(definition);
 	}
 
 	private Language<?> derivative(Set<Id> visited, char c, Language<?> language) {
@@ -411,7 +420,7 @@ public abstract class Grammar {
 		return derivative(new HashSet<Id>(), c, language);
 	}
 	public Language<?> derivative(char c) {
-		return derivative(c, language());
+		return derivative(c, definition);
 	}
 
 	private Language<?> first(HashSet<Id> visited, Language<?> language) {
@@ -452,7 +461,7 @@ public abstract class Grammar {
 		return first(new HashSet<Id>(), language);
 	}
 	public Language<?> first() {
-		return first(language());
+		return first(definition);
 	}
 	public boolean matches(Language<?> language, String s) {
 		if (debug) {
@@ -470,8 +479,6 @@ public abstract class Grammar {
 		return nullable(visited,language);
 	}
 	public boolean matches(String s) {
-		return matches(language(), s);
+		return matches(definition, s);
 	}
-
-	public abstract Language<?> language();
 }
