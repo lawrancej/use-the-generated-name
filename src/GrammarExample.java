@@ -38,6 +38,7 @@ public class GrammarExample {
 //		System.out.println(regex);
 		System.out.println(regex.show(regex.first()));
 		System.out.println(regex.matches("a|b"));
+		System.out.println(regex.matches("a|b**"));
 		System.out.println(regex.matches("(hello)|(world)"));
 		
 //		System.out.println(g);

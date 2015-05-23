@@ -64,8 +64,8 @@ public abstract class Grammar {
 	}
 	/* Singletons */
 	public static final Symbol any = new Symbol(Construct.SYMBOL, null);
-	public static LanguageSet reject = new LanguageSet(Construct.SET, null);
-	public static Language<Void> empty = new Language<Void>(Construct.LIST, null);
+	public static final LanguageSet reject = new LanguageSet(Construct.SET, null);
+	public static final Language<Void> empty = new Language<Void>(Construct.LIST, null);
 	/* Flyweights */
 	/* Pattern: map what's inside the language to the language */
 	private static Map<Character, Grammar.Symbol> symbols = new HashMap<Character, Grammar.Symbol>();
@@ -73,6 +73,8 @@ public abstract class Grammar {
 	private Map<SetOfLanguages, LanguageSet> ors = new HashMap<SetOfLanguages, LanguageSet>();
 	private Map<LanguagePair, BinaryOperator> lists = new HashMap<LanguagePair, BinaryOperator>();
 	private Map<String, Id> ids = new HashMap<String, Id>();
+	private Set<Language<?>> nulls = new HashSet<Language<?>>();
+	private Set<Language<?>> terms = new HashSet<Language<?>>();
 	public boolean debug = false;
 	public static Symbol symbol(char c) {
 		if (!symbols.containsKey(c)) {
@@ -189,9 +191,11 @@ public abstract class Grammar {
 		if (rhs == reject && !ids.containsKey(s)) {
 			return reject;
 		}
-/*		if (rhs == empty && !ids.containsKey(s)) {
+		/*
+		if (rhs == empty && !ids.containsKey(s)) {
 			return empty;
 		}
+		
 		if (terminal(rhs)) {
 			return rhs;
 		}
@@ -274,35 +278,44 @@ public abstract class Grammar {
 	}
 	// Does the language derive the empty string?
 	private boolean nullable(Set<Id> visited, Language<?> language) {
+		boolean result = false;
+		if (nulls.contains(language)) return true;
 		switch(language.type) {
 		case ID:
 			if (!visited.contains((Id) language)) {
 				visited.add((Id) language);
-				return nullable(visited,((Id)language).data.right.current);
+				result = nullable(visited,((Id)language).data.right.current);
+				if (result) {
+					nulls.add(language);
+				}
 			}
+/*			if (debug) {
+				System.out.println("nullable: " + result);
+				System.out.println(((Id)language).data.left);
+				System.out.println(show(((Id)language).data.right.current));
+			} */
 			break;
 		case SET:
 			if (language.data != null) {
-				boolean result = false;
 				for (Language<?> l : ((LanguageSet)language).data) {
 					result = result || nullable(visited, l);
 				}
-				return result;
 			}
 			break;
-		case SYMBOL: default:
+		case SYMBOL:
 			break;
 		case LOOP:
-			return true;
+			result = true;
+			break;
 		case LIST:
 			if (language.data != null) {
-				return nullable(visited, ((BinaryOperator)language).data.left) &&
+				result = nullable(visited, ((BinaryOperator)language).data.left) &&
 						nullable(visited, ((BinaryOperator)language).data.right);
 			} else {
-				return true;
+				result = true;
 			}
 		}
-		return false;
+		return result;
 	}
 	public boolean nullable(Language<?> language) {
 		return nullable(new HashSet<Id>(), language);
@@ -312,34 +325,40 @@ public abstract class Grammar {
 	}
 	// Is the identifier a terminal?
 	private boolean terminal(Set<Id> visited, Language<?> language) {
+		boolean result = true;
+		if (terms.contains(language)) return true;
 		switch(language.type) {
 		case SET:
 			if (language.data != null) {
-				boolean result = true;
 				for (Language<?> l : ((LanguageSet)language).data) {
 					result = result && terminal(visited, l);
 				}
-				return result;
 			}
 			break;
-		case SYMBOL: default:
+		case SYMBOL:
 			break;
 		case ID:
 			if (!visited.contains((Id) language)) {
 				visited.add((Id) language);
-				return terminal(visited,((Id)language).data.right.current);
+				result = terminal(visited,((Id)language).data.right.current);
+				if (result) {
+					terms.add(language);
+				}
 			}
-			return false;
+			else {
+				result = false;
+			}
+			break;
 		case LIST:
 			if (language.data != null) {
-				return terminal(visited, ((BinaryOperator)language).data.left) &&
+				result = terminal(visited, ((BinaryOperator)language).data.left) &&
 						terminal(visited, ((BinaryOperator)language).data.right);
 			}
 			break;
 		case LOOP:
-			return terminal(visited, ((Loop)language).data);
+			result = terminal(visited, ((Loop)language).data);
 		}
-		return true;
+		return result;
 	}
 	public boolean terminal(Language<?> language) {
 		return terminal(new HashSet<Id>(), language);
@@ -448,7 +467,7 @@ public abstract class Grammar {
 				System.out.println(show(language));
 			}
 		}
-		return nullable(language);
+		return nullable(visited,language);
 	}
 	public boolean matches(String s) {
 		return matches(language(), s);

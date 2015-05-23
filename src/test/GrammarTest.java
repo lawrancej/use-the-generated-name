@@ -152,8 +152,9 @@ public class GrammarTest {
 //		System.out.println(regex);
 //		System.out.println(regex.show(regex.first()));
 		Assert.assertTrue(regex.matches("a"));
-//		System.out.println(regex.matches("a|b"));
-//		System.out.println(regex.matches("(hello)|(world)"));
+		Assert.assertTrue(regex.matches("a|b"));
+		Assert.assertTrue(regex.matches("a|b**"));
+		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
 
 /*	@Test

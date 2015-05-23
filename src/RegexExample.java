@@ -27,7 +27,7 @@ public class RegexExample {
 
 //		let("hello").derive(id("hello"), string("world"), id("hello"));
 		System.out.println(asString(id("regex")));
-		System.out.println(matches(id("regex"),"hello|world"));
+		System.out.println(matches(id("regex"),"a"));
 //		System.out.println(asString(id("hello")));
 	}
 	
@@ -80,7 +80,8 @@ public class RegexExample {
 	
 	// Crazy complicated "Hello, world!"
 	public static void main(String[] args) {
-		leftRecursiveList();
+		regexTest();
+//		leftRecursiveList();
 //		balancedParens();
 /*
 		let("S").derive(many(id("A")));
@@ -89,7 +90,7 @@ public class RegexExample {
 		System.out.println(matches(id("S"),"a"));
 		System.out.println(matches(id("S"),"aa"));
 		System.out.println(matches(id("S"),"aaa"));
-//		regexTest();
+//
  * 
  */
 	}
