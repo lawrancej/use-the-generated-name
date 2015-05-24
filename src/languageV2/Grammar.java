@@ -31,11 +31,6 @@ public class Grammar {
 			super(left, right);
 		}
 	}
-	public static class BinaryOperator extends TaggedData<LanguagePair> {
-		BinaryOperator(LanguagePair data) {
-			super(Construct.LIST.ordinal(), data);
-		}
-	}
 	public static class Loop extends TaggedData<TaggedData<?>> {
 		Loop(TaggedData<?> data) {
 			super(Construct.LOOP.ordinal(), data);
@@ -53,19 +48,33 @@ public class Grammar {
 	// Any symbol
 	public static final TaggedData<Character> any = new TaggedData<Character>(Construct.SYMBOL.ordinal(), null);
 	// Symbol cache
-	private TaggedDataCache<Character> symbols = new TaggedDataCache<Character>(Construct.SYMBOL.ordinal());
+	private TaggedDataCache<Character> symbols = new TaggedDataCache<Character>(any);
 	// Get a symbol from the cache
 	public TaggedData<?> symbol(char c) {
 		return symbols.getInstance(c);
 	}
 	
+	/* Lists */
+	// Empty list
+	public static final TaggedData<LanguagePair> empty = new TaggedData<LanguagePair>(Construct.LIST.ordinal(), null);
+	// List cache
+	private TaggedDataCache<LanguagePair> lists = new TaggedDataCache<LanguagePair>(empty);
+	// Get a list from the cache
+	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
+		if (left == reject || right == reject) {
+			return reject;
+		}
+		if (left == empty) { return right; }
+		if (right == empty) { return left; }
+		LanguagePair pair = new LanguagePair(left, right);
+		return lists.getInstance(pair);
+	}
+	
 	public static final LanguageSet reject = new LanguageSet(null);
-	public static final BinaryOperator empty = new BinaryOperator(null);
 	/* Flyweights */
 	/* Pattern: map what's inside the language to the language */
 	private Map<TaggedData<?>, Loop> stars = new HashMap<TaggedData<?>, Loop>();
 	private Map<SetOfLanguages, LanguageSet> ors = new HashMap<SetOfLanguages, LanguageSet>();
-	private Map<LanguagePair, BinaryOperator> lists = new HashMap<LanguagePair, BinaryOperator>();
 	private Map<String, Id> ids = new HashMap<String, Id>();
 	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
 	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
@@ -150,18 +159,6 @@ public class Grammar {
 	public TaggedData<?> option(TaggedData<?> language) {
 		return or(language, empty);
 	}
-	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
-		if (left == reject || right == reject) {
-			return reject;
-		}
-		if (left == empty) { return right; }
-		if (right == empty) { return left; }
-		LanguagePair pair = new LanguagePair(left, right);
-		if (!lists.containsKey(pair)) {
-			lists.put(pair, new BinaryOperator(pair));
-		}
-		return lists.get(pair);
-	}
 	private TaggedData<?> list(TaggedData<?>[] nodes, int i) {
 		if (i >= nodes.length) {
 			return empty;
@@ -212,9 +209,9 @@ public class Grammar {
 				buffer.append("\u03b5");
 			} else {
 				buffer.append('(');
-				show(buffer,((BinaryOperator)language).data.left);
+				show(buffer,((TaggedData<LanguagePair>)language).data.left);
 				buffer.append(' ');
-				show(buffer,((BinaryOperator)language).data.right);
+				show(buffer,((TaggedData<LanguagePair>)language).data.right);
 				buffer.append(')');
 			}
 			break;
@@ -306,8 +303,8 @@ public class Grammar {
 			break;
 		case LIST:
 			if (language.data != null) {
-				result = nullable(visited, ((BinaryOperator)language).data.left) &&
-						nullable(visited, ((BinaryOperator)language).data.right);
+				result = nullable(visited, ((TaggedData<LanguagePair>)language).data.left) &&
+						nullable(visited, ((TaggedData<LanguagePair>)language).data.right);
 			} else {
 				result = true;
 			}
@@ -348,8 +345,8 @@ public class Grammar {
 			break;
 		case LIST:
 			if (language.data != null) {
-				result = terminal(visited, ((BinaryOperator)language).data.left) &&
-						terminal(visited, ((BinaryOperator)language).data.right);
+				result = terminal(visited, ((TaggedData<LanguagePair>)language).data.left) &&
+						terminal(visited, ((TaggedData<LanguagePair>)language).data.right);
 			}
 			break;
 		case LOOP:
@@ -378,10 +375,10 @@ public class Grammar {
 			break;
 		case LIST:
 			if (language.data != null) {
-				TaggedData<?> result = list(derivative(visited, c, ((BinaryOperator)language).data.left),
-						((BinaryOperator)language).data.right);
-				if (nullable(((BinaryOperator)language).data.left)) {
-					return or(result, derivative(visited, c, ((BinaryOperator)language).data.right));
+				TaggedData<?> result = list(derivative(visited, c, ((TaggedData<LanguagePair>)language).data.left),
+						((TaggedData<LanguagePair>)language).data.right);
+				if (nullable(((TaggedData<LanguagePair>)language).data.left)) {
+					return or(result, derivative(visited, c, ((TaggedData<LanguagePair>)language).data.right));
 				}
 				return result;
 			}
@@ -422,9 +419,9 @@ public class Grammar {
 			break;
 		case LIST:
 			if (language.data != null) {
-				TaggedData<?> result = first(visited, ((BinaryOperator)language).data.left);
-				if (nullable(((BinaryOperator)language).data.left)) {
-					result = or(result, first(visited, ((BinaryOperator)language).data.right));
+				TaggedData<?> result = first(visited, ((TaggedData<LanguagePair>)language).data.left);
+				if (nullable(((TaggedData<LanguagePair>)language).data.left)) {
+					result = or(result, first(visited, ((TaggedData<LanguagePair>)language).data.right));
 				}
 				return result;
 			}
