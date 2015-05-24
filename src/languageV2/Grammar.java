@@ -13,12 +13,6 @@ public class Grammar {
 		LOOP /* a* */,
 		ID, /* id -> derivation */
 	};
-	public static class Mutable<T> {
-		public T current;
-		Mutable(T data) {
-			current = data;
-		}
-	}
 	@SuppressWarnings("serial")
 	public static class SetOfLanguages extends HashSet<TaggedData<?>> {}
 	public static class LanguagePair extends Pair<TaggedData<?>,TaggedData<?>> {
@@ -26,24 +20,20 @@ public class Grammar {
 			super(left, right);
 		}
 	}
-	public class Id extends TaggedData<Pair<String,Mutable<TaggedData<?>>>> {
-		Id(String label) {
-			super(Construct.ID.ordinal(), new Pair<String, Mutable<TaggedData<?>>>(label, new Mutable<TaggedData<?>>(reject)));
-		}
-		public void derives(TaggedData<?>... languages) {
-			data.right.current = or(data.right.current, list(languages));
-		}
-	}
-	/* Symbols */
-	// Any symbol
+	/** Symbols */
+	/** Match any symbol */
 	public static final TaggedData<Character> any = new TaggedData<Character>(Construct.SYMBOL.ordinal(), null);
 	// Symbol cache
 	private TaggedDataCache<Character> symbols = new TaggedDataCache<Character>(any);
-	// Get a symbol from the cache
+	/**
+	 * Matches a character
+	 * @param c The character to match
+	 * @return The language
+	 */
 	public TaggedData<?> symbol(char c) {
 		return symbols.getInstance(c);
 	}
-	/* Lists */
+	/** Lists */
 	// Empty list (string)
 	public static final TaggedData<LanguagePair> empty = new TaggedData<LanguagePair>(Construct.LIST.ordinal(), null);
 	// List cache
@@ -58,8 +48,22 @@ public class Grammar {
 		LanguagePair pair = new LanguagePair(left, right);
 		return lists.getInstance(pair);
 	}
-	
-	/* Sets */
+	private TaggedData<?> list(TaggedData<?>[] nodes, int i) {
+		if (i >= nodes.length) {
+			return empty;
+		} else {
+			return listInstance(nodes[i], list(nodes, i+1));
+		}
+	}
+	/**
+	 * Match a list of languages
+	 * @param nodes A list of languages
+	 * @return A language matching the list of languages, in order
+	 */
+	public TaggedData<?> list(TaggedData<?>... nodes) {
+		return list(nodes, 0);
+	}
+	/** Sets */
 	// Empty set (reject)
 	public static final TaggedData<SetOfLanguages> reject = new TaggedData<SetOfLanguages>(Construct.SET.ordinal(),null);
 	// Set cache
@@ -68,31 +72,7 @@ public class Grammar {
 	private TaggedData<?> setInstance(SetOfLanguages s) {
 		return ors.getInstance(s);
 	}
-	
-	/* Loops (Kleene stars) */
-	private TaggedDataCache<TaggedData<?>> stars = new TaggedDataCache<TaggedData<?>>(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
-	// Get a loop from the cache
-	public TaggedData<?> many(TaggedData<?> language) {
-		assert language != null;
-		if (Construct.values()[language.tag] == Construct.LOOP) return language;
-		return stars.getInstance(language);
-	}
-	
-	private Map<String, Id> ids = new HashMap<String, Id>();
-	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
-	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
-	public boolean debug = false;
-	public TaggedData<?> definition = reject;
-	public Grammar() {
-		
-	}
-	public TaggedData<?> string(String s) {
-		TaggedData<?>[] array = new TaggedData<?>[s.length()];
-		for (int i = 0; i < s.length(); i++) {
-			array[i] = symbol(s.charAt(i));
-		}
-		return list(array, 0);
-	}
+	// Set union
 	private TaggedData<?> merge(TaggedData<SetOfLanguages> set, TaggedData<?> item) {
 		if (set.data.contains(item)) {
 			return set;
@@ -102,6 +82,7 @@ public class Grammar {
 			return setInstance(s);
 		}
 	}
+	// Set union
 	private TaggedData<?> mergeAll(TaggedData<SetOfLanguages> set, TaggedData<SetOfLanguages> set2) {
 		if (set.data.containsAll(set2.data)) {
 			return set;
@@ -112,8 +93,6 @@ public class Grammar {
 		}
 	}
 	private TaggedData<?> orInstance(TaggedData<?> left, TaggedData <?> right) {
-		assert left != null;
-		assert right != null;
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
 		if (left == right) { return left; }
@@ -143,21 +122,53 @@ public class Grammar {
 			return orInstance(nodes[i], or(nodes, i+1));
 		}
 	}
+	/**
+	 * Match any of the languages
+	 * @param nodes Languages
+	 * @return A language matching any of the languages
+	 */
 	public TaggedData<?> or(TaggedData<?>... nodes) {
 		return or(nodes, 0);
 	}
-	public TaggedData<?> option(TaggedData<?> language) {
-		return or(language, empty);
+	/** Loops (Kleene stars) */
+	// Loop cache
+	private TaggedDataCache<TaggedData<?>> stars = new TaggedDataCache<TaggedData<?>>(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
+	/**
+	 * Match a language zero or more times
+	 * @param language The language
+	 * @return A language that matches the input language zero or more times
+	 */
+	public TaggedData<?> many(TaggedData<?> language) {
+		assert language != null;
+		if (Construct.values()[language.tag] == Construct.LOOP) return language;
+		return stars.getInstance(language);
 	}
-	private TaggedData<?> list(TaggedData<?>[] nodes, int i) {
-		if (i >= nodes.length) {
-			return empty;
-		} else {
-			return listInstance(nodes[i], list(nodes, i+1));
+	/** Identifiers (Terminals and nonterminals) */
+	public class Id extends TaggedData<Pair<String,Mutable<TaggedData<?>>>> {
+		Id(String label) {
+			super(Construct.ID.ordinal(), new Pair<String, Mutable<TaggedData<?>>>(label, new Mutable<TaggedData<?>>(reject)));
+		}
+		public void derives(TaggedData<?>... languages) {
+			data.right.current = or(data.right.current, list(languages));
 		}
 	}
-	public TaggedData<?> list(TaggedData<?>... nodes) {
-		return list(nodes, 0);
+	// Identifier lookup by name
+	private Map<String, Id> ids = new HashMap<String, Id>();
+
+	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
+	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
+	public boolean debug = false;
+	public TaggedData<?> definition = reject;
+	public Grammar() {}
+	public TaggedData<?> string(String s) {
+		TaggedData<?>[] array = new TaggedData<?>[s.length()];
+		for (int i = 0; i < s.length(); i++) {
+			array[i] = symbol(s.charAt(i));
+		}
+		return list(array, 0);
+	}
+	public TaggedData<?> option(TaggedData<?> language) {
+		return or(language, empty);
 	}
 	public Id id(String s) {
 		Id result;
@@ -187,6 +198,7 @@ public class Grammar {
 		id(s).derives(languages);
 		return id(s);
 	}
+	// Show a language
 	private static StringBuffer show(StringBuffer buffer, TaggedData<?> language) {
 		switch(Construct.values()[language.tag]) {
 		case ID:
@@ -351,6 +363,7 @@ public class Grammar {
 		return terminal(definition);
 	}
 
+	// Compute the derivative of a language
 	private TaggedData<?> derivative(Set<Id> visited, char c, TaggedData<?> language) {
 		switch(Construct.values()[language.tag]) {
 		case ID:
@@ -398,6 +411,7 @@ public class Grammar {
 		return derivative(c, definition);
 	}
 
+	// Compute the first set
 	private TaggedData<?> first(HashSet<Id> visited, TaggedData<?> language) {
 		switch(Construct.values()[language.tag]) {
 		case ID:

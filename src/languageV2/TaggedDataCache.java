@@ -3,7 +3,7 @@ package languageV2;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/* Caches instances of data so that value comparisons become pointer comparisons */
 public class TaggedDataCache<T> {
 	/* Map the data to the instance */
 	private Map<T, TaggedData<T>> instances = new HashMap<T, TaggedData<T>>();
