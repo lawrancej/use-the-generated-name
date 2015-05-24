@@ -21,11 +21,6 @@ public class Grammar {
 	}
 	@SuppressWarnings("serial")
 	public static class SetOfLanguages extends HashSet<TaggedData<?>> {}
-	public static class LanguageSet extends TaggedData<SetOfLanguages> {
-		public LanguageSet(SetOfLanguages data) {
-			super(Construct.SET.ordinal(), data);
-		}
-	}
 	public static class LanguagePair extends Pair<TaggedData<?>,TaggedData<?>> {
 		public LanguagePair(TaggedData<?> left, TaggedData<?> right) {
 			super(left, right);
@@ -55,7 +50,7 @@ public class Grammar {
 	}
 	
 	/* Lists */
-	// Empty list
+	// Empty list (string)
 	public static final TaggedData<LanguagePair> empty = new TaggedData<LanguagePair>(Construct.LIST.ordinal(), null);
 	// List cache
 	private TaggedDataCache<LanguagePair> lists = new TaggedDataCache<LanguagePair>(empty);
@@ -70,11 +65,18 @@ public class Grammar {
 		return lists.getInstance(pair);
 	}
 	
-	public static final LanguageSet reject = new LanguageSet(null);
-	/* Flyweights */
+	/* Sets */
+	// Empty set (reject)
+	public static final TaggedData<SetOfLanguages> reject = new TaggedData<SetOfLanguages>(Construct.SET.ordinal(),null);
+	// Set cache
+	private TaggedDataCache<SetOfLanguages> ors = new TaggedDataCache<SetOfLanguages>(reject);
+	// Get a set from the cache
+	private TaggedData<?> setInstance(SetOfLanguages s) {
+		return ors.getInstance(s);
+	}
+	
 	/* Pattern: map what's inside the language to the language */
 	private Map<TaggedData<?>, Loop> stars = new HashMap<TaggedData<?>, Loop>();
-	private Map<SetOfLanguages, LanguageSet> ors = new HashMap<SetOfLanguages, LanguageSet>();
 	private Map<String, Id> ids = new HashMap<String, Id>();
 	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
 	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
@@ -97,28 +99,22 @@ public class Grammar {
 		}
 		return stars.get(language);
 	}
-	private TaggedData<?> um(SetOfLanguages s) {
-		if (!ors.containsKey(s)) {
-			ors.put(s, new LanguageSet(s));
-		}
-		return ors.get(s);
-	}
-	private TaggedData<?> merge(LanguageSet set, TaggedData<?> item) {
+	private TaggedData<?> merge(TaggedData<SetOfLanguages> set, TaggedData<?> item) {
 		if (set.data.contains(item)) {
 			return set;
 		} else {
 			SetOfLanguages s = (SetOfLanguages)set.data.clone();
 			s.add(item);
-			return um(s);
+			return setInstance(s);
 		}
 	}
-	private TaggedData<?> mergeAll(LanguageSet set, LanguageSet set2) {
+	private TaggedData<?> mergeAll(TaggedData<SetOfLanguages> set, TaggedData<SetOfLanguages> set2) {
 		if (set.data.containsAll(set2.data)) {
 			return set;
 		} else {
 			SetOfLanguages s = (SetOfLanguages)set.data.clone();
 			s.addAll(set2.data);
-			return um(s);
+			return setInstance(s);
 		}
 	}
 	private TaggedData<?> orInstance(TaggedData<?> left, TaggedData <?> right) {
@@ -131,20 +127,20 @@ public class Grammar {
 		// Do the types differ?
 		if (left.tag != right.tag) {
 			if (Construct.values()[left.tag] == Construct.SET) {
-				return merge((LanguageSet)left, right);
+				return merge((TaggedData<SetOfLanguages>)left, right);
 			}
 			else if (Construct.values()[right.tag] == Construct.SET) {
-				return merge((LanguageSet)right, left);
+				return merge((TaggedData<SetOfLanguages>)right, left);
 			}
 		}
 		// The types are the same, and they're both sets
 		else if (Construct.values()[left.tag] == Construct.SET) {
-			return mergeAll((LanguageSet)left, (LanguageSet)right);
+			return mergeAll((TaggedData<SetOfLanguages>)left, (TaggedData<SetOfLanguages>)right);
 		}
 		setOfLanguages = new SetOfLanguages();
 		setOfLanguages.add(left);
 		setOfLanguages.add(right);
-		return um(setOfLanguages);
+		return setInstance(setOfLanguages);
 	}
 	private TaggedData<?> or(TaggedData<?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -221,7 +217,7 @@ public class Grammar {
 			} else {
 				buffer.append('(');
 				boolean flag = false;
-				for (TaggedData<?> l : ((LanguageSet)language).data) {
+				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
 					if (flag) {
 						buffer.append('|');
 					} else {
@@ -291,7 +287,7 @@ public class Grammar {
 			break;
 		case SET:
 			if (language.data != null) {
-				for (TaggedData<?> l : ((LanguageSet)language).data) {
+				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
 					result = result || nullable(visited, l);
 				}
 			}
@@ -324,7 +320,7 @@ public class Grammar {
 		switch(Construct.values()[language.tag]) {
 		case SET:
 			if (language.data != null) {
-				for (TaggedData<?> l : ((LanguageSet)language).data) {
+				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
 					result = result && terminal(visited, l);
 				}
 			}
@@ -386,7 +382,7 @@ public class Grammar {
 		case SET:
 			if (language.data != null) {
 				TaggedData<?> result = reject;
-				for (TaggedData<?> l : ((LanguageSet)language).data) {
+				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
 					result = or(result, derivative(visited, c, l));
 				}
 				return result;
@@ -429,7 +425,7 @@ public class Grammar {
 		case SET:
 			if (language.data != null) {
 				TaggedData<?> result = reject;
-				for (TaggedData<?> l : ((LanguageSet)language).data) {
+				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
 					result = or(result, first(visited, l));
 				}
 				return result;
