@@ -26,11 +26,6 @@ public class Grammar {
 			super(left, right);
 		}
 	}
-	public static class Loop extends TaggedData<TaggedData<?>> {
-		Loop(TaggedData<?> data) {
-			super(Construct.LOOP.ordinal(), data);
-		}
-	}
 	public class Id extends TaggedData<Pair<String,Mutable<TaggedData<?>>>> {
 		Id(String label) {
 			super(Construct.ID.ordinal(), new Pair<String, Mutable<TaggedData<?>>>(label, new Mutable<TaggedData<?>>(reject)));
@@ -48,7 +43,6 @@ public class Grammar {
 	public TaggedData<?> symbol(char c) {
 		return symbols.getInstance(c);
 	}
-	
 	/* Lists */
 	// Empty list (string)
 	public static final TaggedData<LanguagePair> empty = new TaggedData<LanguagePair>(Construct.LIST.ordinal(), null);
@@ -75,8 +69,15 @@ public class Grammar {
 		return ors.getInstance(s);
 	}
 	
-	/* Pattern: map what's inside the language to the language */
-	private Map<TaggedData<?>, Loop> stars = new HashMap<TaggedData<?>, Loop>();
+	/* Loops (Kleene stars) */
+	private TaggedDataCache<TaggedData<?>> stars = new TaggedDataCache<TaggedData<?>>(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
+	// Get a loop from the cache
+	public TaggedData<?> many(TaggedData<?> language) {
+		assert language != null;
+		if (Construct.values()[language.tag] == Construct.LOOP) return language;
+		return stars.getInstance(language);
+	}
+	
 	private Map<String, Id> ids = new HashMap<String, Id>();
 	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
 	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
@@ -91,13 +92,6 @@ public class Grammar {
 			array[i] = symbol(s.charAt(i));
 		}
 		return list(array, 0);
-	}
-	public TaggedData<?> many(TaggedData<?> language) {
-		if (Construct.values()[language.tag] == Construct.LOOP) return language;
-		if (!stars.containsKey(language)) {
-			stars.put(language, new Loop(language));
-		}
-		return stars.get(language);
 	}
 	private TaggedData<?> merge(TaggedData<SetOfLanguages> set, TaggedData<?> item) {
 		if (set.data.contains(item)) {
@@ -230,7 +224,7 @@ public class Grammar {
 			break;
 		case LOOP:
 			buffer.append('(');
-			show(buffer,((Loop)language).data);
+			show(buffer,((TaggedData<TaggedData<?>>)language).data);
 			buffer.append(")*");
 			break;
 		case SYMBOL:
@@ -346,7 +340,7 @@ public class Grammar {
 			}
 			break;
 		case LOOP:
-			result = terminal(visited, ((Loop)language).data);
+			result = terminal(visited, ((TaggedData<TaggedData<?>>)language).data);
 		}
 		return result;
 	}
@@ -389,7 +383,7 @@ public class Grammar {
 			}
 			break;
 		case LOOP:
-			return list(derivative(visited, c, ((Loop)language).data), language);
+			return list(derivative(visited, c, ((TaggedData<TaggedData<?>>)language).data), language);
 		case SYMBOL:
 			if (language.data == null || ((TaggedData<Character>)language).data == c) {
 				return empty;
@@ -432,7 +426,7 @@ public class Grammar {
 			}
 			break;
 		case LOOP:
-			return first(visited, ((Loop)language).data);
+			return first(visited, ((TaggedData<TaggedData<?>>)language).data);
 		case SYMBOL:
 			return language;
 		}
