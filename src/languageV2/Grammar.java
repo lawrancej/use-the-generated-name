@@ -31,11 +31,6 @@ public class Grammar {
 			super(left, right);
 		}
 	}
-	public static class Symbol extends TaggedData<Character> {
-		Symbol(Character data) {
-			super(Construct.SYMBOL.ordinal(), data);
-		}
-	}
 	public static class BinaryOperator extends TaggedData<LanguagePair> {
 		BinaryOperator(LanguagePair data) {
 			super(Construct.LIST.ordinal(), data);
@@ -54,13 +49,20 @@ public class Grammar {
 			data.right.current = or(data.right.current, list(languages));
 		}
 	}
-	/* Singletons */
-	public static final Symbol any = new Symbol(null);
+	/* Symbols */
+	// Any symbol
+	public static final TaggedData<Character> any = new TaggedData<Character>(Construct.SYMBOL.ordinal(), null);
+	// Symbol cache
+	private TaggedDataCache<Character> symbols = new TaggedDataCache<Character>(Construct.SYMBOL.ordinal());
+	// Get a symbol from the cache
+	public TaggedData<?> symbol(char c) {
+		return symbols.getInstance(c);
+	}
+	
 	public static final LanguageSet reject = new LanguageSet(null);
 	public static final BinaryOperator empty = new BinaryOperator(null);
 	/* Flyweights */
 	/* Pattern: map what's inside the language to the language */
-	private static Map<Character, Grammar.Symbol> symbols = new HashMap<Character, Grammar.Symbol>();
 	private Map<TaggedData<?>, Loop> stars = new HashMap<TaggedData<?>, Loop>();
 	private Map<SetOfLanguages, LanguageSet> ors = new HashMap<SetOfLanguages, LanguageSet>();
 	private Map<LanguagePair, BinaryOperator> lists = new HashMap<LanguagePair, BinaryOperator>();
@@ -71,12 +73,6 @@ public class Grammar {
 	public TaggedData<?> definition = reject;
 	public Grammar() {
 		
-	}
-	public static Symbol symbol(char c) {
-		if (!symbols.containsKey(c)) {
-			symbols.put(c, new Symbol(c));
-		}
-		return symbols.get(c);
 	}
 	public TaggedData<?> string(String s) {
 		TaggedData<?>[] array = new TaggedData<?>[s.length()];
@@ -249,7 +245,7 @@ public class Grammar {
 			if (language.data == null) {
 				buffer.append("<any character>");
 			} else {
-				buffer.append(((Grammar.Symbol)language).data);
+				buffer.append(((TaggedData<Character>)language).data);
 			}
 			buffer.append('\'');
 			break;
@@ -402,7 +398,7 @@ public class Grammar {
 		case LOOP:
 			return list(derivative(visited, c, ((Loop)language).data), language);
 		case SYMBOL:
-			if (language.data == null || ((Symbol)language).data == c) {
+			if (language.data == null || ((TaggedData<Character>)language).data == c) {
 				return empty;
 			}
 		}
