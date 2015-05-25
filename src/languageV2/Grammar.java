@@ -166,7 +166,14 @@ public class Grammar {
 	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
 	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
 	public boolean debug = false;
-	public TaggedData<?> definition = reject;
+	/**
+	 * Define the language
+	 * @param language
+	 */
+	public void define(TaggedData<?> language) {
+		definition = language;
+	}
+	private TaggedData<?> definition = reject;
 	public Grammar() {}
 	public TaggedData<?> string(String s) {
 		TaggedData<?>[] array = new TaggedData<?>[s.length()];
@@ -179,15 +186,10 @@ public class Grammar {
 		return or(language, empty);
 	}
 	public Id id(String s) {
-		Id result;
 		if (!ids.containsKey(s)) {
 			ids.put(s, new Id(s));
 		}
-		result = ids.get(s);
-		if (definition == reject) {
-			definition = result;
-		}
-		return result;
+		return ids.get(s);
 	}
 	private TaggedData<?> derives(String s, TaggedData<?>... languages) {
 		TaggedData<?> rhs = list(languages);
@@ -284,13 +286,13 @@ public class Grammar {
 		return show(definition);
 	}
 	// Does the language derive the empty string?
-	private boolean nullable(Set<Id> visited, TaggedData<?> language) {
+	private boolean nullable(Set<String> visited, TaggedData<?> language) {
 		boolean result = false;
 		if (nulls.contains(language)) return true;
 		switch(Construct.values()[language.tag]) {
 		case ID:
-			if (!visited.contains((Id) language)) {
-				visited.add((Id) language);
+			if (!visited.contains((String) language.data)) {
+				visited.add((String) language.data);
 				result = nullable(visited,rhs((String)language.data));
 				if (result) {
 					nulls.add(language);
@@ -325,7 +327,7 @@ public class Grammar {
 		return result;
 	}
 	public boolean nullable(TaggedData<?> language) {
-		return nullable(new HashSet<Id>(), language);
+		return nullable(new HashSet<String>(), language);
 	}
 	public boolean nullable() {
 		return nullable(definition);
@@ -374,13 +376,13 @@ public class Grammar {
 	}
 
 	// Compute the derivative of a language
-	private TaggedData<?> derivative(Set<Id> visited, char c, TaggedData<?> language) {
+	private TaggedData<?> derivative(Set<String> visited, char c, TaggedData<?> language) {
 		switch(Construct.values()[language.tag]) {
 		case ID:
 			Id id = (Id)language;
 			String dc = "D" + c + id.data;
-			if (!visited.contains(id)) {
-				visited.add(id);
+			if (!visited.contains(id.data)) {
+				visited.add(id.data);
 				return derives(dc, derivative(visited, c, rhs(id.data)));
 			} else if (ids.containsKey(dc)) {
 				return id(dc);
@@ -415,7 +417,7 @@ public class Grammar {
 		return reject;
 	}
 	public TaggedData<?> derivative(char c, TaggedData<?> language) {
-		return derivative(new HashSet<Id>(), c, language);
+		return derivative(new HashSet<String>(), c, language);
 	}
 	public TaggedData<?> derivative(char c) {
 		return derivative(c, definition);
@@ -463,19 +465,26 @@ public class Grammar {
 		return first(definition);
 	}
 	public boolean matches(TaggedData<?> language, String s) {
+		boolean result;
 		if (debug) {
 			System.out.println(show(language));
 		}
-		Set<Id> visited = new HashSet<Id>();
+		Set<String> visited = new HashSet<String>();
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(visited, s.charAt(i), language);
+			if (!visited.isEmpty()) {
+				System.out.println("top: " + (String)language.data);
+				System.out.println("visited: " + visited.size() + " "+ visited);
+				System.out.println("ids: " + ids.size() + " " + ids.keySet());
+			}
 			visited.clear();
 			if (debug) {
 				System.out.println(s.charAt(i));
 				System.out.println(show(language));
 			}
 		}
-		return nullable(visited,language);
+		result = nullable(visited,language);
+		return result;
 	}
 	public boolean matches(String s) {
 		return matches(definition, s);

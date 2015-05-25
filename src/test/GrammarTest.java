@@ -10,7 +10,7 @@ public class GrammarTest {
 	@Test
 	public void testSymbol() {
 		Grammar g = new Grammar() {{
-			definition = symbol('s');
+			define(symbol('s'));
 		}};
 		Assert.assertFalse(g.nullable());
 		Assert.assertEquals(Grammar.reject, g.derivative('e'));
@@ -21,7 +21,7 @@ public class GrammarTest {
 	@Test
 	public void testMany() {
 		Grammar aaaa = new Grammar() {{
-			definition = list(any, many(any));
+			define(list(any, many(any)));
 		}};
 		Assert.assertTrue(aaaa.matches("abcdefg"));
 		Assert.assertFalse(aaaa.matches(""));
@@ -30,7 +30,7 @@ public class GrammarTest {
 	@Test
 	public void testOr() {
 		Grammar aaaa = new Grammar() {{
-			definition = many(or(symbol('a'), symbol('b')));
+			define(many(or(symbol('a'), symbol('b'))));
 		}};
 		Assert.assertFalse(aaaa.matches("abcdefg"));
 		Assert.assertTrue(aaaa.matches("aaaa"));
@@ -41,7 +41,7 @@ public class GrammarTest {
 	@Test
 	public void testList() {
 		Grammar g = new Grammar() {{
-			definition = list(symbol('a'), symbol('b'));
+			define(list(symbol('a'), symbol('b')));
 		}};
 		Assert.assertTrue(g.matches("ab"));
 		Assert.assertFalse(g.matches("aaaa"));
@@ -52,7 +52,7 @@ public class GrammarTest {
 	@Test
 	public void testAny() {
 		Grammar g = new Grammar() {{
-			definition = list(any, many(any), symbol('b'));
+			define(list(any, many(any), symbol('b')));
 		}};
 		Assert.assertTrue(g.matches("jebb"));
 		Assert.assertFalse(g.matches("jabba"));
@@ -63,6 +63,7 @@ public class GrammarTest {
 		Grammar parens = new Grammar() {{
 			id("S").derives(id("S"),symbol('('),id("S"),symbol(')'));
 			id("S").derives();
+			define(id("S"));
 		}};
 		Assert.assertTrue(parens.matches(parens.first(), "("));
 		Assert.assertFalse(parens.matches(parens.first(), ")"));
@@ -74,7 +75,7 @@ public class GrammarTest {
 	@Test
 	public void testHelloWorld() {
 		Grammar g = new Grammar() {{
-			definition = string("hello world");
+			define(string("hello world"));
 		}};
 		Assert.assertTrue(g.matches("hello world"));
 		Assert.assertFalse(g.matches("hello"));
@@ -83,7 +84,7 @@ public class GrammarTest {
 	@Test
 	public void testFooBarFrak() {
 		Grammar g = new Grammar() {{
-			definition = many(or(string("foo"),string("bar"),string("frak")));
+			define(many(or(string("foo"),string("bar"),string("frak"))));
 		}};
 		Assert.assertTrue(g.matches("foo"));
 		Assert.assertTrue(g.matches("foofoobar"));
@@ -95,6 +96,7 @@ public class GrammarTest {
 		Grammar g = new Grammar() {{
 			id("L").derives(id("L"),symbol('x'));
 			id("L").derives();
+			define(id("L"));
 			debug = true;
 		}};
 		Assert.assertTrue(g.matches(""));
@@ -114,6 +116,7 @@ public class GrammarTest {
 			id("base").derives(any);
 			id("base").derives(symbol('\\'), any);
 			id("base").derives(symbol('('), id("regex"), symbol(')'));
+			define(id("regex"));
 //			debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
