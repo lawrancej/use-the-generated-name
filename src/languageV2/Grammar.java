@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public class Grammar {
 	public static enum Construct {
 		SYMBOL /* c */,
@@ -336,7 +337,7 @@ public class Grammar {
 		case ID:
 			if (!visited.contains((Id) language)) {
 				visited.add((Id) language);
-				result = terminal(visited,((Id)language).data.right.current);
+				result = terminal(visited, ((Id)language).data.right.current);
 				if (result) {
 					terms.add(language);
 				}
@@ -356,11 +357,13 @@ public class Grammar {
 		}
 		return result;
 	}
-	public boolean terminal(TaggedData<?> language) {
-		return terminal(new HashSet<Id>(), language);
+	public boolean terminal(Id language) {
+		HashSet<Id> identifiers = new HashSet<Id>();
+		identifiers.add(language);
+		return terminal(identifiers, language);
 	}
-	public boolean terminal() {
-		return terminal(definition);
+	public boolean terminal(String s) {
+		return terminal(id(s));
 	}
 
 	// Compute the derivative of a language
