@@ -145,16 +145,23 @@ public class Grammar {
 		return stars.getInstance(language);
 	}
 	/** Identifiers (Terminals and nonterminals) */
-	public class Id extends TaggedData<Pair<String,Mutable<TaggedData<?>>>> {
+	private Map<String, TaggedData<?>> derivations = new HashMap<String, TaggedData<?>>();
+	public class Id extends TaggedData<String> {
 		Id(String label) {
-			super(Construct.ID.ordinal(), new Pair<String, Mutable<TaggedData<?>>>(label, new Mutable<TaggedData<?>>(reject)));
+			super(Construct.ID.ordinal(), label);
 		}
 		public void derives(TaggedData<?>... languages) {
-			data.right.current = or(data.right.current, list(languages));
+			derivations.put(data, or(rhs(data), list(languages)));
 		}
 	}
 	// Identifier lookup by name
 	private Map<String, Id> ids = new HashMap<String, Id>();
+	private TaggedData<?> rhs(String s) {
+		if (!derivations.containsKey(s)) {
+			return reject;
+		}
+		return derivations.get(s);
+	}
 
 	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
 	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
@@ -192,8 +199,11 @@ public class Grammar {
 			return empty;
 		}
 		
-		if (terminal(rhs)) {
-			return rhs;
+		System.out.print(s);
+		System.out.print(" -> ");
+		System.out.println(show(rhs));
+		if (terminal(s, rhs)) {
+//			return rhs;
 		}
 		*/
 		id(s).derives(languages);
@@ -204,7 +214,7 @@ public class Grammar {
 		switch(Construct.values()[language.tag]) {
 		case ID:
 			buffer.append('<');
-			buffer.append(((Id)language).data.left);
+			buffer.append(((Id)language).data);
 			buffer.append('>');
 			break;
 		case LIST:
@@ -259,10 +269,10 @@ public class Grammar {
 		if (Construct.values()[language.tag] == Construct.ID) {
 			for (Id id : ids.values()) {
 				buffer.append('<');
-				buffer.append(id.data.left);
+				buffer.append(id.data);
 				buffer.append('>');
 				buffer.append(" ::= ");
-				show(buffer,id.data.right.current);
+				show(buffer,rhs(id.data));
 				buffer.append("\n");
 			}
 			return buffer.toString();
@@ -281,7 +291,7 @@ public class Grammar {
 		case ID:
 			if (!visited.contains((Id) language)) {
 				visited.add((Id) language);
-				result = nullable(visited,((Id)language).data.right.current);
+				result = nullable(visited,rhs((String)language.data));
 				if (result) {
 					nulls.add(language);
 				}
@@ -321,7 +331,7 @@ public class Grammar {
 		return nullable(definition);
 	}
 	// Is the identifier a terminal?
-	private boolean terminal(Set<Id> visited, TaggedData<?> language) {
+	private boolean terminal(Set<String> visited, TaggedData<?> language) {
 		boolean result = true;
 		if (terms.contains(language)) return true;
 		switch(Construct.values()[language.tag]) {
@@ -335,9 +345,9 @@ public class Grammar {
 		case SYMBOL:
 			break;
 		case ID:
-			if (!visited.contains((Id) language)) {
-				visited.add((Id) language);
-				result = terminal(visited, ((Id)language).data.right.current);
+			if (!visited.contains(((Id) language).data)) {
+				visited.add(((Id) language).data);
+				result = terminal(visited, rhs((String)language.data));
 				if (result) {
 					terms.add(language);
 				}
@@ -357,13 +367,10 @@ public class Grammar {
 		}
 		return result;
 	}
-	public boolean terminal(Id language) {
-		HashSet<Id> identifiers = new HashSet<Id>();
-		identifiers.add(language);
+	public boolean terminal(String s, TaggedData<?> language) {
+		HashSet<String> identifiers = new HashSet<String>();
+		identifiers.add(s);
 		return terminal(identifiers, language);
-	}
-	public boolean terminal(String s) {
-		return terminal(id(s));
 	}
 
 	// Compute the derivative of a language
@@ -371,10 +378,10 @@ public class Grammar {
 		switch(Construct.values()[language.tag]) {
 		case ID:
 			Id id = (Id)language;
-			String dc = "D" + c + id.data.left;
+			String dc = "D" + c + id.data;
 			if (!visited.contains(id)) {
 				visited.add(id);
-				return derives(dc, derivative(visited, c, id.data.right.current));
+				return derives(dc, derivative(visited, c, rhs(id.data)));
 			} else if (ids.containsKey(dc)) {
 				return id(dc);
 			}
@@ -421,7 +428,7 @@ public class Grammar {
 			Id id = (Id) language;
 			if (!visited.contains(id)) {
 				visited.add(id);
-				return first(visited, id.data.right.current);
+				return first(visited, rhs(id.data));
 			}
 			break;
 		case LIST:

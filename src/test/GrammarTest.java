@@ -95,8 +95,8 @@ public class GrammarTest {
 		Grammar g = new Grammar() {{
 			id("L").derives(id("L"),symbol('x'));
 			id("L").derives();
+			debug = true;
 		}};
-//		g.debug = true;
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
 		Assert.assertTrue(g.matches("xx"));
@@ -114,7 +114,7 @@ public class GrammarTest {
 			id("base").derives(any);
 			id("base").derives(symbol('\\'), any);
 			id("base").derives(symbol('('), id("regex"), symbol(')'));
-			debug = true;
+//			debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
