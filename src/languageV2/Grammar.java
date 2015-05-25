@@ -145,6 +145,9 @@ public class Grammar {
 		return stars.getInstance(language);
 	}
 	/** Identifiers (Terminals and nonterminals) */
+	// Identifier lookup by name
+	private Map<String, Id> ids = new HashMap<String, Id>();
+	// Derivation (rhs) lookup by name
 	private Map<String, TaggedData<?>> derivations = new HashMap<String, TaggedData<?>>();
 	public class Id extends TaggedData<String> {
 		Id(String label) {
@@ -154,8 +157,6 @@ public class Grammar {
 			derivations.put(data, or(rhs(data), list(languages)));
 		}
 	}
-	// Identifier lookup by name
-	private Map<String, Id> ids = new HashMap<String, Id>();
 	private TaggedData<?> rhs(String s) {
 		if (!derivations.containsKey(s)) {
 			return reject;
@@ -469,6 +470,12 @@ public class Grammar {
 		if (debug) {
 			System.out.println(show(language));
 		}
+		Map<String, Id> startids = new HashMap<String, Id>();
+		Map<String, TaggedData<?>> startderivations = new HashMap<String, TaggedData<?>>();
+		for (Id id : ids.values()) {
+			startids.put(id.data, id);
+			startderivations.put(id.data, rhs(id.data));
+		}
 		Set<String> visited = new HashSet<String>();
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(visited, s.charAt(i), language);
@@ -484,6 +491,10 @@ public class Grammar {
 			}
 		}
 		result = nullable(visited,language);
+		ids.clear();
+		derivations.clear();
+		ids = startids;
+		derivations = startderivations;
 		return result;
 	}
 	public boolean matches(String s) {

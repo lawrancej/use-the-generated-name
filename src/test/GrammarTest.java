@@ -99,11 +99,11 @@ public class GrammarTest {
 			define(id("L"));
 			debug = true;
 		}};
+		Assert.assertFalse(g.matches("L"));
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches("xxx"));
-		Assert.assertFalse(g.matches("L"));
 	}
 	
 	@Test
