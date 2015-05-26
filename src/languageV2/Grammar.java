@@ -163,9 +163,12 @@ public class Grammar {
 		}
 		return derivations.get(s);
 	}
-
-	private Set<TaggedData<?>> nulls = new HashSet<TaggedData<?>>();
-	private Set<TaggedData<?>> terms = new HashSet<TaggedData<?>>();
+	// Set of terminal identifiers
+	private Set<String> terms = new HashSet<String>();
+	// Set of nonterminal identifiers
+	private Set<String> nonterms = new HashSet<String>();
+	// Set of identifiers deriving empty
+	private Set<String> nulls = new HashSet<String>();
 	public boolean debug = false;
 	/**
 	 * Define the language
@@ -173,6 +176,63 @@ public class Grammar {
 	 */
 	public void define(TaggedData<?> language) {
 		definition = language;
+		// Classify identifiers
+		classify();
+		// Analyze nullability
+		nullable();
+	}
+	public Set<String> nullableSet() {
+		return nulls;
+	}
+	public Set<String> nonterminalSet() {
+		return nonterms;
+	}
+	public Set<String> terminalSet() {
+		return terms;
+	}
+	// Classify identifiers into terminal and nonterminal sets
+	private void classify(Set<String> visited, String s, TaggedData<?> language) {
+		if (nonterms.contains(s)) return;
+		if (terms.contains(s)) return;
+		switch(Construct.values()[language.tag]) {
+		case SET:
+			if (language.data != null) {
+				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
+					classify(visited, s, l);
+				}
+			}
+			return;
+		case SYMBOL: return;
+		case ID:
+			String label = (String)language.data;
+			if (!visited.contains(label)) {
+				visited.add(label);
+				classify(visited, s, rhs(label));
+				if (!nonterms.contains(s)) {
+					terms.add(s);
+				}
+			}
+			else if (!terms.contains(s)) {
+				nonterms.add(s);
+			}
+			return;
+		case LIST:
+			if (language.data != null) {
+				classify(visited, s, ((TaggedData<LanguagePair>)language).data.left);
+				classify(visited, s, ((TaggedData<LanguagePair>)language).data.right);
+			}
+			return;
+		case LOOP:
+			classify(visited, s, ((TaggedData<TaggedData<?>>)language).data);
+		}
+	}
+	// Classify identifiers into: terminal, nonterminal
+	private void classify() {
+		HashSet<String> visited = new HashSet<String>();
+		for (Id id : ids.values()) {
+			classify(visited, id.data, rhs(id.data));
+			visited.clear();
+		}
 	}
 	private TaggedData<?> definition = reject;
 	public Grammar() {}
@@ -287,23 +347,19 @@ public class Grammar {
 		return show(definition);
 	}
 	// Does the language derive the empty string?
-	private boolean nullable(Set<String> visited, TaggedData<?> language) {
+	private boolean nullable(Set<TaggedData<?>> visited, TaggedData<?> language) {
 		boolean result = false;
-		if (nulls.contains(language)) return true;
 		switch(Construct.values()[language.tag]) {
 		case ID:
-			if (!visited.contains((String) language.data)) {
-				visited.add((String) language.data);
-				result = nullable(visited,rhs((String)language.data));
+			String label = (String) language.data;
+			if (nulls.contains(label)) return true;
+			if (!visited.contains(language)) {
+				visited.add(language);
+				result = nullable(visited,rhs(label));
 				if (result) {
-					nulls.add(language);
+					nulls.add(label);
 				}
 			}
-/*			if (debug) {
-				System.out.println("nullable: " + result);
-				System.out.println(((Id)language).data.left);
-				System.out.println(show(((Id)language).data.right.current));
-			} */
 			break;
 		case SET:
 			if (language.data != null) {
@@ -327,53 +383,11 @@ public class Grammar {
 		}
 		return result;
 	}
-	public boolean nullable(TaggedData<?> language) {
-		return nullable(new HashSet<String>(), language);
+	private boolean nullable(TaggedData<?> language) {
+		return nullable(new HashSet<TaggedData<?>>(), language);
 	}
 	public boolean nullable() {
 		return nullable(definition);
-	}
-	// Is the identifier a terminal?
-	private boolean terminal(Set<String> visited, TaggedData<?> language) {
-		boolean result = true;
-		if (terms.contains(language)) return true;
-		switch(Construct.values()[language.tag]) {
-		case SET:
-			if (language.data != null) {
-				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
-					result = result && terminal(visited, l);
-				}
-			}
-			break;
-		case SYMBOL:
-			break;
-		case ID:
-			if (!visited.contains(((Id) language).data)) {
-				visited.add(((Id) language).data);
-				result = terminal(visited, rhs((String)language.data));
-				if (result) {
-					terms.add(language);
-				}
-			}
-			else {
-				result = false;
-			}
-			break;
-		case LIST:
-			if (language.data != null) {
-				result = terminal(visited, ((TaggedData<LanguagePair>)language).data.left) &&
-						terminal(visited, ((TaggedData<LanguagePair>)language).data.right);
-			}
-			break;
-		case LOOP:
-			result = terminal(visited, ((TaggedData<TaggedData<?>>)language).data);
-		}
-		return result;
-	}
-	public boolean terminal(String s, TaggedData<?> language) {
-		HashSet<String> identifiers = new HashSet<String>();
-		identifiers.add(s);
-		return terminal(identifiers, language);
 	}
 
 	// Compute the derivative of a language
@@ -494,7 +508,7 @@ public class Grammar {
 				System.out.println(show(language));
 			}
 		}
-		result = nullable(visited,language);
+		result = nullable(language);
 /*		ids.clear();
 		derivations.clear();
 		ids = startids;

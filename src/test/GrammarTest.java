@@ -65,6 +65,9 @@ public class GrammarTest {
 			id("S").derives();
 			define(id("S"));
 		}};
+		System.out.println(parens.terminalSet());
+		System.out.println(parens.nonterminalSet());
+		System.out.println(parens.nullableSet());
 		Assert.assertTrue(parens.matches(parens.first(), "("));
 		Assert.assertFalse(parens.matches(parens.first(), ")"));
 		Assert.assertTrue(parens.matches("()"));
@@ -99,6 +102,9 @@ public class GrammarTest {
 			define(id("L"));
 			debug = true;
 		}};
+		System.out.println(g.nullableSet());
+		System.out.println(g.terminalSet());
+		System.out.println(g.nonterminalSet());
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
 		Assert.assertTrue(g.matches("xx"));
@@ -117,8 +123,12 @@ public class GrammarTest {
 			id("base").derives(symbol('\\'), any);
 			id("base").derives(symbol('('), id("regex"), symbol(')'));
 			define(id("regex"));
-//			debug = true;
+			debug = true;
 		}};
+		System.out.println(regex.show(regex.first()));
+		System.out.println(regex.terminalSet());
+		System.out.println(regex.nonterminalSet());
+		System.out.println(regex.nullableSet());
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
 		Assert.assertTrue(regex.matches("a|b**"));
