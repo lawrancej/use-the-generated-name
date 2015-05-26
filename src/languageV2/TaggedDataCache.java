@@ -9,14 +9,17 @@ public class TaggedDataCache<T> {
 	private Map<T, TaggedData<T>> instances = new HashMap<T, TaggedData<T>>();
 	private final int tag;
 	private final TaggedData<T> bottom;
-	public TaggedDataCache(TaggedData<T> bottom) {
+	private TaggedDataCache(TaggedData<T> bottom) {
 		this.tag = bottom.tag;
 		this.bottom = bottom;
+	}
+	public static <T> TaggedDataCache<T> create(TaggedData<T> bottom) {
+		return new TaggedDataCache<T>(bottom);
 	}
 	public TaggedData<T> getInstance(T key) {
 		if (key == null) return bottom;
 		if (!instances.containsKey(key)) {
-			instances.put(key, new TaggedData<T>(tag, key));
+			instances.put(key, TaggedData.create(tag, key));
 		}
 		return instances.get(key);
 	}

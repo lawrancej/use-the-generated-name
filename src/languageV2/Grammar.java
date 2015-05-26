@@ -23,9 +23,9 @@ public class Grammar {
 	}
 	/** Symbols */
 	/** Match any symbol */
-	public static final TaggedData<Character> any = new TaggedData<Character>(Construct.SYMBOL.ordinal(), null);
+	public static final TaggedData<Character> any = TaggedData.create(Construct.SYMBOL.ordinal(), null);
 	// Symbol cache
-	private TaggedDataCache<Character> symbols = new TaggedDataCache<Character>(any);
+	private TaggedDataCache<Character> symbols = TaggedDataCache.create(any);
 	/**
 	 * Matches a character
 	 * @param c The character to match
@@ -36,9 +36,9 @@ public class Grammar {
 	}
 	/** Lists */
 	// Empty list (string)
-	public static final TaggedData<LanguagePair> empty = new TaggedData<LanguagePair>(Construct.LIST.ordinal(), null);
+	public static final TaggedData<LanguagePair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
 	// List cache
-	private TaggedDataCache<LanguagePair> lists = new TaggedDataCache<LanguagePair>(empty);
+	private TaggedDataCache<LanguagePair> lists = TaggedDataCache.create(empty);
 	// Get a list from the cache
 	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
 		if (left == reject || right == reject) {
@@ -66,9 +66,9 @@ public class Grammar {
 	}
 	/** Sets */
 	// Empty set (reject)
-	public static final TaggedData<SetOfLanguages> reject = new TaggedData<SetOfLanguages>(Construct.SET.ordinal(),null);
+	public static final TaggedData<SetOfLanguages> reject = TaggedData.create(Construct.SET.ordinal(),null);
 	// Set cache
-	private TaggedDataCache<SetOfLanguages> ors = new TaggedDataCache<SetOfLanguages>(reject);
+	private TaggedDataCache<SetOfLanguages> ors = TaggedDataCache.create(reject);
 	// Get a set from the cache
 	private TaggedData<?> setInstance(SetOfLanguages s) {
 		return ors.getInstance(s);
@@ -133,7 +133,7 @@ public class Grammar {
 	}
 	/** Loops (Kleene stars) */
 	// Loop cache
-	private TaggedDataCache<TaggedData<?>> stars = new TaggedDataCache<TaggedData<?>>(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
+	private TaggedDataCache<TaggedData<?>> stars = TaggedDataCache.create(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
 	/**
 	 * Match a language zero or more times
 	 * @param language The language
@@ -478,6 +478,10 @@ public class Grammar {
 		}
 		Set<String> visited = new HashSet<String>();
 		for (int i = 0; i < s.length(); i++) {
+/*			if (language.tag == Construct.ID.ordinal()) {
+				visited.add((String)language.data);
+			}
+*/
 			language = derivative(visited, s.charAt(i), language);
 			if (!visited.isEmpty()) {
 				System.out.println("top: " + (String)language.data);
@@ -491,11 +495,11 @@ public class Grammar {
 			}
 		}
 		result = nullable(visited,language);
-		ids.clear();
+/*		ids.clear();
 		derivations.clear();
 		ids = startids;
 		derivations = startderivations;
-		return result;
+*/		return result;
 	}
 	public boolean matches(String s) {
 		return matches(definition, s);
