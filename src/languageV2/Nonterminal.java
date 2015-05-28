@@ -31,10 +31,7 @@ public class Nonterminal implements Visitor<Boolean> {
 	}
 	public Boolean id(String id) {
 		todo.todo(id);
-		if (todo.visited(label)) {
-			return true;
-		}
-		return false;
+		return todo.visited(label);
 	}
 
 	public Boolean rule(String id, TaggedData<?> rhs) {
