@@ -66,9 +66,7 @@ public class GrammarTest {
 			define(id("S"));
 		}};
 		System.out.println(parens);
-		System.out.println(parens.terminalSet());
-		System.out.println(parens.nonterminalSet());
-		System.out.println(parens.nullableSet());
+		Assert.assertTrue(parens.nonterminal("S"));
 		Assert.assertTrue(parens.matches(parens.first(), "("));
 		Assert.assertFalse(parens.matches(parens.first(), ")"));
 		Assert.assertTrue(parens.matches("()"));
@@ -105,8 +103,8 @@ public class GrammarTest {
 		}};
 		Assert.assertTrue(g.nonterminal("L"));
 		Assert.assertTrue(g.nullableSet().contains("L"));
-		Assert.assertTrue(g.terminalSet().isEmpty());
-		Assert.assertTrue(g.nonterminalSet().contains("L"));
+//		Assert.assertTrue(g.terminalSet().isEmpty());
+//		Assert.assertTrue(g.nonterminalSet().contains("L"));
 		Assert.assertTrue(g.matches(""));
 //		Assert.assertTrue(g.matches(""));
 //		Assert.assertTrue(g.matches("xx"));
@@ -158,8 +156,8 @@ public class GrammarTest {
 		Assert.assertTrue(regex.nonterminal("base"));
 		System.out.println(regex);
 //		System.out.println(regex.show(regex.first()));
-		System.out.println(regex.terminalSet());
-		System.out.println(regex.nonterminalSet());
+//		System.out.println(regex.terminalSet());
+//		System.out.println(regex.nonterminalSet());
 		System.out.println(regex.nullableSet());
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));

@@ -263,16 +263,15 @@ public class Grammar {
 	public String toString() {
 		return visit(new Printer()).toString();
 	}
-	
+	/**
+	 * Is the identifier a nonterminal?
+	 * @param s The identifier label
+	 * @return Whether the identifier is a nonterminal
+	 */
 	public boolean nonterminal(String s) {
 		return visit(new Nonterminal(s));
 	}
-
 	
-	// Set of terminal identifiers
-	private Set<String> terms = new HashSet<String>();
-	// Set of nonterminal identifiers
-	private Set<String> nonterms = new HashSet<String>();
 	// Set of identifiers deriving empty
 	private Set<String> nulls = new HashSet<String>();
 	public Set<String> identifierSet() {
@@ -280,59 +279,6 @@ public class Grammar {
 	}
 	public Set<String> nullableSet() {
 		return nulls;
-	}
-	public Set<String> nonterminalSet() {
-		return nonterms;
-	}
-	public Set<String> terminalSet() {
-		return terms;
-	}
-	// Classify identifiers into terminal and nonterminal sets
-	private void classify(Set<String> visited, String s, TaggedData<?> language) {
-		if (nonterms.contains(s)) return;
-		if (terms.contains(s)) return;
-		switch(Construct.values()[language.tag]) {
-		case SET:
-			if (language.data != null) {
-				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
-					classify(visited, s, l);
-				}
-			}
-			return;
-		case SYMBOL: return;
-		case ID:
-			String label = (String)language.data;
-			if (!visited.contains(label)) {
-				visited.add(label);
-				classify(visited, s, rhs(label));
-				if (!nonterms.contains(s)) {
-					terms.add(s);
-				}
-			}
-			else if (!terms.contains(s)) {
-				nonterms.add(s);
-			}
-			return;
-		case LIST:
-			if (language.data != null) {
-				classify(visited, s, ((TaggedData<LanguagePair>)language).data.left);
-				classify(visited, s, ((TaggedData<LanguagePair>)language).data.right);
-			}
-			return;
-		case LOOP:
-			classify(visited, s, ((TaggedData<TaggedData<?>>)language).data);
-			break;
-		default:
-			break;
-		}
-	}
-	// Classify identifiers into: terminal, nonterminal
-	private void classify() {
-		HashSet<String> visited = new HashSet<String>();
-		for (Id id : ids.values()) {
-			classify(visited, id.data, rhs(id.data));
-			visited.clear();
-		}
 	}
 	private TaggedData<?> derives(String s, TaggedData<?>... languages) {
 		TaggedData<?> rhs = list(languages);
