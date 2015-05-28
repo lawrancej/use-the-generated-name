@@ -20,6 +20,9 @@ class WorkList<T> implements Iterator<T>, Iterable<T> {
 			todo.remove(s);
 		}
 	}
+	public boolean visited(T s) {
+		return done.contains(s);
+	}
 	public void clear() {
 		todo.clear();
 		done.clear();

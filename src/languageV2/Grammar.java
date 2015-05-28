@@ -254,6 +254,9 @@ public class Grammar {
 		// Analyze nullability
 //		nullable();
 	}
+	public void define(String id) {
+		definition = id(id);
+	}
 	public Grammar() {}
 	public boolean debug = false;
 	@Override
@@ -261,6 +264,10 @@ public class Grammar {
 		return visit(new Printer()).toString();
 	}
 	
+	public boolean nonterminal(String s) {
+		return visit(new Nonterminal(s));
+	}
+
 	
 	// Set of terminal identifiers
 	private Set<String> terms = new HashSet<String>();

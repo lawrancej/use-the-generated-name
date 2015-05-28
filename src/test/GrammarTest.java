@@ -103,6 +103,7 @@ public class GrammarTest {
 			define(id("L"));
 			debug = true;
 		}};
+		Assert.assertTrue(g.nonterminal("L"));
 		Assert.assertTrue(g.nullableSet().contains("L"));
 		Assert.assertTrue(g.terminalSet().isEmpty());
 		Assert.assertTrue(g.nonterminalSet().contains("L"));
@@ -113,6 +114,31 @@ public class GrammarTest {
 //		Assert.assertFalse(g.matches("L"));
 	}
 	
+	@Test
+	public void testNonterminal() {
+		Grammar g = new Grammar() {{
+			id("S").derives(or(id("A"), id("nope")));
+			id("A").derives(many(id("S")));
+			id("nope").derives(any);
+			define("S");
+		}};
+		Assert.assertTrue(g.nonterminal("S"));
+		Assert.assertTrue(g.nonterminal("A"));
+		Assert.assertFalse(g.nonterminal("nope"));
+	}
+
+	
+	@Test
+	public void testNonterminal2() {
+		Grammar g = new Grammar() {{
+			id("S").derives(or(many(id("S")), id("nope")));
+			id("nope").derives(any);
+			define("S");
+		}};
+		Assert.assertTrue(g.nonterminal("S"));
+		Assert.assertFalse(g.nonterminal("nope"));
+	}
+
 	@Test
 	public void testRegexGrammar() {
 		Grammar regex = new Grammar() {{
@@ -126,6 +152,10 @@ public class GrammarTest {
 			define(id("regex"));
 //			debug = true;
 		}};
+		Assert.assertTrue(regex.nonterminal("regex"));
+		Assert.assertTrue(regex.nonterminal("term"));
+		Assert.assertTrue(regex.nonterminal("factor"));
+		Assert.assertTrue(regex.nonterminal("base"));
 		System.out.println(regex);
 //		System.out.println(regex.show(regex.first()));
 		System.out.println(regex.terminalSet());
