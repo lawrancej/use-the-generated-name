@@ -15,7 +15,7 @@ public class GrammarExample {
 			id("Q").derives();
 		}};
 		System.out.println(page148);
-		System.out.println(page148.show(page148.first(page148.id("A"))));
+//		System.out.println(page148.show(page148.first(page148.id("A"))));
 		System.out.println(page148.nullable());
 		
 		Grammar regex = new Grammar() {{
@@ -28,7 +28,7 @@ public class GrammarExample {
 			id("base").derives(symbol('('), id("regex"), symbol(')'));
 		}};
 //		System.out.println(regex);
-		System.out.println(regex.show(regex.first()));
+//		System.out.println(regex.show(regex.first()));
 		System.out.println(regex.matches("a|b"));
 		System.out.println(regex.matches("a|b**"));
 		System.out.println(regex.matches("(hello)|(world)"));
