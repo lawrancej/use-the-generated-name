@@ -7,7 +7,7 @@ public class Nonterminal implements Visitor<Boolean> {
 	Grammar g;
 	WorkList<String> todo;
 	String label;
-	public Nonterminal(String label) {
+	protected Nonterminal(String label) {
 		this.label = label;
 	}
 	public Boolean symbol(Character c) {
@@ -44,8 +44,6 @@ public class Nonterminal implements Visitor<Boolean> {
 
 	public Boolean top(Grammar g, WorkList<String> rules) {
 		todo = rules;
-		todo.clear();
-		todo.todo(label);
 		this.g = g;
 		for (String id : todo) {
 			if (g.visit(this, id)) {

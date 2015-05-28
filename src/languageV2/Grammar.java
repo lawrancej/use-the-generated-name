@@ -214,7 +214,7 @@ public class Grammar {
 	/** Visitors traverse a tree. */
 	/**
 	 * Visit a rule of the form id ::= rhs.
-	 * Use this method to control traversal.
+	 * Use this method during traversal.
 	 * @param visitor
 	 * @param id
 	 * @return
@@ -246,17 +246,24 @@ public class Grammar {
 		}
 	}
 	/**
-	 * Visit the language definition.
-	 * Use this method to begin traversal.
+	 * Begin traversal of the language specification, at specified identifier
+	 * @param visitor
+	 * @param id
+	 */
+	public <T> T beginTraversal(Visitor<T> visitor, String id) {
+		WorkList<String> rules = new WorkList<String>();
+		rules.todo(id);
+		return visitor.top(this, rules);
+	}
+	/**
+	 * Begin traversal of the language specification
 	 * @param visitor
 	 * @return
 	 */
-	public <T> T visit(Visitor<T> visitor) {
+	public <T> T beginTraversal(Visitor<T> visitor) {
 		// Visit a grammar
 		if (definition.tag == Construct.ID.ordinal()) {
-			WorkList<String> rules = new WorkList<String>();
-			rules.todo((String)definition.data);
-			return visitor.top(this, rules);
+			return beginTraversal(visitor, (String)definition.data);
 		}
 		// Visit a regex
 		else {
@@ -266,7 +273,7 @@ public class Grammar {
 	public boolean debug = false;
 	@Override
 	public String toString() {
-		return visit(new Printer()).toString();
+		return beginTraversal(new Printer()).toString();
 	}
 	/**
 	 * Is the identifier a nonterminal?
@@ -274,7 +281,7 @@ public class Grammar {
 	 * @return Whether the identifier is a nonterminal
 	 */
 	public boolean nonterminal(String s) {
-		return visit(new Nonterminal(s));
+		return beginTraversal(new Nonterminal(s), s);
 	}
 	
 	// Set of identifiers deriving empty
