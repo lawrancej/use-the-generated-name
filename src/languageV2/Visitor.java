@@ -37,7 +37,7 @@ public interface Visitor<T> {
 	 */
 	T rule(String id, TaggedData<?> rhs);
 	/**
-	 * Visit rules in language by need.
+	 * Visit rules in language lazily by need.
 	 * @param g A language grammar
 	 * @param rules A worklist of rules
 	 */

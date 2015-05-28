@@ -7,8 +7,15 @@ import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class Grammar {
-	/** A language is a set of lists of symbols.
-	 * Loops define repetition, and identifiers enable recursion. */
+	/**
+	 * Construct a language specification
+	 */
+	public Grammar() {}
+	/**
+	 * A language is a set of lists of symbols.
+	 * Specifying an infinite language requires repetition or recursion.
+	 * Loops specify repetition, and identifiers enable recursion.
+	 */
 	public static enum Construct {
 		SYMBOL /* c */,
 		LIST /* abc... */,
@@ -16,6 +23,7 @@ public class Grammar {
 		LOOP /* a* */,
 		ID, /* id */
 	};
+	
 	/** Symbols match a character. The null symbol matches any character. */
 	public static final TaggedData<Character> any = TaggedData.create(Construct.SYMBOL.ordinal(), null);
 	private TaggedDataCache<Character> symbols = TaggedDataCache.create(any);
@@ -27,10 +35,10 @@ public class Grammar {
 	public TaggedData<?> symbol(char c) {
 		return symbols.getInstance(c);
 	}
+	
 	/** Lists match a sequence. The null list matches the empty sequence. */
 	public static final TaggedData<LanguagePair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
 	private TaggedDataCache<LanguagePair> lists = TaggedDataCache.create(empty);
-	// Get a list from the cache
 	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
 		// Avoid creating a new list, if possible
 		if (left == reject || right == reject) {
@@ -68,10 +76,10 @@ public class Grammar {
 		}
 		return list(array, 0);
 	}
+	
 	/** Sets match one of many possible options. The null set rejects. */
 	public static final TaggedData<SetOfLanguages> reject = TaggedData.create(Construct.SET.ordinal(),null);
 	private TaggedDataCache<SetOfLanguages> ors = TaggedDataCache.create(reject);
-	
 	// Get a set from the cache
 	private TaggedData<?> setInstance(SetOfLanguages s) {
 		return ors.getInstance(s);
@@ -142,6 +150,7 @@ public class Grammar {
 	public TaggedData<?> option(TaggedData<?> language) {
 		return or(language, empty);
 	}
+	
 	/** Loops (Kleene stars) define repetition. */
 	private TaggedDataCache<TaggedData<?>> stars = TaggedDataCache.create(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
 	/**
@@ -156,6 +165,7 @@ public class Grammar {
 		if (Construct.values()[language.tag] == Construct.LOOP) return language;
 		return stars.getInstance(language);
 	}
+	
 	/** Identifiers include terminals and nonterminals. Identifiers enable recursion. */
 	// Identifier lookup by name
 	private Map<String, Id> ids = new HashMap<String, Id>();
@@ -186,6 +196,20 @@ public class Grammar {
 			return reject;
 		}
 		return derivations.get(s);
+	}
+	/** The language definition. The root of all traversal. */
+	private TaggedData<?> definition = reject;
+	/**
+	 * Define the language.
+	 * For regular expressions, surround the definition with define().
+	 * For grammars, call define() *after* specifying the language.
+	 * @param language The language
+	 */
+	public void define(TaggedData<?> language) {
+		definition = language;
+	}
+	public void define(String id) {
+		definition = id(id);
 	}
 	/** Visitors traverse a tree. */
 	/**
@@ -239,25 +263,6 @@ public class Grammar {
 			return visit(visitor, definition);
 		}
 	}
-	/** The language definition. The root of all traversal. */
-	private TaggedData<?> definition = reject;
-	/**
-	 * Define the language.
-	 * For regular expressions, surround the definition with define().
-	 * For grammars, call define() *after* specifying the language.
-	 * @param language The language
-	 */
-	public void define(TaggedData<?> language) {
-		definition = language;
-		// Classify identifiers
-//		classify();
-		// Analyze nullability
-//		nullable();
-	}
-	public void define(String id) {
-		definition = id(id);
-	}
-	public Grammar() {}
 	public boolean debug = false;
 	@Override
 	public String toString() {
@@ -345,33 +350,6 @@ public class Grammar {
 	}
 	public boolean nullable() {
 		return nullable(definition);
-	}
-	public void todo(WorkList<String> list, TaggedData<?> language) {
-		switch(Construct.values()[language.tag]) {
-		case ID:
-			list.todo((String)language.data);
-			break;
-		case LIST:
-			if (language.data != null) {
-				todo(list, ((TaggedData<LanguagePair>)language).data.left);
-				todo(list, ((TaggedData<LanguagePair>)language).data.right);
-			}
-			break;
-		case SET:
-			if (language.data != null) {
-				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
-					todo(list, l);
-				}
-			}
-			break;
-		case LOOP:
-			todo(list, ((TaggedData<TaggedData<?>>)language).data);
-			break;
-		case SYMBOL:
-			break;
-		default:
-			break;
-		}
 	}
 	// Compute the derivative of a language
 	private TaggedData<?> derivative(Set<String> visited, char c, TaggedData<?> language) {
