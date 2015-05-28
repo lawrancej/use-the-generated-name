@@ -13,13 +13,16 @@ public class Grammar {
 	public Grammar() {}
 	/**
 	 * A language is a set of lists of symbols.
+	 * 
 	 * Specifying an infinite language requires repetition or recursion.
 	 * Loops specify repetition, and identifiers enable recursion.
 	 */
 	public static enum Construct {
+		// Finite language specifiers
 		SYMBOL /* c */,
 		LIST /* abc... */,
 		SET /* a|b|c... */,
+		// Infinite language specifiers
 		LOOP /* a* */,
 		ID, /* id */
 	};
@@ -29,6 +32,7 @@ public class Grammar {
 	private TaggedDataCache<Character> symbols = TaggedDataCache.create(any);
 	/**
 	 * Match a character
+	 * 
 	 * @param c The character
 	 * @return A language matching character c.
 	 */
@@ -58,6 +62,7 @@ public class Grammar {
 	}
 	/**
 	 * Match a sequence of languages
+	 * 
 	 * @param nodes A sequence of languages
 	 * @return A language matching the languages in order
 	 */
@@ -66,6 +71,7 @@ public class Grammar {
 	}
 	/**
 	 * Match String s literally.
+	 * 
 	 * @param s the String to match
 	 * @return A language matching String s.
 	 */
@@ -136,6 +142,7 @@ public class Grammar {
 	}
 	/**
 	 * Match one of the languages
+	 * 
 	 * @param nodes Languages to match
 	 * @return A language matching one of the languages
 	 */
@@ -155,6 +162,7 @@ public class Grammar {
 	private TaggedDataCache<TaggedData<?>> stars = TaggedDataCache.create(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
 	/**
 	 * Match a language zero or more times
+	 * 
 	 * @param language The language
 	 * @return A language that matches the input language zero or more times
 	 */
@@ -181,6 +189,7 @@ public class Grammar {
 	}
 	/**
 	 * Declare or use an identifier (terminal or nonterminal).
+	 * 
 	 * @param s The identifier name.
 	 * @return The identifier.
 	 */
@@ -197,20 +206,30 @@ public class Grammar {
 		}
 		return derivations.get(s);
 	}
+	
 	/** The language definition. The root of all traversal. */
 	private TaggedData<?> definition = reject;
 	/**
-	 * Define the language.
+	 * Specify a language.
+	 * 
 	 * For regular expressions, surround the definition with define().
 	 * For grammars, call define() *after* specifying the language.
+	 * 
 	 * @param language The language
 	 */
 	public void define(TaggedData<?> language) {
 		definition = language;
 	}
+	/**
+	 * Specify a context-free language.
+	 * 
+	 * For grammars, call define() *after* specifying the language.
+	 * @param id The starting identifier (nonterminal)
+	 */
 	public void define(String id) {
 		definition = id(id);
 	}
+	
 	/** Visitors traverse a tree. */
 	/**
 	 * Visit a rule of the form id ::= rhs.
@@ -270,6 +289,7 @@ public class Grammar {
 			return visit(visitor, definition);
 		}
 	}
+	
 	public boolean debug = false;
 	@Override
 	public String toString() {

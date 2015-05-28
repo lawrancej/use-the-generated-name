@@ -1,7 +1,7 @@
 package languageV2;
 
 /**
- * Traverse a language definition.
+ * Traverse a language specification.
  * @param <T>
  */
 public interface Visitor<T> {
