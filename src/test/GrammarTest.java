@@ -58,7 +58,7 @@ public class GrammarTest {
 		Assert.assertFalse(g.matches("jabba"));
 	}
 	
-//	@Test
+	@Test
 	public void testParens() {
 		Grammar parens = new Grammar() {{
 			id("S").derives(id("S"),symbol('('),id("S"),symbol(')'));

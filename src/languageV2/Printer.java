@@ -5,13 +5,13 @@ public class Printer implements Visitor<StringBuffer> {
 	StringBuffer buffer = new StringBuffer();
 	WorkList<String> todo;
 	public StringBuffer symbol(Character c) {
-		buffer.append('\'');
 		if (c == null) {
 			buffer.append("<any character>");
 		} else {
+			buffer.append('\'');
 			buffer.append(c);
+			buffer.append('\'');
 		}
-		buffer.append('\'');
 		return buffer;
 	}
 	public StringBuffer list(LanguagePair list) {

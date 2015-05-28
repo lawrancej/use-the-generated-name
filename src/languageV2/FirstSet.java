@@ -1,17 +1,10 @@
 package languageV2;
 
-import java.util.HashSet;
-
-import languageV2.Grammar.Construct;
-import languageV2.Grammar.Id;
-
 // Compute the first set
-public abstract class FirstSet implements Visitor<TaggedData<?>> {
-	/*
+public class FirstSet implements Visitor<TaggedData<?>> {
 	private Grammar g;
-	public TaggedData<?> first(TaggedData<?> language) {
-		return first(new HashSet<Id>(), language);
-	}
+	WorkList<String> todo;
+	protected FirstSet() {}
 	public TaggedData<?> symbol(Character c) {
 		return g.symbol(c);
 	}
@@ -35,22 +28,23 @@ public abstract class FirstSet implements Visitor<TaggedData<?>> {
 		return result;
 	}
 	@Override
-	public TaggedData<?> id(String id, TaggedData<?> rhs) {
-		if (!visited.contains(id)) {
-			visited.add(id);
-			return g.visit(this, rhs);
-		}
+	public TaggedData<?> id(String id) {
+		todo.todo(id);
 		return Grammar.reject;
 	}
 	@Override
-	public TaggedData<?> result() {
-		// TODO Auto-generated method stub
-		return null;
+	public TaggedData<?> rule(String id, TaggedData<?> rhs) {
+		todo.done(id);
+		return g.visit(this, rhs);
 	}
 	@Override
-	public void rule(String id, TaggedData<?> rhs) {
-		// TODO Auto-generated method stub
-		
+	public TaggedData<?> top(Grammar g, WorkList<String> rules) {
+		TaggedData<?> result = Grammar.reject;
+		todo = rules;
+		this.g = g;
+		for (String id : todo) {
+			result = g.or(result, g.visit(this, id));
+		}
+		return result;
 	}
-	*/
 }

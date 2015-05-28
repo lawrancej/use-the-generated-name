@@ -303,6 +303,23 @@ public class Grammar {
 	public boolean nonterminal(String s) {
 		return beginTraversal(new Nonterminal(s), s);
 	}
+	/**
+	 * Compute the first set for identifier s.
+	 * 
+	 * @param id the identifier
+	 * @return The first set for the identifier.
+	 */
+	public TaggedData<?> first(String id) {
+		return beginTraversal(new FirstSet(), id);
+	}
+	/**
+	 * Compute the first set for the language specification.
+	 * 
+	 * @return The first set (the set of symbols appearing first in any derivation)
+	 */
+	public TaggedData<?> first() {
+		return beginTraversal(new FirstSet());
+	}
 	
 	// Set of identifiers deriving empty
 	private Set<String> nulls = new HashSet<String>();
@@ -429,9 +446,6 @@ public class Grammar {
 		return derivative(c, definition);
 	}
 
-	public TaggedData<?> first() {
-		return null; //first(definition);
-	}
 	public boolean matches(TaggedData<?> language, String s) {
 		boolean result;
 		if (debug) {

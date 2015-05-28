@@ -2,7 +2,7 @@ package languageV2;
 
 /**
  * Traverse a language specification.
- * @param <T>
+ * @param <T> The return type of the visitor.
  */
 public interface Visitor<T> {
 	/**
@@ -25,17 +25,21 @@ public interface Visitor<T> {
 	 * @param set A set of languages
 	 */
 	T set(SetOfLanguages set);
+	// FIXME: pass visited as a boolean here?
 	/**
 	 * Visit an identifier
 	 * @param id The identifier label
 	 */
 	T id(String id);
+	// FIXME: outside of here, call todo.done(id)?
 	/**
 	 * Visit a rule of the form `id -> rhs`
 	 * @param id The identifier label
 	 * @param rhs The identifier definition
 	 */
 	T rule(String id, TaggedData<?> rhs);
+	// FIXME: Hide the WorkList from the end user?
+	// I don't think it's possible. :-(
 	/**
 	 * Visit rules in language lazily by need.
 	 * @param g A language grammar
