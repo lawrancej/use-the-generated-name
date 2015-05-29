@@ -61,17 +61,15 @@ public class GrammarTest {
 	@Test
 	public void testParens() {
 		Grammar parens = new Grammar() {{
-			derives("S", id("S"),symbol('('),id("S"),symbol(')'));
+			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
 			derives("S");
 			define(id("S"));
 		}};
-		System.out.println(parens);
 		Assert.assertTrue(parens.nonterminal("S"));
-//		Assert.assertTrue(parens.matches(parens.first(), "("));
-//		Assert.assertFalse(parens.matches(parens.first(), ")"));
-//		Assert.assertTrue(parens.matches("()"));
+		Assert.assertTrue(parens.matches(parens.first(), "("));
+		Assert.assertFalse(parens.matches(parens.first(), ")"));
 		Assert.assertFalse(parens.matches("("));
-		System.out.println(parens);
+		Assert.assertTrue(parens.matches("()"));
 		Assert.assertFalse(parens.matches(")"));
 	}
 	
@@ -94,7 +92,7 @@ public class GrammarTest {
 		Assert.assertFalse(g.matches("foobaz"));
 	}
 	
-//	@Test
+	@Test
 	public void testLeftRecursion() {
 		Grammar g = new Grammar() {{
 			id("L").derives(id("L"),symbol('x'));
@@ -103,13 +101,10 @@ public class GrammarTest {
 			debug = true;
 		}};
 		Assert.assertTrue(g.nonterminal("L"));
-//		Assert.assertTrue(g.terminalSet().isEmpty());
-//		Assert.assertTrue(g.nonterminalSet().contains("L"));
+		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
-//		Assert.assertTrue(g.matches(""));
-//		Assert.assertTrue(g.matches("xx"));
-//		Assert.assertTrue(g.matches("xxx"));
-//		Assert.assertFalse(g.matches("L"));
+		Assert.assertTrue(g.matches("x"));
+		Assert.assertFalse(g.matches("L"));
 	}
 	
 	@Test
