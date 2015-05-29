@@ -24,7 +24,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		return false;
 	}
 	public Boolean id(String id) {
-		return todo.visited(id);
+		return false;
 	}
 	public Boolean rule(String id, TaggedData<?> rhs) {
 		return g.visit(this, rhs);

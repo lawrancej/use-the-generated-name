@@ -188,7 +188,7 @@ public class Grammar {
 		}
 	}
 	/**
-	 * Declare or use an identifier (terminal or nonterminal).
+	 * Reference an identifier (terminal or nonterminal).
 	 * 
 	 * @param s The identifier name.
 	 * @return The identifier.
@@ -205,6 +205,21 @@ public class Grammar {
 			return reject;
 		}
 		return derivations.get(s);
+	}
+	/**
+	 * Define an identifier: `id -> rhs`
+	 * 
+	 * @param id the identifier
+	 * @param languages the right hand side
+	 * @return the identifier reference
+	 */
+	public TaggedData<?> derives(String id, TaggedData<?>... languages) {
+		TaggedData<?> rhs = list(languages);
+		if (rhs == reject && !ids.containsKey(id)) {
+			return reject;
+		}
+		derivations.put(id, or(rhs(id), list(languages)));
+		return id(id);
 	}
 	
 	/** The language definition. The root of all traversal. */
@@ -346,69 +361,36 @@ public class Grammar {
 		return beginTraversal(new FirstSet(this));
 	}
 	
-	public TaggedData<?> derives(String s, TaggedData<?>... languages) {
-		TaggedData<?> rhs = list(languages);
-		if (rhs == reject && !ids.containsKey(s)) {
-			return reject;
-		}
-		derivations.put(s, or(rhs(s), list(languages)));
-		return id(s);
-	}
+	/**
+	 * Can this language derive the empty string?
+	 * 
+	 * @param language
+	 */
 	public boolean nullable(TaggedData<?> language) {
 		return beginTraversal(new Nullable(this), language);
 	}
+	/**
+	 * Can this identifier derive the empty string?
+	 * 
+	 * @param id
+	 */
 	public boolean nullable(String id) {
 		return beginTraversal(new Nullable(this), id);
 	}
+	/**
+	 * Can this language specification derive the empty string?
+	 */
 	public boolean nullable() {
 		return beginTraversal(new Nullable(this));
 	}
 	// Compute the derivative of a language
-	private TaggedData<?> derivative(Set<String> visited, char c, TaggedData<?> language) {
-		switch(Construct.values()[language.tag]) {
-		case ID:
-			Id id = (Id)language;
-			String dc = "D" + c + id.data;
-			if (!visited.contains(id.data)) {
-				visited.add(id.data);
-				return derives(dc, derivative(visited, c, rhs(id.data)));
-			} else if (ids.containsKey(dc)) {
-				return id(dc);
-			}
-			break;
-		case LIST:
-			if (language.data != null) {
-				TaggedData<LanguagePair> l = (TaggedData<LanguagePair>)language;
-				TaggedData<?> result = list(derivative(visited, c, l.data.left), l.data.right);
-				if (nullable(l.data.left)) {
-					return or(result, derivative(visited, c, l.data.right));
-				}
-				return result;
-			}
-			break;
-		case SET:
-			if (language.data != null) {
-				TaggedData<?> result = reject;
-				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
-					result = or(result, derivative(visited, c, l));
-				}
-				return result;
-			}
-			break;
-		case LOOP:
-			return list(derivative(visited, c, ((TaggedData<TaggedData<?>>)language).data), language);
-		case SYMBOL:
-			if (language.data == null || ((TaggedData<Character>)language).data == c) {
-				return empty;
-			}
-			break;
-		default:
-			break;
-		}
-		return reject;
+	private TaggedData<?> derivative(Derivative visitor, char c, TaggedData<?> language) {
+		visitor.c = c;
+		visitor.getWorkList().clear();
+		return beginTraversal(visitor, language);
 	}
 	public TaggedData<?> derivative(char c, TaggedData<?> language) {
-		return derivative(new HashSet<String>(), c, language);
+		return derivative(new Derivative(this), c, language);
 	}
 	public TaggedData<?> derivative(char c) {
 		return derivative(c, definition);
@@ -425,20 +407,20 @@ public class Grammar {
 			startids.put(id.data, id);
 			startderivations.put(id.data, rhs(id.data));
 		}
-		Set<String> visited = new HashSet<String>();
+		Derivative visitor = new Derivative(this);
 		for (int i = 0; i < s.length(); i++) {
-			language = derivative(visited, s.charAt(i), language);
-			if (!visited.isEmpty()) {
-				System.out.println("top: " + (String)language.data);
-				System.out.println("visited: " + visited.size() + " "+ visited);
-				System.out.println("ids: " + ids.size() + " " + ids.keySet());
+			language = derivative(visitor, s.charAt(i), language);
+			if (ids.size() > 0) {
+			System.out.println("top: " + (String)language.data);
+//			System.out.println("visited: " + visited.size() + " "+ visited);
+			System.out.println("ids: " + ids.size() + " " + ids.keySet());
 			}
-			visited.clear();
 			if (debug) {
 				System.out.println(s.charAt(i));
 //				System.out.println(show(language));
 			}
 		}
+		System.out.println(s);
 		System.out.println(toString(language));
 		result = nullable(language);
 /*		ids.clear();

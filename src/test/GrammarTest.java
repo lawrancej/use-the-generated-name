@@ -61,8 +61,8 @@ public class GrammarTest {
 	@Test
 	public void testParens() {
 		Grammar parens = new Grammar() {{
-			id("S").derives(id("S"),symbol('('),id("S"),symbol(')'));
-			id("S").derives();
+			derives("S", id("S"),symbol('('),id("S"),symbol(')'));
+			derives("S");
 			define(id("S"));
 		}};
 		System.out.println(parens);
