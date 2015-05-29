@@ -1,9 +1,10 @@
 package languageV2;
 
-public class Printer implements Visitor<StringBuffer> {
-	Grammar g;
+public class Printer extends AbstractVisitor<StringBuffer> {
+	public Printer(Grammar g, WorkList<String> todo) {
+		super(g, todo);
+	}
 	StringBuffer buffer = new StringBuffer();
-	WorkList<String> todo;
 	public StringBuffer symbol(Character c) {
 		if (c == null) {
 			buffer.append("<any character>");
@@ -53,25 +54,20 @@ public class Printer implements Visitor<StringBuffer> {
 	public StringBuffer id(String id) {
 		buffer.append('<');
 		buffer.append(id);
-		todo.todo(id);
 		buffer.append('>');
 		return buffer;
 	}
 	public StringBuffer rule(String id, TaggedData<?> rhs) {
-		todo.done(id);
 		this.id(id);
 		buffer.append(" ::= ");
 		g.visit(this, rhs);
 		buffer.append("\n");
 		return buffer;
 	}
-	@Override
-	public StringBuffer top(Grammar g, WorkList<String> rules) {
-		todo = rules;
-		this.g = g;
-		for (String id : todo) {
-			g.visit(this, id);
-		}
+	public StringBuffer bottom() {
+		return buffer;
+	}
+	public StringBuffer reduce(StringBuffer a, StringBuffer b) {
 		return buffer;
 	}
 }

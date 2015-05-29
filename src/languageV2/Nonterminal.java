@@ -3,11 +3,10 @@ package languageV2;
 /**
  * Is the identifier a nonterminal?
  */
-public class Nonterminal implements Visitor<Boolean> {
-	Grammar g;
-	WorkList<String> todo;
+public class Nonterminal extends AbstractVisitor<Boolean> {
 	String label;
-	protected Nonterminal(String label) {
+	protected Nonterminal(Grammar g, WorkList<String> todo, String label) {
+		super(g, todo);
 		this.label = label;
 	}
 	public Boolean symbol(Character c) {
@@ -30,23 +29,15 @@ public class Nonterminal implements Visitor<Boolean> {
 		return result;
 	}
 	public Boolean id(String id) {
-		todo.todo(id);
 		return todo.visited(label);
 	}
-
 	public Boolean rule(String id, TaggedData<?> rhs) {
-		todo.done(id);
 		return g.visit(this, rhs);
 	}
-
-	public Boolean top(Grammar g, WorkList<String> rules) {
-		todo = rules;
-		this.g = g;
-		for (String id : todo) {
-			if (g.visit(this, id)) {
-				return true;
-			}
-		}
+	public Boolean bottom() {
 		return false;
+	}
+	public Boolean reduce(Boolean a, Boolean b) {
+		return a || b;
 	}
 }

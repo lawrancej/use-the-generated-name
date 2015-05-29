@@ -1,10 +1,15 @@
 package languageV2;
 
 /**
- * Traverse a language specification.
+ * Traverse a language specification lazily by need.
  * @param <T> The return type of the visitor.
  */
 public interface Visitor<T> {
+	/**
+	 * Grammar traversal requires a work list of identifiers to visit to enable termination.
+	 * @return the work list.
+	 */
+	WorkList<String> getWorkList();
 	/**
 	 * Visit symbol `c`
 	 * @param c Character
@@ -25,25 +30,28 @@ public interface Visitor<T> {
 	 * @param set A set of languages
 	 */
 	T set(SetOfLanguages set);
-	// FIXME: pass visited as a boolean here?
 	/**
 	 * Visit an identifier
 	 * @param id The identifier label
 	 */
 	T id(String id);
-	// FIXME: outside of here, call todo.done(id)?
 	/**
 	 * Visit a rule of the form `id -> rhs`
 	 * @param id The identifier label
 	 * @param rhs The identifier definition
 	 */
 	T rule(String id, TaggedData<?> rhs);
-	// FIXME: Hide the WorkList from the end user?
-	// I don't think it's possible. :-(
 	/**
-	 * Visit rules in language lazily by need.
-	 * @param g A language grammar
-	 * @param rules A worklist of rules
+	 * The default result.
+	 * 
+	 * @return the default result
 	 */
-	T top(Grammar g, WorkList<String> rules);
+	T bottom();
+	/**
+	 * Accumulate results during worklist traversal.
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	T reduce(T a, T b);
 }

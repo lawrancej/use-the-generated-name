@@ -239,6 +239,7 @@ public class Grammar {
 	 * @return
 	 */
 	public <T> T visit(Visitor<T> visitor, String id) {
+		visitor.getWorkList().done(id);
 		return visitor.rule(id, rhs(id));
 	}
 	/**
@@ -251,6 +252,7 @@ public class Grammar {
 	public <T> T visit(Visitor<T> visitor, TaggedData<?> language) {
 		switch(Construct.values()[language.tag]) {
 		case ID:
+			visitor.getWorkList().todo((String)language.data);
 			return visitor.id((String)language.data);
 		case LIST:
 			return visitor.list((LanguagePair)language.data);
@@ -270,9 +272,28 @@ public class Grammar {
 	 * @param id
 	 */
 	public <T> T beginTraversal(Visitor<T> visitor, String id) {
-		WorkList<String> rules = new WorkList<String>();
-		rules.todo(id);
-		return visitor.top(this, rules);
+		visitor.getWorkList().todo(id);
+		T result = visitor.bottom();
+		for (String identifier : visitor.getWorkList()) {
+			result = visitor.reduce(result, visit(visitor, identifier));
+		}
+		return result;
+	}
+	/**
+	 * Begin traversal of a language
+	 * @param visitor
+	 * @param language
+	 * @return
+	 */
+	public <T> T beginTraversal(Visitor<T> visitor, TaggedData<?> language) {
+		// Visit a grammar
+		if (language.tag == Construct.ID.ordinal()) {
+			return beginTraversal(visitor, (String)language.data);
+		}
+		// Visit a regex
+		else {
+			return visit(visitor, language);
+		}
 	}
 	/**
 	 * Begin traversal of the language specification
@@ -280,20 +301,24 @@ public class Grammar {
 	 * @return
 	 */
 	public <T> T beginTraversal(Visitor<T> visitor) {
-		// Visit a grammar
-		if (definition.tag == Construct.ID.ordinal()) {
-			return beginTraversal(visitor, (String)definition.data);
-		}
-		// Visit a regex
-		else {
-			return visit(visitor, definition);
-		}
+		return beginTraversal(visitor, definition);
 	}
 	
 	public boolean debug = false;
 	@Override
 	public String toString() {
-		return beginTraversal(new Printer()).toString();
+		return beginTraversal(new Printer(this, new WorkList<String>())).toString();
+	}
+	/**
+	 * Returns a string representation of this identifier.
+	 * @param id an identifier
+	 * @return a string representation of the identifier
+	 */
+	public String toString(String id) {
+		return beginTraversal(new Printer(this, new WorkList<String>()), id).toString();
+	}
+	public String toString(TaggedData<?> language) {
+		return beginTraversal(new Printer(this, new WorkList<String>()), language).toString();
 	}
 	/**
 	 * Is the identifier a nonterminal?
@@ -301,7 +326,7 @@ public class Grammar {
 	 * @return Whether the identifier is a nonterminal
 	 */
 	public boolean nonterminal(String s) {
-		return beginTraversal(new Nonterminal(s), s);
+		return beginTraversal(new Nonterminal(this, new WorkList<String>(), s), s);
 	}
 	/**
 	 * Compute the first set for identifier s.
@@ -310,7 +335,7 @@ public class Grammar {
 	 * @return The first set for the identifier.
 	 */
 	public TaggedData<?> first(String id) {
-		return beginTraversal(new FirstSet(), id);
+		return beginTraversal(new FirstSet(this, new WorkList<String>()), id);
 	}
 	/**
 	 * Compute the first set for the language specification.
@@ -318,17 +343,9 @@ public class Grammar {
 	 * @return The first set (the set of symbols appearing first in any derivation)
 	 */
 	public TaggedData<?> first() {
-		return beginTraversal(new FirstSet());
+		return beginTraversal(new FirstSet(this, new WorkList<String>()));
 	}
 	
-	// Set of identifiers deriving empty
-	private Set<String> nulls = new HashSet<String>();
-	public Set<String> identifierSet() {
-		return ids.keySet();
-	}
-	public Set<String> nullableSet() {
-		return nulls;
-	}
 	private TaggedData<?> derives(String s, TaggedData<?>... languages) {
 		TaggedData<?> rhs = list(languages);
 		if (rhs == reject && !ids.containsKey(s)) {
@@ -349,51 +366,15 @@ public class Grammar {
 		id(s).derives(languages);
 		return id(s);
 	}
-	// Does the language derive the empty string?
-	private boolean nullable(Set<TaggedData<?>> visited, TaggedData<?> language) {
-		boolean result = false;
-		switch(Construct.values()[language.tag]) {
-		case ID:
-			String label = (String) language.data;
-			if (nulls.contains(label)) return true;
-			if (!visited.contains(language)) {
-				visited.add(language);
-				result = nullable(visited,rhs(label));
-				if (result) {
-					nulls.add(label);
-				}
-			}
-			break;
-		case SET:
-			if (language.data != null) {
-				for (TaggedData<?> l : ((TaggedData<SetOfLanguages>)language).data) {
-					result = result || nullable(visited, l);
-				}
-			}
-			break;
-		case SYMBOL:
-			break;
-		case LOOP:
-			result = true;
-			break;
-		case LIST:
-			if (language.data != null) {
-				result = nullable(visited, ((TaggedData<LanguagePair>)language).data.left) &&
-						nullable(visited, ((TaggedData<LanguagePair>)language).data.right);
-			} else {
-				result = true;
-			}
-			break;
-		default:
-			break;
-		}
-		return result;
-	}
+	// FIXME: This is obviously wrong
 	public boolean nullable(TaggedData<?> language) {
-		return nullable(new HashSet<TaggedData<?>>(), language);
+		return beginTraversal(new Nullable(this, new WorkList<String>()), language);
+	}
+	public boolean nullable(String id) {
+		return beginTraversal(new Nullable(this, new WorkList<String>()), id);
 	}
 	public boolean nullable() {
-		return nullable(definition);
+		return beginTraversal(new Nullable(this, new WorkList<String>()));
 	}
 	// Compute the derivative of a language
 	private TaggedData<?> derivative(Set<String> visited, char c, TaggedData<?> language) {
@@ -466,12 +447,12 @@ public class Grammar {
 				System.out.println("ids: " + ids.size() + " " + ids.keySet());
 			}
 			visited.clear();
-			nulls.clear();
 			if (debug) {
 				System.out.println(s.charAt(i));
 //				System.out.println(show(language));
 			}
 		}
+		System.out.println(toString(language));
 		result = nullable(language);
 /*		ids.clear();
 		derivations.clear();

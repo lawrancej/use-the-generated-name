@@ -1,6 +1,5 @@
 import languageV2.Grammar;
 
-
 public class GrammarExample {
 	public static void main(String[] args) {
 		Grammar page148 = new Grammar() {{
