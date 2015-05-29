@@ -1,8 +1,8 @@
 package languageV2;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
-	public Printer(Grammar g, WorkList<String> todo) {
-		super(g, todo);
+	public Printer(Grammar g) {
+		super(g, new WorkList<String>());
 	}
 	StringBuffer buffer = new StringBuffer();
 	public StringBuffer symbol(Character c) {

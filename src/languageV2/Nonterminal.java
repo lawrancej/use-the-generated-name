@@ -5,8 +5,8 @@ package languageV2;
  */
 public class Nonterminal extends AbstractVisitor<Boolean> {
 	String label;
-	protected Nonterminal(Grammar g, WorkList<String> todo, String label) {
-		super(g, todo);
+	protected Nonterminal(Grammar g, String label) {
+		super(g, new WorkList<String>());
 		this.label = label;
 	}
 	public Boolean symbol(Character c) {
@@ -21,10 +21,9 @@ public class Nonterminal extends AbstractVisitor<Boolean> {
 	}
 	public Boolean set(SetOfLanguages set) {
 		boolean result = false;
-		if (set != null) {
-			for (TaggedData<?> l : set) {
-				result = result || g.visit(this, l);
-			}
+		if (set == null) return result;
+		for (TaggedData<?> l : set) {
+			result = result || g.visit(this, l);
 		}
 		return result;
 	}

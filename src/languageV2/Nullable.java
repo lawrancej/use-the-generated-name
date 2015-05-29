@@ -1,8 +1,8 @@
 package languageV2;
 
 public class Nullable extends AbstractVisitor<Boolean> {
-	public Nullable(Grammar g, WorkList<String> todo) {
-		super(g, todo);
+	public Nullable(Grammar g) {
+		super(g, new WorkList<String>());
 	}
 	public Boolean symbol(Character c) {
 		return false;
