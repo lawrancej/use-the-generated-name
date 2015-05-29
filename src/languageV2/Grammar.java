@@ -1,9 +1,7 @@
 package languageV2;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class Grammar {
@@ -214,10 +212,10 @@ public class Grammar {
 	 * @return the identifier reference
 	 */
 	public TaggedData<?> derives(String id, TaggedData<?>... languages) {
-		TaggedData<?> rhs = list(languages);
-		if (rhs == reject && !ids.containsKey(id)) {
-			return reject;
-		}
+//		TaggedData<?> rhs = list(languages);
+//		if (rhs == reject && !ids.containsKey(id)) {
+//			return reject;
+//		}
 		derivations.put(id, or(rhs(id), list(languages)));
 		return id(id);
 	}
@@ -420,11 +418,11 @@ public class Grammar {
 		System.out.println(toString(language));
 		}
 		result = nullable(language);
-/*		ids.clear();
+		ids.clear();
 		derivations.clear();
 		ids = startids;
 		derivations = startderivations;
-*/		return result;
+		return result;
 	}
 	public boolean matches(String s) {
 		return matches(definition, s);

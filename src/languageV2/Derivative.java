@@ -36,7 +36,8 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public TaggedData<?> rule(String id, TaggedData<?> rhs) {
 		String dc = "D" + c + id;
-		return g.derives(dc, g.visit(this, rhs));
+		TaggedData<?> result = g.derives(dc, g.visit(this, rhs));
+		return result;
 	}
 	public TaggedData<?> bottom() {
 		return Grammar.reject;

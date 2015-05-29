@@ -9,7 +9,8 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	}
 	public Boolean list(LanguagePair list) {
 		if (list == null) return true;
-		return g.visit(this, list.left) && g.visit(this, list.right);
+		boolean result = g.visit(this, list.left) && g.visit(this, list.right);
+		return result;
 	}
 	public Boolean loop(TaggedData<?> language) {
 		return true;
@@ -24,7 +25,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		return false;
 	}
 	public Boolean id(String id) {
-		return false;
+		return todo.visited(id);
 	}
 	public Boolean rule(String id, TaggedData<?> rhs) {
 		return g.visit(this, rhs);
@@ -34,5 +35,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	}
 	public Boolean reduce(Boolean a, Boolean b) {
 		return a || b;
+//		if (a == bottom()) return b;
+//		else return a;
 	}
 }

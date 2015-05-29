@@ -132,6 +132,37 @@ public class GrammarTest {
 		Assert.assertTrue(g.nonterminal("S"));
 		Assert.assertFalse(g.nonterminal("nope"));
 	}
+	
+	@Test
+	public void testBrainfuck() {
+		Grammar g = new Grammar() {{
+			// Program -> Sequence
+			id("Program").derives(id("Sequence"));
+			// Sequence -> ( Command | Loop ) *
+			id("Sequence").derives(many(or(id("Command"), id("Loop"))));
+			// Command -> '+' | '-' | '<' | '>' | ',' | '.'
+			id("Command").derives(or(
+				symbol('+'),symbol('-'),
+				symbol('<'), symbol('>'),
+				symbol('.'), symbol(',')
+			));
+			// Loop -> '[' Sequence ']'
+			id("Loop").derives(symbol('['), id("Sequence"), symbol(']'));
+			define("Program");
+			debug = true;
+//			id("Comment").derives(any);
+		}};
+		System.out.println(g);
+		Assert.assertTrue(g.matches("+"));
+		Assert.assertFalse(g.matches("+["));
+		Assert.assertFalse(g.matches("+[."));
+		Assert.assertFalse(g.matches("+[.+"));
+//		Assert.assertFalse(g.matches("hi"));
+		Assert.assertTrue(g.matches("+[.+]"));
+//		Assert.assertTrue(g.matches("+[.+]+"));
+//		Assert.assertTrue(g.matches("+[.+]"));
+//		Assert.assertFalse(g.matches("boo"));
+	}
 
 	@Test
 	public void testRegexGrammar() {
@@ -146,6 +177,7 @@ public class GrammarTest {
 			define(id("regex"));
 //			debug = true;
 		}};
+		System.out.println(regex);
 		Assert.assertTrue(regex.nonterminal("regex"));
 		Assert.assertTrue(regex.nonterminal("term"));
 		Assert.assertTrue(regex.nonterminal("factor"));
