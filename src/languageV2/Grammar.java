@@ -398,9 +398,6 @@ public class Grammar {
 
 	public boolean matches(TaggedData<?> language, String s) {
 		boolean result;
-		if (debug) {
-//			System.out.println(show(language));
-		}
 		Map<String, Id> startids = new HashMap<String, Id>();
 		Map<String, TaggedData<?>> startderivations = new HashMap<String, TaggedData<?>>();
 		for (Id id : ids.values()) {
@@ -412,16 +409,16 @@ public class Grammar {
 			language = derivative(visitor, s.charAt(i), language);
 			if (ids.size() > 0) {
 			System.out.println("top: " + (String)language.data);
-//			System.out.println("visited: " + visited.size() + " "+ visited);
 			System.out.println("ids: " + ids.size() + " " + ids.keySet());
 			}
 			if (debug) {
 				System.out.println(s.charAt(i));
-//				System.out.println(show(language));
 			}
 		}
+		if (debug) {
 		System.out.println(s);
 		System.out.println(toString(language));
+		}
 		result = nullable(language);
 /*		ids.clear();
 		derivations.clear();

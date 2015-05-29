@@ -64,13 +64,14 @@ public class GrammarTest {
 			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
 			derives("S");
 			define(id("S"));
+			debug = true;
 		}};
 		Assert.assertTrue(parens.nonterminal("S"));
-		Assert.assertTrue(parens.matches(parens.first(), "("));
-		Assert.assertFalse(parens.matches(parens.first(), ")"));
 		Assert.assertFalse(parens.matches("("));
 		Assert.assertTrue(parens.matches("()"));
 		Assert.assertFalse(parens.matches(")"));
+		Assert.assertTrue(parens.matches(parens.first(), "("));
+		Assert.assertFalse(parens.matches(parens.first(), ")"));
 	}
 	
 	@Test
@@ -154,30 +155,4 @@ public class GrammarTest {
 		Assert.assertTrue(regex.matches("a|b**"));
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
-
-/*	@Test
-	public void testId() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testNullable() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testDerivativeChar() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testFirst() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testMatchesString() {
-		fail("Not yet implemented");
-	}
-*/
 }
