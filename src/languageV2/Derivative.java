@@ -46,4 +46,8 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		if (accumulator == bottom()) return current;
 		else return accumulator;
 	}
+	@Override
+	public boolean done(TaggedData<?> accumulator) {
+		return false;
+	}
 }

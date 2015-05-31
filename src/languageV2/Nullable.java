@@ -1,12 +1,7 @@
 package languageV2;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class Nullable extends AbstractVisitor<Boolean> {
 	boolean flag = true;
-	String root;
-	Set<String> nulls = new HashSet<String>();
 	public Nullable(Grammar g) {
 		super(g, new WorkList<String>());
 	}
@@ -31,24 +26,29 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		return false;
 	}
 	public Boolean id(String id) {
-		return nulls.contains(id);
+		if (todo.visited(id)) {
+			return false;
+		} else {
+			return g.visit(this, g.rhs(id));
+		}
 	}
 	public Boolean rule(String id, TaggedData<?> rhs) {
-		boolean result = g.visit(this, rhs);
-		if (result) {
-			nulls.add(id);
-		}
-		return result;
+		return g.visit(this, rhs);
 	}
 	public Boolean bottom() {
 		return false;
 	}
 	public Boolean reduce(Boolean accumulator, String identifier, Boolean current) {
+		// The work queue needs to visit identifiers and 
 		// Return only the first result.
 		if (flag) {
 			flag = false;
-			root = identifier;
+			return current;
 		}
-		return nulls.contains(root);
+		return accumulator;
+	}
+	@Override
+	public boolean done(Boolean accumulator) {
+		return accumulator;
 	}
 }

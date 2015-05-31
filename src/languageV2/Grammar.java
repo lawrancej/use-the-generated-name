@@ -198,7 +198,7 @@ public class Grammar {
 		return ids.get(s);
 	}
 	// Get the right hand side
-	private TaggedData<?> rhs(String s) {
+	public TaggedData<?> rhs(String s) {
 		if (!derivations.containsKey(s)) {
 			return reject;
 		}
@@ -286,11 +286,14 @@ public class Grammar {
 	 */
 	public <T> T beginTraversal(Visitor<T> visitor, String id) {
 		visitor.getWorkList().todo(id);
-		T result = visitor.bottom();
+		T accumulator = visitor.bottom();
 		for (String identifier : visitor.getWorkList()) {
-			result = visitor.reduce(result, identifier, visit(visitor, identifier));
+			accumulator = visitor.reduce(accumulator, identifier, visit(visitor, identifier));
+			if (visitor.done(accumulator)) {
+				return accumulator;
+			}
 		}
-		return result;
+		return accumulator;
 	}
 	/**
 	 * Begin traversal of a language
@@ -413,11 +416,11 @@ public class Grammar {
 		Derivative visitor = new Derivative(this);
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(visitor, s.charAt(i), language);
-			if (ids.size() > 0) {
-			System.out.println("top: " + (String)language.data);
-			System.out.println("ids: " + ids.size() + " " + ids.keySet());
-			}
 			if (debug) {
+				if (ids.size() > 0) {
+					System.out.println("top: " + (String)language.data);
+					System.out.println("ids: " + ids.size() + " " + ids.keySet());
+				}
 				System.out.println(s.charAt(i));
 			}
 		}

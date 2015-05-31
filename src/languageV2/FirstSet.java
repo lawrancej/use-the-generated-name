@@ -39,4 +39,8 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> reduce(TaggedData<?> accumulator, String id, TaggedData<?> current) {
 		return g.or(accumulator, current);
 	}
+	@Override
+	public boolean done(TaggedData<?> accumulator) {
+		return false;
+	}
 }

@@ -38,7 +38,7 @@ public interface Visitor<T> {
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
 	 */
-	WorkList<String> getWorkList();
+	WorkQueue<String> getWorkList();
 	/**
 	 * Visit an identifier.
 	 * @param id The identifier label
@@ -56,6 +56,12 @@ public interface Visitor<T> {
 	 * @return the default result
 	 */
 	T bottom();
+	/**
+	 * Should we stop traversal early?
+	 * @param accumulator
+	 * @return whether traversal should end early
+	 */
+	boolean done(T accumulator);
 	/**
 	 * Accumulate results during worklist traversal.
 	 * @param accumulator

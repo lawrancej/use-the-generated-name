@@ -64,7 +64,6 @@ public class GrammarTest {
 			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
 			derives("S");
 			define(id("S"));
-			debug = true;
 		}};
 		Assert.assertTrue(parens.isNonterminal("S"));
 		Assert.assertFalse(parens.matches("("));
@@ -99,7 +98,6 @@ public class GrammarTest {
 			id("L").derives(id("L"),symbol('x'));
 			id("L").derives();
 			define(id("L"));
-			debug = true;
 		}};
 		Assert.assertTrue(g.isNonterminal("L"));
 		Assert.assertTrue(g.matches("xx"));
