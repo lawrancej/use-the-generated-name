@@ -36,7 +36,7 @@ public class Nonterminal extends AbstractVisitor<Boolean> {
 	public Boolean bottom() {
 		return false;
 	}
-	public Boolean reduce(Boolean accumulator, String identifier, Boolean current) {
+	public Boolean reduce(Boolean accumulator, Boolean current) {
 		return accumulator || current;
 	}
 	@Override

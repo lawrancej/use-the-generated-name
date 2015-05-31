@@ -69,5 +69,5 @@ public interface Visitor<T> {
 	 * @param the current result
 	 * @return the result
 	 */
-	T reduce(T accumulator, String id, T current);
+	T reduce(T accumulator, T current);
 }

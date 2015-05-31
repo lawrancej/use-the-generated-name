@@ -1,7 +1,6 @@
 package languageV2;
 
 public class Nullable extends AbstractVisitor<Boolean> {
-	boolean flag = true;
 	public Nullable(Grammar g) {
 		super(g, new WorkList<String>());
 	}
@@ -38,17 +37,11 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean bottom() {
 		return false;
 	}
-	public Boolean reduce(Boolean accumulator, String identifier, Boolean current) {
-		// The work queue needs to visit identifiers and 
-		// Return only the first result.
-		if (flag) {
-			flag = false;
-			return current;
-		}
-		return accumulator;
+	public Boolean reduce(Boolean accumulator, Boolean current) {
+		return current;
 	}
-	@Override
+	// Return only the first result.
 	public boolean done(Boolean accumulator) {
-		return accumulator;
+		return true;
 	}
 }

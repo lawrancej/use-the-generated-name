@@ -67,7 +67,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	public StringBuffer bottom() {
 		return buffer;
 	}
-	public StringBuffer reduce(StringBuffer accumulator, String id, StringBuffer current) {
+	public StringBuffer reduce(StringBuffer accumulator, StringBuffer current) {
 		return buffer;
 	}
 	public boolean done(StringBuffer accumulator) {

@@ -42,7 +42,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> bottom() {
 		return Grammar.reject;
 	}
-	public TaggedData<?> reduce(TaggedData<?> accumulator, String id, TaggedData<?> current) {
+	public TaggedData<?> reduce(TaggedData<?> accumulator, TaggedData<?> current) {
 		if (accumulator == bottom()) return current;
 		else return accumulator;
 	}

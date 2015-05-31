@@ -288,7 +288,7 @@ public class Grammar {
 		visitor.getWorkList().todo(id);
 		T accumulator = visitor.bottom();
 		for (String identifier : visitor.getWorkList()) {
-			accumulator = visitor.reduce(accumulator, identifier, visit(visitor, identifier));
+			accumulator = visitor.reduce(accumulator, visit(visitor, identifier));
 			if (visitor.done(accumulator)) {
 				return accumulator;
 			}
