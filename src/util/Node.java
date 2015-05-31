@@ -1,4 +1,5 @@
-package languageV2;
+package util;
+
 
 public class Node<T> extends Data<T> {
 	public final Node<T> next;

@@ -1,5 +1,7 @@
 package languageV2;
 
+import util.TaggedData;
+
 // Compute the first set
 public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	protected FirstSet(Grammar g) {

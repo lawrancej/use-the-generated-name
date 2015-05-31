@@ -1,5 +1,7 @@
 package languageV2;
 
+import util.TaggedData;
+
 /**
  * Traverse a language specification.
  * 

@@ -1,4 +1,4 @@
-package languageV2;
+package util;
 
 // A pair of two objects
 public class Pair<T1, T2> {

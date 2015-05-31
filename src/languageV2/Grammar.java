@@ -3,6 +3,9 @@ package languageV2;
 import java.util.HashMap;
 import java.util.Map;
 
+import util.TaggedData;
+import util.TaggedDataCache;
+
 @SuppressWarnings("unchecked")
 public class Grammar {
 	/**

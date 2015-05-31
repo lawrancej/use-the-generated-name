@@ -1,4 +1,5 @@
-package languageV2;
+package util;
+
 
 public class TaggedData<T> extends Data<T> {
 	public final int tag;

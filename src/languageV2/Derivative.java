@@ -1,5 +1,7 @@
 package languageV2;
 
+import util.TaggedData;
+
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
 	public Derivative(Grammar g) {

@@ -1,5 +1,7 @@
 package languageV2;
 
+import util.TaggedData;
+
 /**
  * Is the identifier a nonterminal?
  */

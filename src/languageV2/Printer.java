@@ -1,5 +1,7 @@
 package languageV2;
 
+import util.TaggedData;
+
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Grammar g) {
 		super(g, new WorkList<String>());

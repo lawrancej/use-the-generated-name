@@ -3,6 +3,8 @@ package languageV2;
 import java.util.HashSet;
 import java.util.Set;
 
+import util.TaggedData;
+
 public class Nullable extends AbstractVisitor<Boolean> {
 	Set<String> nulls = new HashSet<String>();
 	public Nullable(Grammar g) {
