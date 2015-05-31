@@ -1,8 +1,8 @@
-package languageV2;
+package languageV2.traversal;
 
 import java.util.Iterator;
 
-interface WorkQueue<T> extends Iterator<T>, Iterable<T> {
+public interface WorkQueue<T> extends Iterator<T>, Iterable<T> {
 
 	public abstract void todo(T s);
 

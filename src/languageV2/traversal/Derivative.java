@@ -1,6 +1,9 @@
-package languageV2;
+package languageV2.traversal;
 
+import languageV2.Grammar;
+import languageV2.SetOfLanguages;
 import util.TaggedData;
+import util.TaggedDataPair;
 
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
@@ -13,7 +16,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		return bottom();
 	}
-	public TaggedData<?> list(LanguagePair list) {
+	public TaggedData<?> list(TaggedDataPair list) {
 		if (list == null) return bottom();
 		TaggedData<?> result = g.list(g.visit(this, list.left), list.right);
 		if (g.nullable(list.left)) {

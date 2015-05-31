@@ -1,10 +1,13 @@
-package languageV2;
+package languageV2.traversal;
 
+import languageV2.Grammar;
+import languageV2.SetOfLanguages;
 import util.TaggedData;
+import util.TaggedDataPair;
 
 // Compute the first set
 public class FirstSet extends AbstractVisitor<TaggedData<?>> {
-	protected FirstSet(Grammar g) {
+	public FirstSet(Grammar g) {
 		super(g, new WorkList<String>());
 	}
 	public TaggedData<?> symbol(Character c) {
@@ -13,7 +16,7 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> loop(TaggedData<?> loop) {
 		return g.visit(this, loop);
 	}
-	public TaggedData<?> list(LanguagePair pair) {
+	public TaggedData<?> list(TaggedDataPair pair) {
 		if (pair == null) return bottom();
 		TaggedData<?> result = g.visit(this, pair.left);
 		if (g.nullable(pair.left)) {

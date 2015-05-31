@@ -1,4 +1,6 @@
-package languageV2;
+package languageV2.traversal;
+
+import languageV2.Grammar;
 
 public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public final WorkQueue<String> todo;

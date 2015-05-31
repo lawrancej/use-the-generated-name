@@ -1,6 +1,9 @@
-package languageV2;
+package languageV2.traversal;
 
+import languageV2.Grammar;
+import languageV2.SetOfLanguages;
 import util.TaggedData;
+import util.TaggedDataPair;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Grammar g) {
@@ -17,7 +20,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer list(LanguagePair list) {
+	public StringBuffer list(TaggedDataPair list) {
 		if (list == null) {
 			buffer.append("\u03b5");
 		} else {

@@ -1,6 +1,8 @@
-package languageV2;
+package languageV2.traversal;
 
+import languageV2.SetOfLanguages;
 import util.TaggedData;
+import util.TaggedDataPair;
 
 /**
  * Traverse a language specification.
@@ -23,7 +25,7 @@ public interface Visitor<T> {
 	 * Visit a list of languages `abc...`
 	 * @param list The language list
 	 */
-	T list(LanguagePair list);
+	T list(TaggedDataPair list);
 	/**
 	 * Visit a language loop `a*`
 	 * @param loop The language `a`

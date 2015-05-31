@@ -3,8 +3,15 @@ package languageV2;
 import java.util.HashMap;
 import java.util.Map;
 
+import languageV2.traversal.Derivative;
+import languageV2.traversal.FirstSet;
+import languageV2.traversal.Nonterminal;
+import languageV2.traversal.Nullable;
+import languageV2.traversal.Printer;
+import languageV2.traversal.Visitor;
 import util.TaggedData;
 import util.TaggedDataCache;
+import util.TaggedDataPair;
 
 @SuppressWarnings("unchecked")
 public class Grammar {
@@ -42,8 +49,8 @@ public class Grammar {
 	}
 	
 	/** Lists match a sequence. The null list matches the empty sequence. */
-	public static final TaggedData<LanguagePair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
-	private TaggedDataCache<LanguagePair> lists = TaggedDataCache.create(empty);
+	public static final TaggedData<TaggedDataPair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
+	private TaggedDataCache<TaggedDataPair> lists = TaggedDataCache.create(empty);
 	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
 		// Avoid creating a new list, if possible
 		if (left == reject || right == reject) {
@@ -51,7 +58,7 @@ public class Grammar {
 		}
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
-		LanguagePair pair = new LanguagePair(left, right);
+		TaggedDataPair pair = new TaggedDataPair(left, right);
 		return lists.getInstance(pair);
 	}
 	private TaggedData<?> list(TaggedData<?>[] nodes, int i) {
@@ -271,7 +278,7 @@ public class Grammar {
 			visitor.getWorkList().todo((String)language.data);
 			return visitor.id((String)language.data);
 		case LIST:
-			return visitor.list((LanguagePair)language.data);
+			return visitor.list((TaggedDataPair)language.data);
 		case LOOP:
 			return visitor.loop((TaggedData<?>)language.data);
 		case SET:

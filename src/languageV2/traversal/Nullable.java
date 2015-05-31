@@ -1,9 +1,12 @@
-package languageV2;
+package languageV2.traversal;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import languageV2.Grammar;
+import languageV2.SetOfLanguages;
 import util.TaggedData;
+import util.TaggedDataPair;
 
 public class Nullable extends AbstractVisitor<Boolean> {
 	Set<String> nulls = new HashSet<String>();
@@ -13,7 +16,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean symbol(Character c) {
 		return false;
 	}
-	public Boolean list(LanguagePair list) {
+	public Boolean list(TaggedDataPair list) {
 		if (list == null) return true;
 		boolean result = g.visit(this, list.left) && g.visit(this, list.right);
 		return result;
