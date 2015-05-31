@@ -20,11 +20,11 @@ public class GrammarTest {
 
 	@Test
 	public void testMany() {
-		Grammar aaaa = new Grammar() {{
+		Grammar g = new Grammar() {{
 			define(list(any, many(any)));
 		}};
-		Assert.assertTrue(aaaa.matches("abcdefg"));
-		Assert.assertFalse(aaaa.matches(""));
+		Assert.assertTrue(g.matches("abcdefg"));
+		Assert.assertFalse(g.matches(""));
 	}
 
 	@Test
@@ -61,18 +61,16 @@ public class GrammarTest {
 	@Test
 	public void testParens() {
 		Grammar parens = new Grammar() {{
-			id("S").derives(id("S"),symbol('('),id("S"),symbol(')'));
-			id("S").derives();
+			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
+			derives("S");
 			define(id("S"));
 		}};
-		System.out.println(parens.terminalSet());
-		System.out.println(parens.nonterminalSet());
-		System.out.println(parens.nullableSet());
+		Assert.assertTrue(parens.isNonterminal("S"));
+		Assert.assertFalse(parens.matches("("));
+		Assert.assertTrue(parens.matches("()"));
+		Assert.assertFalse(parens.matches(")"));
 		Assert.assertTrue(parens.matches(parens.first(), "("));
 		Assert.assertFalse(parens.matches(parens.first(), ")"));
-		Assert.assertTrue(parens.matches("()"));
-		Assert.assertFalse(parens.matches("("));
-		Assert.assertFalse(parens.matches(")"));
 	}
 	
 	@Test
@@ -100,18 +98,85 @@ public class GrammarTest {
 			id("L").derives(id("L"),symbol('x'));
 			id("L").derives();
 			define(id("L"));
-			debug = true;
 		}};
-		System.out.println(g.nullableSet());
-		System.out.println(g.terminalSet());
-		System.out.println(g.nonterminalSet());
+		Assert.assertTrue(g.isNonterminal("L"));
+		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
-		Assert.assertTrue(g.matches("xx"));
-		Assert.assertTrue(g.matches("xxx"));
 		Assert.assertFalse(g.matches("L"));
 	}
 	
+	@Test
+	public void testNonterminal() {
+		Grammar g = new Grammar() {{
+			id("S").derives(or(id("A"), id("nope")));
+			id("A").derives(many(id("S")));
+			id("nope").derives(any);
+			define("S");
+		}};
+		Assert.assertTrue(g.isNonterminal("S"));
+		Assert.assertTrue(g.isNonterminal("A"));
+		Assert.assertFalse(g.isNonterminal("nope"));
+	}
+
+	
+	@Test
+	public void testNonterminal2() {
+		Grammar g = new Grammar() {{
+			id("S").derives(or(many(id("S")), id("nope")));
+			id("nope").derives(any);
+			define("S");
+		}};
+		Assert.assertTrue(g.isNonterminal("S"));
+		Assert.assertFalse(g.isNonterminal("nope"));
+	}
+	
+	@Test
+	public void testPage148() {
+		Grammar page148 = new Grammar() {{
+			id("S").derives(id("A"), id("C"));
+			id("C").derives(symbol('c'));
+			id("C").derives();
+			id("A").derives(symbol('a'), id("B"), id("C"), symbol('d'));
+			id("A").derives(id("B"), id("Q"));
+			id("B").derives(symbol('b'), id("B"));
+			id("B").derives();
+			id("Q").derives(symbol('q'));
+			id("Q").derives();
+			define("S");
+		}};
+		System.out.println(page148);
+//		System.out.println(page148.show(page148.first(page148.id("A"))));
+		Assert.assertTrue(page148.nullable());
+	}
+
+	@Test
+	public void testBrainfuck() {
+		Grammar g = new Grammar() {{
+			// Program -> Sequence
+			id("Program").derives(id("Sequence"));
+			// Sequence -> ( Command | Loop ) *
+			id("Sequence").derives(many(or(id("Command"), id("Loop"))));
+			// Command -> '+' | '-' | '<' | '>' | ',' | '.'
+			id("Command").derives(or(
+				symbol('+'),symbol('-'),
+				symbol('<'), symbol('>'),
+				symbol('.'), symbol(',')
+			));
+			// Loop -> '[' Sequence ']'
+			id("Loop").derives(symbol('['), id("Sequence"), symbol(']'));
+			define("Program");
+		}};
+		Assert.assertTrue(g.matches("+"));
+		Assert.assertFalse(g.matches("+["));
+		Assert.assertFalse(g.matches("+[."));
+		Assert.assertFalse(g.matches("+[.+"));
+		Assert.assertFalse(g.matches("hi"));
+		Assert.assertTrue(g.matches("+[.+]"));
+		Assert.assertTrue(g.matches("+[.+]+"));
+		Assert.assertFalse(g.matches("boo"));
+	}
+
 	@Test
 	public void testRegexGrammar() {
 		Grammar regex = new Grammar() {{
@@ -125,39 +190,14 @@ public class GrammarTest {
 			define(id("regex"));
 			debug = true;
 		}};
-		System.out.println(regex.show(regex.first()));
-		System.out.println(regex.terminalSet());
-		System.out.println(regex.nonterminalSet());
-		System.out.println(regex.nullableSet());
+		System.out.println(regex);
+		Assert.assertTrue(regex.isNonterminal("regex"));
+		Assert.assertTrue(regex.isNonterminal("term"));
+		Assert.assertTrue(regex.isNonterminal("factor"));
+		Assert.assertTrue(regex.isNonterminal("base"));
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
 		Assert.assertTrue(regex.matches("a|b**"));
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
-
-/*	@Test
-	public void testId() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testNullable() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testDerivativeChar() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testFirst() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testMatchesString() {
-		fail("Not yet implemented");
-	}
-*/
 }
