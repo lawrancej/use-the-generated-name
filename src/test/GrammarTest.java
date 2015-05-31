@@ -132,6 +132,25 @@ public class GrammarTest {
 	}
 	
 	@Test
+	public void testPage148() {
+		Grammar page148 = new Grammar() {{
+			id("S").derives(id("A"), id("C"));
+			id("C").derives(symbol('c'));
+			id("C").derives();
+			id("A").derives(symbol('a'), id("B"), id("C"), symbol('d'));
+			id("A").derives(id("B"), id("Q"));
+			id("B").derives(symbol('b'), id("B"));
+			id("B").derives();
+			id("Q").derives(symbol('q'));
+			id("Q").derives();
+			define("S");
+		}};
+		System.out.println(page148);
+//		System.out.println(page148.show(page148.first(page148.id("A"))));
+		Assert.assertTrue(page148.nullable());
+	}
+
+	@Test
 	public void testBrainfuck() {
 		Grammar g = new Grammar() {{
 			// Program -> Sequence
@@ -147,19 +166,15 @@ public class GrammarTest {
 			// Loop -> '[' Sequence ']'
 			id("Loop").derives(symbol('['), id("Sequence"), symbol(']'));
 			define("Program");
-			debug = true;
-//			id("Comment").derives(any);
 		}};
-		System.out.println(g);
 		Assert.assertTrue(g.matches("+"));
 		Assert.assertFalse(g.matches("+["));
 		Assert.assertFalse(g.matches("+[."));
 		Assert.assertFalse(g.matches("+[.+"));
-//		Assert.assertFalse(g.matches("hi"));
+		Assert.assertFalse(g.matches("hi"));
 		Assert.assertTrue(g.matches("+[.+]"));
-//		Assert.assertTrue(g.matches("+[.+]+"));
-//		Assert.assertTrue(g.matches("+[.+]"));
-//		Assert.assertFalse(g.matches("boo"));
+		Assert.assertTrue(g.matches("+[.+]+"));
+		Assert.assertFalse(g.matches("boo"));
 	}
 
 	@Test
@@ -184,24 +199,5 @@ public class GrammarTest {
 		Assert.assertTrue(regex.matches("a|b"));
 		Assert.assertTrue(regex.matches("a|b**"));
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
-	}
-	
-	@Test
-	public void testPage148() {
-		Grammar page148 = new Grammar() {{
-			id("S").derives(id("A"), id("C"));
-			id("C").derives(symbol('c'));
-			id("C").derives();
-			id("A").derives(symbol('a'), id("B"), id("C"), symbol('d'));
-			id("A").derives(id("B"), id("Q"));
-			id("B").derives(symbol('b'), id("B"));
-			id("B").derives();
-			id("Q").derives(symbol('q'));
-			id("Q").derives();
-			define("S");
-		}};
-		System.out.println(page148);
-//		System.out.println(page148.show(page148.first(page148.id("A"))));
-		Assert.assertTrue(page148.nullable());
 	}
 }

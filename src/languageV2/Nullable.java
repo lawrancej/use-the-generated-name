@@ -28,7 +28,10 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		if (todo.visited(id)) {
 			return false;
 		} else {
-			return g.visit(this, g.rhs(id));
+			// Either it is:
+			//return g.visit(this, g.rhs(id));
+			// Or it is:
+			return g.visit(this, id);
 		}
 	}
 	public Boolean rule(String id, TaggedData<?> rhs) {
