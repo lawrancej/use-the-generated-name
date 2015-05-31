@@ -198,7 +198,7 @@ public class Grammar {
 		return ids.get(s);
 	}
 	// Get the right hand side
-	public TaggedData<?> rhs(String s) {
+	private TaggedData<?> rhs(String s) {
 		if (!derivations.containsKey(s)) {
 			return reject;
 		}

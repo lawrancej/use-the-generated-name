@@ -1,6 +1,10 @@
 package languageV2;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Nullable extends AbstractVisitor<Boolean> {
+	Set<String> nulls = new HashSet<String>();
 	public Nullable(Grammar g) {
 		super(g, new WorkList<String>());
 	}
@@ -26,12 +30,13 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	}
 	public Boolean id(String id) {
 		if (todo.visited(id)) {
-			return false;
+			return nulls.contains(id);
 		} else {
-			// Either it is:
-			//return g.visit(this, g.rhs(id));
-			// Or it is:
-			return g.visit(this, id);
+			boolean result = g.visit(this, id);
+			if (result) {
+				nulls.add(id);
+			}
+			return result;
 		}
 	}
 	public Boolean rule(String id, TaggedData<?> rhs) {
