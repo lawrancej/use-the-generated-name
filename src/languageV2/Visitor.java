@@ -3,13 +3,11 @@ package languageV2;
 /**
  * Traverse a language specification.
  * 
- * Whereas regular languages imply tree traversal among symbols, lists, sets and loops,
- * context-free languages require graph traversal.
- * To enable graph traversal termination, the interface requires:
+ * Regular languages consist of symbols, lists, sets and loops,
+ * whereas context-free languages also include identifiers and derivation rules.
+ * Regular languages imply tree traversal; grammars imply graph traversal.
  * 
- * * a worklist of visited identifiers
- * * a means to visit identifiers and rules
- * * a means to accumulate the results of visiting several identifiers
+ * A work queue enables graph traversal termination.
  * 
  * @param <T> The return type of the visitor.
  */
@@ -40,7 +38,7 @@ public interface Visitor<T> {
 	 */
 	WorkQueue<String> getWorkList();
 	/**
-	 * Visit an identifier.
+	 * Visit an identifier (on the right hand side).
 	 * @param id The identifier label
 	 */
 	T id(String id);
@@ -63,9 +61,8 @@ public interface Visitor<T> {
 	 */
 	boolean done(T accumulator);
 	/**
-	 * Accumulate results during worklist traversal.
+	 * Accumulate results during work queue traversal.
 	 * @param accumulator
-	 * @param the current identifier
 	 * @param the current result
 	 * @return the result
 	 */
