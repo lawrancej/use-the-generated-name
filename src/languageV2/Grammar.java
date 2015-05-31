@@ -288,7 +288,7 @@ public class Grammar {
 		visitor.getWorkList().todo(id);
 		T result = visitor.bottom();
 		for (String identifier : visitor.getWorkList()) {
-			result = visitor.reduce(result, visit(visitor, identifier));
+			result = visitor.reduce(result, identifier, visit(visitor, identifier));
 		}
 		return result;
 	}
@@ -338,8 +338,16 @@ public class Grammar {
 	 * @param s The identifier label
 	 * @return Whether the identifier is a nonterminal
 	 */
-	public boolean nonterminal(String s) {
+	public boolean isNonterminal(String s) {
 		return beginTraversal(new Nonterminal(this, s), s);
+	}
+	/**
+	 * Is the identifier a terminal?
+	 * @param s The identifier label
+	 * @return Whether the identifier is a terminal
+	 */
+	public boolean isTerminal(String s) {
+		return !beginTraversal(new Nonterminal(this, s), s);
 	}
 	/**
 	 * Compute the first set for identifier s.

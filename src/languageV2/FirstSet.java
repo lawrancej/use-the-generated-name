@@ -36,7 +36,7 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> bottom() {
 		return Grammar.reject;
 	}
-	public TaggedData<?> reduce(TaggedData<?> a, TaggedData<?> b) {
-		return g.or(a, b);
+	public TaggedData<?> reduce(TaggedData<?> accumulator, String id, TaggedData<?> current) {
+		return g.or(accumulator, current);
 	}
 }

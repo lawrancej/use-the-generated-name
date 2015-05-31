@@ -20,7 +20,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		return result;
 	}
 	public TaggedData<?> loop(TaggedData<?> language) {
-		return g.list(g.visit(this, language), g.many(language));
+		return g.visit(this, g.list(language, g.many(language)));
 	}
 	public TaggedData<?> set(SetOfLanguages set) {
 		TaggedData<?> result = bottom();
@@ -42,8 +42,8 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> bottom() {
 		return Grammar.reject;
 	}
-	public TaggedData<?> reduce(TaggedData<?> a, TaggedData<?> b) {
-		if (a == bottom()) return b;
-		else return a;
+	public TaggedData<?> reduce(TaggedData<?> accumulator, String id, TaggedData<?> current) {
+		if (accumulator == bottom()) return current;
+		else return accumulator;
 	}
 }

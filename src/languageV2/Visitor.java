@@ -1,15 +1,19 @@
 package languageV2;
 
 /**
- * Traverse a language specification lazily by need.
+ * Traverse a language specification.
+ * 
+ * Whereas regular languages imply tree traversal among symbols, lists, sets and loops,
+ * context-free languages require graph traversal.
+ * To enable graph traversal termination, the interface requires:
+ * 
+ * * a worklist of visited identifiers
+ * * a means to visit identifiers and rules
+ * * a means to accumulate the results of visiting several identifiers
+ * 
  * @param <T> The return type of the visitor.
  */
 public interface Visitor<T> {
-	/**
-	 * Grammar traversal requires a work list of identifiers to visit to enable termination.
-	 * @return the work list.
-	 */
-	WorkList<String> getWorkList();
 	/**
 	 * Visit symbol `c`
 	 * @param c Character
@@ -31,7 +35,12 @@ public interface Visitor<T> {
 	 */
 	T set(SetOfLanguages set);
 	/**
-	 * Visit an identifier
+	 * Get the worklist of visited identifiers.
+	 * @return the work list.
+	 */
+	WorkList<String> getWorkList();
+	/**
+	 * Visit an identifier.
 	 * @param id The identifier label
 	 */
 	T id(String id);
@@ -49,9 +58,10 @@ public interface Visitor<T> {
 	T bottom();
 	/**
 	 * Accumulate results during worklist traversal.
-	 * @param a
-	 * @param b
-	 * @return
+	 * @param accumulator
+	 * @param the current identifier
+	 * @param the current result
+	 * @return the result
 	 */
-	T reduce(T a, T b);
+	T reduce(T accumulator, String id, T current);
 }
