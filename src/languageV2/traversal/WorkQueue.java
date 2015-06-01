@@ -9,6 +9,8 @@ public interface WorkQueue<T> extends Iterator<T>, Iterable<T> {
 	public abstract void done(T s);
 
 	public abstract boolean visited(T s);
+	
+	public abstract boolean visiting(T s);
 
 	public abstract void clear();
 

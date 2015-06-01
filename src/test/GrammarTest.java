@@ -98,6 +98,7 @@ public class GrammarTest {
 			derives("L");
 			debug = true;
 		}};
+		System.out.println(g);
 		Assert.assertTrue(g.isNonterminal("L"));
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
