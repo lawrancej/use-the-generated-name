@@ -184,28 +184,17 @@ public class Grammar {
 	
 	/** Identifiers include terminals and nonterminals. Identifiers enable recursion. */
 	// Identifier lookup by name
-	private Map<String, Id> ids = new HashMap<String, Id>();
+	private TaggedDataCache<String> ids = TaggedDataCache.create(new TaggedData<String>(Construct.ID.ordinal(), null));
 	// Derivation (rhs) lookup by name
 	private Map<String, TaggedData<?>> derivations = new HashMap<String, TaggedData<?>>();
-	public class Id extends TaggedData<String> {
-		Id(String label) {
-			super(Construct.ID.ordinal(), label);
-		}
-		public void derives(TaggedData<?>... languages) {
-			derivations.put(data, or(rhs(data), list(languages)));
-		}
-	}
 	/**
 	 * Reference an identifier (terminal or nonterminal).
 	 * 
 	 * @param s The identifier name.
 	 * @return The identifier.
 	 */
-	public Id id(String s) {
-		if (!ids.containsKey(s)) {
-			ids.put(s, new Id(s));
-		}
-		return ids.get(s);
+	public TaggedData<String> id(String s) {
+		return ids.getInstance(s);
 	}
 	// Get the right hand side
 	private TaggedData<?> rhs(String s) {
@@ -417,11 +406,11 @@ public class Grammar {
 
 	public boolean matches(TaggedData<?> language, String s) {
 		boolean result;
-		Map<String, Id> startids = new HashMap<String, Id>();
+		TaggedDataCache<String> startids = TaggedDataCache.create(new TaggedData<String>(Construct.ID.ordinal(), null));
 		Map<String, TaggedData<?>> startderivations = new HashMap<String, TaggedData<?>>();
-		for (Id id : ids.values()) {
-			startids.put(id.data, id);
-			startderivations.put(id.data, rhs(id.data));
+		for (TaggedData<?> id : ids.values()) {
+			startids.getInstance((String)id.data);
+			startderivations.put((String)id.data, rhs((String)id.data));
 		}
 		Derivative visitor = new Derivative(this);
 		for (int i = 0; i < s.length(); i++) {

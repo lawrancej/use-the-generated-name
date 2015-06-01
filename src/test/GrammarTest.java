@@ -95,8 +95,8 @@ public class GrammarTest {
 	@Test
 	public void testLeftRecursion() {
 		Grammar g = new Grammar() {{
-			id("L").derives(id("L"),symbol('x'));
-			id("L").derives();
+			derives("L",id("L"),symbol('x'));
+			derives("L");
 			define(id("L"));
 		}};
 		Assert.assertTrue(g.isNonterminal("L"));
@@ -109,9 +109,9 @@ public class GrammarTest {
 	@Test
 	public void testNonterminal() {
 		Grammar g = new Grammar() {{
-			id("S").derives(or(id("A"), id("nope")));
-			id("A").derives(many(id("S")));
-			id("nope").derives(any);
+			derives("S",or(id("A"), id("nope")));
+			derives("A",many(id("S")));
+			derives("nope",any);
 			define("S");
 		}};
 		Assert.assertTrue(g.isNonterminal("S"));
@@ -123,8 +123,8 @@ public class GrammarTest {
 	@Test
 	public void testNonterminal2() {
 		Grammar g = new Grammar() {{
-			id("S").derives(or(many(id("S")), id("nope")));
-			id("nope").derives(any);
+			derives("S",or(many(id("S")), id("nope")));
+			derives("nope",any);
 			define("S");
 		}};
 		Assert.assertTrue(g.isNonterminal("S"));
@@ -134,15 +134,15 @@ public class GrammarTest {
 	@Test
 	public void testPage148() {
 		Grammar page148 = new Grammar() {{
-			id("S").derives(id("A"), id("C"));
-			id("C").derives(symbol('c'));
-			id("C").derives();
-			id("A").derives(symbol('a'), id("B"), id("C"), symbol('d'));
-			id("A").derives(id("B"), id("Q"));
-			id("B").derives(symbol('b'), id("B"));
-			id("B").derives();
-			id("Q").derives(symbol('q'));
-			id("Q").derives();
+			derives("S",id("A"), id("C"));
+			derives("C",symbol('c'));
+			derives("C");
+			derives("A",symbol('a'), id("B"), id("C"), symbol('d'));
+			derives("A",id("B"), id("Q"));
+			derives("B",symbol('b'), id("B"));
+			derives("B");
+			derives("Q",symbol('q'));
+			derives("Q");
 			define("S");
 		}};
 		System.out.println(page148);
@@ -154,17 +154,17 @@ public class GrammarTest {
 	public void testBrainfuck() {
 		Grammar g = new Grammar() {{
 			// Program -> Sequence
-			id("Program").derives(id("Sequence"));
+			derives("Program",id("Sequence"));
 			// Sequence -> ( Command | Loop ) *
-			id("Sequence").derives(many(or(id("Command"), id("Loop"))));
+			derives("Sequence",many(or(id("Command"), id("Loop"))));
 			// Command -> '+' | '-' | '<' | '>' | ',' | '.'
-			id("Command").derives(or(
+			derives("Command",or(
 				symbol('+'),symbol('-'),
 				symbol('<'), symbol('>'),
 				symbol('.'), symbol(',')
 			));
 			// Loop -> '[' Sequence ']'
-			id("Loop").derives(symbol('['), id("Sequence"), symbol(']'));
+			derives("Loop",symbol('['), id("Sequence"), symbol(']'));
 			define("Program");
 		}};
 		Assert.assertTrue(g.matches("+"));
@@ -180,13 +180,13 @@ public class GrammarTest {
 	@Test
 	public void testRegexGrammar() {
 		Grammar regex = new Grammar() {{
-			id("regex").derives(id("term"),symbol('|'),id("regex"));
-			id("regex").derives(id("term"));
-			id("term").derives(many(id("factor")));
-			id("factor").derives(id("base"), option(symbol('*')));
-			id("base").derives(any);
-			id("base").derives(symbol('\\'), any);
-			id("base").derives(symbol('('), id("regex"), symbol(')'));
+			derives("regex",id("term"),symbol('|'),id("regex"));
+			derives("regex",id("term"));
+			derives("term",many(id("factor")));
+			derives("factor",id("base"), option(symbol('*')));
+			derives("base",any);
+			derives("base",symbol('\\'), any);
+			derives("base",symbol('('), id("regex"), symbol(')'));
 			define(id("regex"));
 			debug = true;
 		}};

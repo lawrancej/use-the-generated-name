@@ -1,7 +1,9 @@
 package util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /* Caches instances of data so that value comparisons become pointer comparisons */
 public class TaggedDataCache<T> {
@@ -22,5 +24,17 @@ public class TaggedDataCache<T> {
 			instances.put(key, TaggedData.create(tag, key));
 		}
 		return instances.get(key);
+	}
+	public void clear() {
+		instances.clear();
+	}
+	public Collection<TaggedData<T>> values() {
+		return instances.values();
+	}
+	public int size() {
+		return instances.size();
+	}
+	public Set<T> keySet() {
+		return instances.keySet();
 	}
 }
