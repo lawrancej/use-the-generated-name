@@ -63,7 +63,6 @@ public class GrammarTest {
 		Language parens = new Language() {{
 			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
 			derives("S");
-			define(id("S"));
 		}};
 		Assert.assertTrue(parens.isNonterminal("S"));
 		Assert.assertFalse(parens.matches("("));
@@ -97,7 +96,6 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
-			define(id("L"));
 		}};
 		Assert.assertTrue(g.isNonterminal("L"));
 		Assert.assertTrue(g.matches("xx"));
@@ -112,7 +110,6 @@ public class GrammarTest {
 			derives("S",or(id("A"), id("nope")));
 			derives("A",many(id("S")));
 			derives("nope",any);
-			define("S");
 		}};
 		Assert.assertTrue(g.isNonterminal("S"));
 		Assert.assertTrue(g.isNonterminal("A"));
@@ -125,7 +122,6 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("S",or(many(id("S")), id("nope")));
 			derives("nope",any);
-			define("S");
 		}};
 		Assert.assertTrue(g.isNonterminal("S"));
 		Assert.assertFalse(g.isNonterminal("nope"));
@@ -143,7 +139,6 @@ public class GrammarTest {
 			derives("B");
 			derives("Q",symbol('q'));
 			derives("Q");
-			define("S");
 		}};
 		System.out.println(page148);
 //		System.out.println(page148.show(page148.first(page148.id("A"))));
@@ -165,7 +160,6 @@ public class GrammarTest {
 			));
 			// Loop -> '[' Sequence ']'
 			derives("Loop",symbol('['), id("Sequence"), symbol(']'));
-			define("Program");
 		}};
 		Assert.assertTrue(g.matches("+"));
 		Assert.assertFalse(g.matches("+["));
@@ -187,7 +181,6 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			define(id("regex"));
 			debug = true;
 		}};
 		System.out.println(regex);

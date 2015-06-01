@@ -213,12 +213,16 @@ public class Language {
 	 * @return the identifier reference
 	 */
 	public TaggedData<?> derives(String id, TaggedData<?>... languages) {
+		TaggedData<?> result = id(id);
+		if (definition == reject) {
+			definition = result;
+		}
 //		TaggedData<?> rhs = list(languages);
 //		if (rhs == reject && !ids.containsKey(id)) {
 //			return reject;
 //		}
 		derivations.put(id, or(rhs(id), list(languages)));
-		return id(id);
+		return result;
 	}
 	
 	/**
