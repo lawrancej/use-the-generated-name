@@ -56,9 +56,6 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> rule(String id, TaggedData<?> rhs) {
 		String dc = "D" + c + id;
 		TaggedData<?> derivation = g.visit(this,  rhs);
-		System.out.print(dc);
-		System.out.println(" will be ");
-		System.out.println(g.toString(derivation));
 		if (derivation == bottom()) {
 			return derivation;
 		} else {
