@@ -1,6 +1,6 @@
 package test;
 
-import languageV2.Grammar;
+import languageV2.Language;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,18 +9,18 @@ public class GrammarTest {
 
 	@Test
 	public void testSymbol() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			define(symbol('s'));
 		}};
 		Assert.assertFalse(g.nullable());
-		Assert.assertEquals(Grammar.reject, g.derivative('e'));
-		Assert.assertEquals(Grammar.empty, g.derivative('s'));
+		Assert.assertEquals(Language.reject, g.derivative('e'));
+		Assert.assertEquals(Language.empty, g.derivative('s'));
 		Assert.assertTrue(g.matches("s"));
 	}
 
 	@Test
 	public void testMany() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			define(list(any, many(any)));
 		}};
 		Assert.assertTrue(g.matches("abcdefg"));
@@ -29,7 +29,7 @@ public class GrammarTest {
 
 	@Test
 	public void testOr() {
-		Grammar aaaa = new Grammar() {{
+		Language aaaa = new Language() {{
 			define(many(or(symbol('a'), symbol('b'))));
 		}};
 		Assert.assertFalse(aaaa.matches("abcdefg"));
@@ -40,7 +40,7 @@ public class GrammarTest {
 
 	@Test
 	public void testList() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			define(list(symbol('a'), symbol('b')));
 		}};
 		Assert.assertTrue(g.matches("ab"));
@@ -51,7 +51,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testAny() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			define(list(any, many(any), symbol('b')));
 		}};
 		Assert.assertTrue(g.matches("jebb"));
@@ -60,7 +60,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testParens() {
-		Grammar parens = new Grammar() {{
+		Language parens = new Language() {{
 			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
 			derives("S");
 			define(id("S"));
@@ -75,7 +75,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testHelloWorld() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			define(string("hello world"));
 		}};
 		Assert.assertTrue(g.matches("hello world"));
@@ -84,7 +84,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testFooBarFrak() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			define(many(or(string("foo"),string("bar"),string("frak"))));
 		}};
 		Assert.assertTrue(g.matches("foo"));
@@ -94,7 +94,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testLeftRecursion() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
 			define(id("L"));
@@ -108,7 +108,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testNonterminal() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			derives("S",or(id("A"), id("nope")));
 			derives("A",many(id("S")));
 			derives("nope",any);
@@ -122,7 +122,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testNonterminal2() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			derives("S",or(many(id("S")), id("nope")));
 			derives("nope",any);
 			define("S");
@@ -133,7 +133,7 @@ public class GrammarTest {
 	
 	@Test
 	public void testPage148() {
-		Grammar page148 = new Grammar() {{
+		Language page148 = new Language() {{
 			derives("S",id("A"), id("C"));
 			derives("C",symbol('c'));
 			derives("C");
@@ -152,7 +152,7 @@ public class GrammarTest {
 
 	@Test
 	public void testBrainfuck() {
-		Grammar g = new Grammar() {{
+		Language g = new Language() {{
 			// Program -> Sequence
 			derives("Program",id("Sequence"));
 			// Sequence -> ( Command | Loop ) *
@@ -179,7 +179,7 @@ public class GrammarTest {
 
 	@Test
 	public void testRegexGrammar() {
-		Grammar regex = new Grammar() {{
+		Language regex = new Language() {{
 			derives("regex",id("term"),symbol('|'),id("regex"));
 			derives("regex",id("term"));
 			derives("term",many(id("factor")));

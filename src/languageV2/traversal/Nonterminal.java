@@ -1,6 +1,6 @@
 package languageV2.traversal;
 
-import languageV2.Grammar;
+import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.TaggedData;
 import util.TaggedDataPair;
@@ -10,7 +10,7 @@ import util.TaggedDataPair;
  */
 public class Nonterminal extends AbstractVisitor<Boolean> {
 	String label;
-	public Nonterminal(Grammar g, String label) {
+	public Nonterminal(Language g, String label) {
 		super(g, new WorkList<String>());
 		this.label = label;
 	}

@@ -1,18 +1,18 @@
 package languageV2.traversal;
 
-import languageV2.Grammar;
+import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.TaggedData;
 import util.TaggedDataPair;
 
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
-	public Derivative(Grammar g) {
+	public Derivative(Language g) {
 		super(g, new WorkList<String>());
 	}
 	public TaggedData<?> symbol(Character c) {
 		if (c == null || this.c == c) {
-			return Grammar.empty;
+			return Language.empty;
 		}
 		return bottom();
 	}
@@ -45,7 +45,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		return result;
 	}
 	public TaggedData<?> bottom() {
-		return Grammar.reject;
+		return Language.reject;
 	}
 	public TaggedData<?> reduce(TaggedData<?> accumulator, TaggedData<?> current) {
 		if (accumulator == bottom()) return current;

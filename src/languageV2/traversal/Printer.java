@@ -1,12 +1,12 @@
 package languageV2.traversal;
 
-import languageV2.Grammar;
+import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.TaggedData;
 import util.TaggedDataPair;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
-	public Printer(Grammar g) {
+	public Printer(Language g) {
 		super(g, new WorkList<String>());
 	}
 	StringBuffer buffer = new StringBuffer();

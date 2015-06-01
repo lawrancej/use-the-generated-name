@@ -14,11 +14,11 @@ import util.TaggedDataCache;
 import util.TaggedDataPair;
 
 @SuppressWarnings("unchecked")
-public class Grammar {
+public class Language {
 	/**
 	 * Construct a language specification
 	 */
-	public Grammar() {}
+	public Language() {}
 	/**
 	 * A language is a set of lists of symbols.
 	 * 
@@ -203,6 +203,8 @@ public class Grammar {
 		}
 		return derivations.get(s);
 	}
+	/** The language definition. The root of all traversal. */
+	private TaggedData<?> definition = reject;
 	/**
 	 * Define an identifier: `id -> rhs`
 	 * 
@@ -219,8 +221,6 @@ public class Grammar {
 		return id(id);
 	}
 	
-	/** The language definition. The root of all traversal. */
-	private TaggedData<?> definition = reject;
 	/**
 	 * Specify a language.
 	 * 

@@ -1,13 +1,13 @@
 package languageV2.traversal;
 
-import languageV2.Grammar;
+import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.TaggedData;
 import util.TaggedDataPair;
 
 // Compute the first set
 public class FirstSet extends AbstractVisitor<TaggedData<?>> {
-	public FirstSet(Grammar g) {
+	public FirstSet(Language g) {
 		super(g, new WorkList<String>());
 	}
 	public TaggedData<?> symbol(Character c) {
@@ -39,7 +39,7 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 		return g.visit(this, rhs);
 	}
 	public TaggedData<?> bottom() {
-		return Grammar.reject;
+		return Language.reject;
 	}
 	public TaggedData<?> reduce(TaggedData<?> accumulator, TaggedData<?> current) {
 		return g.or(accumulator, current);
