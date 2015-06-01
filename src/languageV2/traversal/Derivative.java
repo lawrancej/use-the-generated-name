@@ -42,15 +42,11 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public TaggedData<?> id(String id) {
 		String dc = "D" + c + id;
-		if (todo.visited(id)) {
-			if (ids.contains(id)) {
-				return g.id(dc);
-			}
-		} else {
-			TaggedData<?> result = g.visit(this, id);
-			if (result != bottom()) {
-				return g.id(dc);
-			}
+		if (!todo.visited(id)) {
+			g.visit(this, id);
+		}
+		if (ids.contains(id)) {
+			return g.id(dc);
 		}
 		return bottom();
 //		return g.id(dc);
