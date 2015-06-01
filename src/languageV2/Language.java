@@ -423,6 +423,7 @@ public class Language {
 				if (ids.size() > 0) {
 					System.out.println("top: " + (String)language.data);
 					System.out.println("ids: " + ids.size() + " " + ids.keySet());
+//					System.out.println(toString(language));
 				}
 				System.out.println(s.charAt(i));
 			}

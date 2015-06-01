@@ -96,6 +96,7 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
+			debug = true;
 		}};
 		Assert.assertTrue(g.isNonterminal("L"));
 		Assert.assertTrue(g.matches("xx"));

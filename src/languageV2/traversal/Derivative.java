@@ -1,5 +1,8 @@
 package languageV2.traversal;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.TaggedData;
@@ -7,6 +10,7 @@ import util.TaggedDataPair;
 
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
+	Set<String> ids = new HashSet<String>();
 	public Derivative(Language g) {
 		super(g, new WorkList<String>());
 	}
@@ -26,6 +30,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public TaggedData<?> loop(TaggedData<?> language) {
 		return g.visit(this, g.list(language, g.many(language)));
+//		return g.list(g.visit(this, language), g.many(language));
 	}
 	public TaggedData<?> set(SetOfLanguages set) {
 		TaggedData<?> result = bottom();
@@ -37,11 +42,31 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public TaggedData<?> id(String id) {
 		String dc = "D" + c + id;
-		return g.id(dc);
+		if (todo.visited(id)) {
+			if (ids.contains(id)) {
+				return g.id(dc);
+			}
+		} else {
+			TaggedData<?> result = g.visit(this, id);
+			if (result != bottom()) {
+				return g.id(dc);
+			}
+		}
+		return bottom();
+//		return g.id(dc);
 	}
 	public TaggedData<?> rule(String id, TaggedData<?> rhs) {
 		String dc = "D" + c + id;
-		TaggedData<?> result = g.derives(dc, g.visit(this, rhs));
+		TaggedData<?> derivation = g.visit(this,  rhs);
+		System.out.print(id);
+		System.out.println(" will be ");
+		System.out.println(g.toString(derivation));
+		if (derivation == bottom()) {
+			return derivation;
+		} else {
+			ids.add(id);
+		}
+		TaggedData<?> result = g.derives(dc, derivation);
 		return result;
 	}
 	public TaggedData<?> bottom() {
