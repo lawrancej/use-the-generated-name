@@ -9,7 +9,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Language g) {
 		super(g, new WorkList<String>());
 	}
-	StringBuffer buffer = new StringBuffer();
+	private StringBuffer buffer = new StringBuffer();
 	public StringBuffer symbol(Character c) {
 		if (c == null) {
 			buffer.append("<any character>");

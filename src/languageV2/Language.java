@@ -276,6 +276,7 @@ public class Language {
 	 * @param id
 	 */
 	public <T> T beginTraversal(Visitor<T> visitor, String id) {
+		visitor.getWorkList().clear();
 		visitor.getWorkList().todo(id);
 		T accumulator = visitor.bottom();
 		for (String identifier : visitor.getWorkList()) {
@@ -299,6 +300,7 @@ public class Language {
 		}
 		// Visit a regex
 		else {
+			visitor.getWorkList().clear();
 			return visit(visitor, language);
 		}
 	}
@@ -310,9 +312,7 @@ public class Language {
 	public <T> T beginTraversal(Visitor<T> visitor) {
 		return beginTraversal(visitor, definition);
 	}
-	
 	public boolean debug = false;
-	@Override
 	public String toString() {
 		return beginTraversal(new Printer(this)).toString();
 	}
@@ -361,13 +361,14 @@ public class Language {
 		return beginTraversal(new FirstSet(this));
 	}
 	
+	private Nullable nullable = new Nullable(this);
 	/**
 	 * Can this language derive the empty string?
 	 * 
 	 * @param language
 	 */
 	public boolean nullable(TaggedData<?> language) {
-		return beginTraversal(new Nullable(this), language);
+		return beginTraversal(nullable, language);
 	}
 	/**
 	 * Can this identifier derive the empty string?
@@ -375,28 +376,44 @@ public class Language {
 	 * @param id
 	 */
 	public boolean nullable(String id) {
-		return beginTraversal(new Nullable(this), id);
+		return beginTraversal(nullable, id);
 	}
 	/**
 	 * Can this language specification derive the empty string?
 	 */
 	public boolean nullable() {
-		return beginTraversal(new Nullable(this));
+		return beginTraversal(nullable);
 	}
-	// Compute the derivative of a language
-	private TaggedData<?> derivative(Derivative visitor, char c, TaggedData<?> language) {
-		visitor.c = c;
-		visitor.getWorkList().clear();
-		return beginTraversal(visitor, language);
-	}
+	
+	private Derivative derivative = new Derivative(this);
+	/**
+	 * Compute the derivative of a language with respect to a character.
+	 * 
+	 * @param c
+	 * @param language
+	 * @return
+	 */
 	public TaggedData<?> derivative(char c, TaggedData<?> language) {
-		return derivative(new Derivative(this), c, language);
+		derivative.c = c;
+		return beginTraversal(derivative, language);
 	}
+	/**
+	 * Compute the derivative of a language specification
+	 * 
+	 * @param c
+	 * @param language
+	 * @return
+	 */
 	public TaggedData<?> derivative(char c) {
 		return derivative(c, definition);
 	}
+	
+	private GC collector = new GC(this);
+	/**
+	 * Garbage collect unreferenced identifiers and derivations.
+	 * @param language the root set language for gc.
+	 */
 	public void gc(TaggedData<?> language) {
-		GC collector = new GC(this);
 		beginTraversal(collector, language);
 		WorkQueue<String> list = collector.getWorkList();
 		Iterator<Entry<String, TaggedData<String>>> iterator = ids.entrySet().iterator();
@@ -414,6 +431,9 @@ public class Language {
 			}
 		}
 	}
+	/**
+	 * Garbage collect unreferenced identifiers and derivations.
+	 */
 	public void gc() {
 		gc(definition);
 	}
@@ -426,23 +446,21 @@ public class Language {
 			startids.getInstance((String)id.data);
 			startderivations.put((String)id.data, rhs((String)id.data));
 		}
-		Derivative visitor = new Derivative(this);
 		for (int i = 0; i < s.length(); i++) {
-			language = derivative(visitor, s.charAt(i), language);
+			language = derivative(s.charAt(i), language);
 			gc(language);
-			if (debug) {
+			/*
 				if (ids.size() > 0) {
 					System.out.println("top: " + (String)language.data);
 					System.out.println("ids: " + ids.size() + " " + ids.keySet());
-//					System.out.println(toString(language));
 				}
 				System.out.println(s.charAt(i));
-			}
+			*/
 		}
-		if (debug) {
-		System.out.println(s);
-		System.out.println(toString(language));
-		}
+		/*
+			System.out.println(s);
+			System.out.println(toString(language));
+		*/
 		result = nullable(language);
 		ids.clear();
 		derivations.clear();
