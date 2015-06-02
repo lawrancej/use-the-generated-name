@@ -63,6 +63,7 @@ public class GrammarTest {
 		Language parens = new Language() {{
 			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
 			derives("S");
+			debug = true;
 		}};
 		Assert.assertTrue(parens.isNonterminal("S"));
 		Assert.assertFalse(parens.matches("("));
@@ -183,7 +184,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-//			debug = true;
+			debug = true;
 		}};
 		System.out.println(regex);
 		Assert.assertTrue(regex.isNonterminal("regex"));

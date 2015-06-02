@@ -38,6 +38,9 @@ class WorkList<T> implements WorkQueue<T> {
 	public Iterator<T> iterator() {
 		return this;
 	}
+	public Set<T> visited() {
+		return done;
+	}
 	public boolean visiting(T s) {
 		return s == current;
 	}

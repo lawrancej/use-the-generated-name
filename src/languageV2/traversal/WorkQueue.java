@@ -1,23 +1,26 @@
 package languageV2.traversal;
 
 import java.util.Iterator;
+import java.util.Set;
 
 public interface WorkQueue<T> extends Iterator<T>, Iterable<T> {
 
-	public abstract void todo(T s);
+	public void todo(T s);
 
-	public abstract void done(T s);
+	public void done(T s);
 
-	public abstract boolean visited(T s);
+	public boolean visited(T s);
 	
-	public abstract boolean visiting(T s);
+	public Set<T> visited();
+	
+	public boolean visiting(T s);
 
-	public abstract void clear();
+	public void clear();
 
-	public abstract boolean hasNext();
+	public boolean hasNext();
 
-	public abstract T next();
+	public T next();
 
-	public abstract Iterator<T> iterator();
+	public Iterator<T> iterator();
 
 }

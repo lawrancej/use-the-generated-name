@@ -3,6 +3,7 @@ package util;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /* Caches instances of data so that value comparisons become pointer comparisons */
@@ -25,11 +26,17 @@ public class TaggedDataCache<T> {
 		}
 		return instances.get(key);
 	}
+	public void remove(T key) {
+		instances.remove(key);
+	}
 	public void clear() {
 		instances.clear();
 	}
 	public Collection<TaggedData<T>> values() {
 		return instances.values();
+	}
+	public Set<Entry<T, TaggedData<T>>> entrySet() {
+		return instances.entrySet();
 	}
 	public int size() {
 		return instances.size();

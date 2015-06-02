@@ -1,14 +1,18 @@
 package languageV2;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import languageV2.traversal.Derivative;
 import languageV2.traversal.FirstSet;
+import languageV2.traversal.GC;
 import languageV2.traversal.Nonterminal;
 import languageV2.traversal.Nullable;
 import languageV2.traversal.Printer;
 import languageV2.traversal.Visitor;
+import languageV2.traversal.WorkQueue;
 import util.TaggedData;
 import util.TaggedDataCache;
 import util.TaggedDataPair;
@@ -19,22 +23,6 @@ public class Language {
 	 * Construct a language specification
 	 */
 	public Language() {}
-	/**
-	 * A language is a set of lists of symbols.
-	 * 
-	 * Specifying an infinite language requires repetition or recursion.
-	 * Loops specify repetition, and identifiers enable recursion.
-	 */
-	public static enum Construct {
-		// Finite language specifiers
-		SYMBOL /* c */,
-		LIST /* abc... */,
-		SET /* a|b|c... */,
-		// Infinite language specifiers
-		LOOP /* a* */,
-		ID, /* id */
-	};
-	
 	/** Symbols match a character. The null symbol matches any character. */
 	public static final TaggedData<Character> any = TaggedData.create(Construct.SYMBOL.ordinal(), null);
 	private TaggedDataCache<Character> symbols = TaggedDataCache.create(any);
@@ -407,6 +395,28 @@ public class Language {
 	public TaggedData<?> derivative(char c) {
 		return derivative(c, definition);
 	}
+	public void gc(TaggedData<?> language) {
+		GC collector = new GC(this);
+		beginTraversal(collector, language);
+		WorkQueue<String> list = collector.getWorkList();
+		Iterator<Entry<String, TaggedData<String>>> iterator = ids.entrySet().iterator();
+		while(iterator.hasNext()) {
+			Entry<String, TaggedData<String>> entry = iterator.next();
+			if (!list.visited(entry.getKey())) {
+				iterator.remove();
+			}
+		}
+		Iterator<Entry<String, TaggedData<?>>> it = derivations.entrySet().iterator();
+		while(it.hasNext()) {
+			Entry<String, TaggedData<?>> entry = it.next();
+			if (!list.visited(entry.getKey())) {
+				it.remove();
+			}
+		}
+	}
+	public void gc() {
+		gc(definition);
+	}
 
 	public boolean matches(TaggedData<?> language, String s) {
 		boolean result;
@@ -419,6 +429,7 @@ public class Language {
 		Derivative visitor = new Derivative(this);
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(visitor, s.charAt(i), language);
+			gc(language);
 			if (debug) {
 				if (ids.size() > 0) {
 					System.out.println("top: " + (String)language.data);
