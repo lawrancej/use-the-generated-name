@@ -63,7 +63,6 @@ public class GrammarTest {
 		Language parens = new Language() {{
 			derives("S",id("S"),symbol('('),id("S"),symbol(')'));
 			derives("S");
-			debug = true;
 		}};
 		Assert.assertTrue(parens.isNonterminal("S"));
 		Assert.assertFalse(parens.matches("("));
@@ -97,9 +96,7 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
-//			debug = true;
 		}};
-		System.out.println(g);
 		Assert.assertTrue(g.isNonterminal("L"));
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
@@ -143,7 +140,6 @@ public class GrammarTest {
 			derives("Q",symbol('q'));
 			derives("Q");
 		}};
-		System.out.println(page148);
 //		System.out.println(page148.show(page148.first(page148.id("A"))));
 		Assert.assertTrue(page148.nullable());
 	}
@@ -165,6 +161,7 @@ public class GrammarTest {
 			derives("Loop",symbol('['), id("Sequence"), symbol(']'));
 		}};
 		Assert.assertTrue(g.matches("+"));
+		Assert.assertTrue(g.matches("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
 		Assert.assertFalse(g.matches("+["));
 		Assert.assertFalse(g.matches("+[."));
 		Assert.assertFalse(g.matches("+[.+"));
@@ -184,9 +181,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			debug = true;
 		}};
-		System.out.println(regex);
 		Assert.assertTrue(regex.isNonterminal("regex"));
 		Assert.assertTrue(regex.isNonterminal("term"));
 		Assert.assertTrue(regex.isNonterminal("factor"));

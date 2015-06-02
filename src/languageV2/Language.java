@@ -5,17 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import languageV2.traversal.Derivative;
-import languageV2.traversal.FirstSet;
-import languageV2.traversal.GC;
-import languageV2.traversal.Nonterminal;
-import languageV2.traversal.Nullable;
-import languageV2.traversal.Printer;
-import languageV2.traversal.Visitor;
-import languageV2.traversal.WorkQueue;
-import util.TaggedData;
-import util.TaggedDataCache;
-import util.TaggedDataPair;
+import languageV2.traversal.*;
+import util.*;
 
 @SuppressWarnings("unchecked")
 public class Language {
