@@ -8,6 +8,12 @@ import java.util.Map.Entry;
 import languageV2.traversal.*;
 import util.*;
 
+/**
+ * A language specification
+ * 
+ * @author Joseph Lawrance
+ *
+ */
 @SuppressWarnings("unchecked")
 public class Language {
 	/**
@@ -428,15 +434,28 @@ public class Language {
 	public void gc() {
 		gc(definition);
 	}
-
-	public boolean matches(TaggedData<?> language, String s) {
-		boolean result;
-		TaggedDataCache<String> startids = TaggedDataCache.create(new TaggedData<String>(Construct.ID.ordinal(), null));
-		Map<String, TaggedData<?>> startderivations = new HashMap<String, TaggedData<?>>();
+	
+	private TaggedDataCache<String> startids;
+	private Map<String, TaggedData<?>> startderivations;
+	
+	public void backup() {
+		startids = TaggedDataCache.create(new TaggedData<String>(Construct.ID.ordinal(), null));
+		startderivations = new HashMap<String, TaggedData<?>>();
 		for (TaggedData<?> id : ids.values()) {
 			startids.getInstance((String)id.data);
 			startderivations.put((String)id.data, rhs((String)id.data));
 		}
+	}
+	public void restore() {
+		ids.clear();
+		derivations.clear();
+		ids = startids;
+		derivations = startderivations;
+	}
+
+	public boolean matches(TaggedData<?> language, String s) {
+		boolean result;
+		backup();
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
 			gc(language);
@@ -448,15 +467,9 @@ public class Language {
 				System.out.println(s.charAt(i));
 			*/
 		}
-		/*
-			System.out.println(s);
-			System.out.println(toString(language));
-		*/
+		System.out.println(toString(language));
 		result = nullable(language);
-		ids.clear();
-		derivations.clear();
-		ids = startids;
-		derivations = startderivations;
+		restore();
 		return result;
 	}
 	public boolean matches(String s) {

@@ -6,6 +6,17 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class GrammarTest {
+	
+	@Test
+	public void testCox() {
+		Language g = new Language() {{
+			derives("S", id("S"), symbol('+'), id("S"));
+			derives("S", symbol('1'));
+//			derives("S", id("S"), symbol('+'), or(symbol('1'), id("S")));
+		}};
+		Assert.assertTrue(g.matches("1+1+1"));
+//		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+	}
 
 	@Test
 	public void testSymbol() {

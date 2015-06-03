@@ -42,12 +42,15 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public TaggedData<?> id(String id) {
 		String dc = "D" + c + id;
+		// If we're looking it already (i.e., id -> id), return the identifier
 		if (todo.visiting(id)) {
 			return g.id(dc);
 		}
+		// If we haven't seen this yet, examine the rule for the identifier
 		if (!todo.visited(id)) {
 			g.visit(this, id);
 		}
+		// If the rule doesn't derive empty set, return the identifier
 		if (ids.contains(id)) {
 			return g.id(dc);
 		}
