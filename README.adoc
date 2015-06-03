@@ -1,0 +1,18 @@
+= Dictorobitary
+
+Dictorobitary is a parsing library that:
+
+* accepts all context-free grammars
+* operates at high speed
+* uses a EBNF specification both as a DSEL and as a string
+* sips memory
+* chooses the appropriate parsing algorithm based on the grammar
+* is non-blocking
+* is unicode-capable
+* will not leak memory
+* is easy to embed in your code
+* is easy to extend in your code
+
+In short, Dictorobitary is the language computer: a machine that translates any language into our own.
+
+
