@@ -22,6 +22,7 @@ public class Language {
 	public Language() {}
 	/** Symbols match a character. The null symbol matches any character. */
 	public static final TaggedData<Character> any = TaggedData.create(Construct.SYMBOL.ordinal(), null);
+	private static final Construct[] constructs = Construct.values();
 	private TaggedDataCache<Character> symbols = TaggedDataCache.create(any);
 	/**
 	 * Match a character
@@ -110,15 +111,15 @@ public class Language {
 		SetOfLanguages setOfLanguages;
 		// Do the types differ?
 		if (left.tag != right.tag) {
-			if (Construct.values()[left.tag] == Construct.SET) {
+			if (constructs[left.tag] == Construct.SET) {
 				return merge((TaggedData<SetOfLanguages>)left, right);
 			}
-			else if (Construct.values()[right.tag] == Construct.SET) {
+			else if (constructs[right.tag] == Construct.SET) {
 				return merge((TaggedData<SetOfLanguages>)right, left);
 			}
 		}
 		// If they're both sets, merge them together
-		else if (Construct.values()[left.tag] == Construct.SET) {
+		else if (constructs[left.tag] == Construct.SET) {
 			return mergeAll((TaggedData<SetOfLanguages>)left, (TaggedData<SetOfLanguages>)right);
 		}
 		setOfLanguages = new SetOfLanguages();
@@ -163,7 +164,7 @@ public class Language {
 		assert language != null;
 		// Avoid creating a new loop, if possible
 		if (language == empty || language == reject) { return empty; }
-		if (Construct.values()[language.tag] == Construct.LOOP) return language;
+		if (constructs[language.tag] == Construct.LOOP) return language;
 		return stars.getInstance(language);
 	}
 	
@@ -251,7 +252,7 @@ public class Language {
 	 * @return
 	 */
 	public <T> T visit(Visitor<T> visitor, TaggedData<?> language) {
-		switch(Construct.values()[language.tag]) {
+		switch(constructs[language.tag]) {
 		case ID:
 			visitor.getWorkList().todo((String)language.data);
 			return visitor.id((String)language.data);
@@ -309,7 +310,7 @@ public class Language {
 	public <T> T beginTraversal(Visitor<T> visitor) {
 		return beginTraversal(visitor, definition);
 	}
-	public boolean debug = false;
+	public boolean debug = true;
 	public String toString() {
 		return beginTraversal(new Printer(this)).toString();
 	}
@@ -459,15 +460,17 @@ public class Language {
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
 			gc(language);
-			/*
+			if (debug) {
 				if (ids.size() > 0) {
 					System.out.println("top: " + (String)language.data);
 					System.out.println("ids: " + ids.size() + " " + ids.keySet());
 				}
 				System.out.println(s.charAt(i));
-			*/
+			}
 		}
-		System.out.println(toString(language));
+		if (debug) {
+			System.out.println(toString(language));
+		}
 		result = nullable(language);
 		restore();
 		return result;
