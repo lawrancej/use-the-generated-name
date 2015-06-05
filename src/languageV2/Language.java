@@ -16,14 +16,15 @@ import util.*;
  */
 @SuppressWarnings("unchecked")
 public class Language {
+	private static final Construct[] constructs = Construct.values();
 	/**
 	 * Construct a language specification
 	 */
 	public Language() {}
-	/** Symbols match a character. The null symbol matches any character. */
+	
+	/** Match any character, equivalent to regular expression dot. */
 	public static final TaggedData<Character> any = TaggedData.create(Construct.SYMBOL.ordinal(), null);
-	private static final Construct[] constructs = Construct.values();
-	private TaggedDataCache<Character> symbols = TaggedDataCache.create(any);
+	private Map<Character, TaggedData<?>> symbols = new HashMap<Character, TaggedData<?>>();
 	/**
 	 * Match a character
 	 * 
@@ -31,7 +32,10 @@ public class Language {
 	 * @return A language matching character c.
 	 */
 	public TaggedData<?> symbol(char c) {
-		return symbols.getInstance(c);
+		if (!symbols.containsKey(c)) {
+			symbols.put(c, TaggedData.create(Construct.SYMBOL.ordinal(), c));
+		}
+		return symbols.get(c);
 	}
 	
 	/** The null list matches the empty sequence. */
@@ -96,7 +100,10 @@ public class Language {
 	private TaggedData<?> mergeAll(TaggedData<SetOfLanguages> set, TaggedData<SetOfLanguages> set2) {
 		if (set.data.containsAll(set2.data)) {
 			return set;
-		} else {
+		} else if (set2.data.containsAll(set.data)) {
+			return set2;
+		}
+		else {
 			SetOfLanguages s = (SetOfLanguages)set.data.clone();
 			s.addAll(set2.data);
 			return setInstance(s);
@@ -164,54 +171,65 @@ public class Language {
 		return new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), language);
 	}
 	
-	/** Identifiers include terminals and nonterminals. Identifiers enable recursion. */
+	/** Identifiers are nonterminals. Identifiers enable recursion. */
+	private static class Id extends TaggedData<String> {
+		public Id(String data) {
+			super(Construct.ID.ordinal(), data);
+		}
+		private TaggedData<?> rhs;
+	}
 	// Identifier lookup by name
-	private TaggedDataCache<String> ids = TaggedDataCache.create(new TaggedData<String>(Construct.ID.ordinal(), null));
-	// Derivation (rhs) lookup by name
-	private Map<String, TaggedData<?>> derivations = new HashMap<String, TaggedData<?>>();
+	private Map<String, Id> ids = new HashMap<String, Id>();
 	/**
 	 * Reference an identifier (terminal or nonterminal).
 	 * 
 	 * @param s The identifier name.
 	 * @return The identifier.
 	 */
-	public TaggedData<String> id(String s) {
-		return ids.getInstance(s);
+	public Id id(String s) {
+		if (!ids.containsKey(s)) {
+			ids.put(s, new Id(s));
+		}
+		return ids.get(s);
 	}
 	// Get the right hand side
 	private TaggedData<?> rhs(String s) {
-		if (!derivations.containsKey(s)) {
+		// An unused identifier rejects
+		if (!ids.containsKey(s)) {
 			return reject;
 		}
-		return derivations.get(s);
+		Id result = ids.get(s);
+		// An undeclared identifier rejects
+		if (result.rhs == null) {
+			return reject;
+		}
+		return ids.get(s).rhs;
 	}
 	/** The language definition. The root of all traversal. */
 	private TaggedData<?> definition = reject;
 	/**
 	 * Define an identifier: `id -> rhs`
 	 * 
+	 * If the list of languages rejects, then this removes the identifier.
+	 * 
 	 * @param id the identifier
 	 * @param languages the right hand side
 	 * @return the identifier reference
 	 */
 	public TaggedData<?> derives(String id, TaggedData<?>... languages) {
-		TaggedData<?> result;
+		Id result;
 		TaggedData<?> rhs = list(languages);
-		// This identifier should be evicted
+		// If the rhs rejects, remove identifier
 		if (rhs == reject) {
-			derivations.remove(id);
+			ids.remove(id);
 			return reject;
 		}
 		result = id(id);
-		// The  language is undefined, so make this the starting nonterminal
+		// If the language is undefined, make this the starting nonterminal
 		if (definition == reject) {
 			definition = result;
 		}
-//		TaggedData<?> rhs = list(languages);
-//		if (rhs == reject && !ids.containsKey(id)) {
-//			return reject;
-//		}
-		derivations.put(id, or(rhs(id), rhs));
+		result.rhs = or(rhs(id), rhs);
 		return result;
 	}
 	
@@ -219,21 +237,12 @@ public class Language {
 	 * Specify a language.
 	 * 
 	 * For regular expressions, surround the definition with define().
-	 * For grammars, call define() *after* specifying the language.
+	 * For grammars, the first derivation is the starting nonterminal.
 	 * 
 	 * @param language The language
 	 */
 	public void define(TaggedData<?> language) {
 		definition = language;
-	}
-	/**
-	 * Specify a context-free language.
-	 * 
-	 * For grammars, call define() *after* specifying the language.
-	 * @param id The starting identifier (nonterminal)
-	 */
-	public void define(String id) {
-		definition = id(id);
 	}
 	
 	/** Visitors traverse a tree. */
@@ -412,50 +421,38 @@ public class Language {
 	
 	private GC collector = new GC(this);
 	/**
-	 * Garbage collect unreferenced identifiers and derivations.
+	 * Garbage collect unreferenced identifiers (nonterminals).
 	 * @param language the root set language for gc.
 	 */
 	public void gc(TaggedData<?> language) {
 		beginTraversal(collector, language);
 		WorkQueue<String> list = collector.getWorkList();
-		Iterator<Entry<String, TaggedData<String>>> iterator = ids.entrySet().iterator();
+		Iterator<Entry<String, Id>> iterator = ids.entrySet().iterator();
 		while(iterator.hasNext()) {
-			Entry<String, TaggedData<String>> entry = iterator.next();
+			Entry<String, Id> entry = iterator.next();
 			if (!list.visited(entry.getKey())) {
 				iterator.remove();
 			}
 		}
-		Iterator<Entry<String, TaggedData<?>>> it = derivations.entrySet().iterator();
-		while(it.hasNext()) {
-			Entry<String, TaggedData<?>> entry = it.next();
-			if (!list.visited(entry.getKey())) {
-				it.remove();
-			}
-		}
 	}
 	/**
-	 * Garbage collect unreferenced identifiers and derivations.
+	 * Garbage collect unreferenced identifiers (nonterminals).
 	 */
 	public void gc() {
 		gc(definition);
 	}
 	
-	private TaggedDataCache<String> startids;
-	private Map<String, TaggedData<?>> startderivations;
+	private Map<String, Id> startids;
 	
 	public void backup() {
-		startids = TaggedDataCache.create(new TaggedData<String>(Construct.ID.ordinal(), null));
-		startderivations = new HashMap<String, TaggedData<?>>();
-		for (TaggedData<?> id : ids.values()) {
-			startids.getInstance((String)id.data);
-			startderivations.put((String)id.data, rhs((String)id.data));
+		startids = new HashMap<String, Id>();
+		for (Id id : ids.values()) {
+			startids.put((String)id.data, id);
 		}
 	}
 	public void restore() {
 		ids.clear();
-		derivations.clear();
 		ids = startids;
-		derivations = startderivations;
 	}
 
 	public boolean matches(TaggedData<?> language, String s) {
