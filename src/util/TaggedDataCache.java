@@ -19,6 +19,9 @@ public class TaggedDataCache<T> {
 	public static <T> TaggedDataCache<T> create(TaggedData<T> bottom) {
 		return new TaggedDataCache<T>(bottom);
 	}
+	public boolean has(T key) {
+		return instances.containsKey(key);
+	}
 	public TaggedData<T> getInstance(T key) {
 		if (key == null) return bottom;
 		if (!instances.containsKey(key)) {

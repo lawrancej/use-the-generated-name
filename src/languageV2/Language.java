@@ -34,9 +34,8 @@ public class Language {
 		return symbols.getInstance(c);
 	}
 	
-	/** Lists match a sequence. The null list matches the empty sequence. */
+	/** The null list matches the empty sequence. */
 	public static final TaggedData<TaggedDataPair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
-	private TaggedDataCache<TaggedDataPair> lists = TaggedDataCache.create(empty);
 	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
 		// Avoid creating a new list, if possible
 		if (left == reject || right == reject) {
@@ -45,7 +44,7 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		TaggedDataPair pair = new TaggedDataPair(left, right);
-		return lists.getInstance(pair);
+		return new TaggedData<TaggedDataPair>(Construct.LIST.ordinal(), pair);
 	}
 	private TaggedData<?> list(TaggedData<?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -79,10 +78,9 @@ public class Language {
 	
 	/** Sets match one of many possible options. The null set rejects. */
 	public static final TaggedData<SetOfLanguages> reject = TaggedData.create(Construct.SET.ordinal(),null);
-	private TaggedDataCache<SetOfLanguages> ors = TaggedDataCache.create(reject);
 	// Get a set from the cache
 	private TaggedData<?> setInstance(SetOfLanguages s) {
-		return ors.getInstance(s);
+		return new TaggedData<SetOfLanguages>(Construct.SET.ordinal(), s);
 	}
 	// Set union
 	private TaggedData<?> merge(TaggedData<SetOfLanguages> set, TaggedData<?> item) {
@@ -152,8 +150,6 @@ public class Language {
 		return or(language, empty);
 	}
 	
-	/** Loops (Kleene stars) define repetition. */
-	private TaggedDataCache<TaggedData<?>> stars = TaggedDataCache.create(new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), null));
 	/**
 	 * Match a language zero or more times
 	 * 
@@ -165,7 +161,7 @@ public class Language {
 		// Avoid creating a new loop, if possible
 		if (language == empty || language == reject) { return empty; }
 		if (constructs[language.tag] == Construct.LOOP) return language;
-		return stars.getInstance(language);
+		return new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), language);
 	}
 	
 	/** Identifiers include terminals and nonterminals. Identifiers enable recursion. */
@@ -199,7 +195,15 @@ public class Language {
 	 * @return the identifier reference
 	 */
 	public TaggedData<?> derives(String id, TaggedData<?>... languages) {
-		TaggedData<?> result = id(id);
+		TaggedData<?> result;
+		TaggedData<?> rhs = list(languages);
+		// This identifier should be evicted
+		if (rhs == reject) {
+			derivations.remove(id);
+			return reject;
+		}
+		result = id(id);
+		// The  language is undefined, so make this the starting nonterminal
 		if (definition == reject) {
 			definition = result;
 		}
@@ -207,7 +211,7 @@ public class Language {
 //		if (rhs == reject && !ids.containsKey(id)) {
 //			return reject;
 //		}
-		derivations.put(id, or(rhs(id), list(languages)));
+		derivations.put(id, or(rhs(id), rhs));
 		return result;
 	}
 	
@@ -310,7 +314,7 @@ public class Language {
 	public <T> T beginTraversal(Visitor<T> visitor) {
 		return beginTraversal(visitor, definition);
 	}
-	public boolean debug = true;
+	public boolean debug = false;
 	public String toString() {
 		return beginTraversal(new Printer(this)).toString();
 	}
