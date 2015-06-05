@@ -16,14 +16,20 @@ import util.*;
  */
 @SuppressWarnings("unchecked")
 public class Language {
-	private static final Construct[] constructs = Construct.values();
 	/**
 	 * Construct a language specification
 	 */
 	public Language() {}
+	/** The language constructs (set, list, symbol, loop, id) */
+	private static final Construct[] constructs = Construct.values();
 	
 	/** Match any character, equivalent to regular expression dot. */
 	public static final TaggedData<Character> any = TaggedData.create(Construct.SYMBOL.ordinal(), null);
+	/** Match the empty list (empty sequence). */
+	public static final TaggedData<TaggedDataPair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
+	/** Reject everything (the empty set). */
+	public static final TaggedData<SetOfLanguages> reject = TaggedData.create(Construct.SET.ordinal(),null);
+
 	private Map<Character, TaggedData<?>> symbols = new HashMap<Character, TaggedData<?>>();
 	/**
 	 * Match a character
@@ -38,8 +44,6 @@ public class Language {
 		return symbols.get(c);
 	}
 	
-	/** The null list matches the empty sequence. */
-	public static final TaggedData<TaggedDataPair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
 	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
 		// Avoid creating a new list, if possible
 		if (left == reject || right == reject) {
@@ -80,8 +84,6 @@ public class Language {
 		return list(array, 0);
 	}
 	
-	/** Sets match one of many possible options. The null set rejects. */
-	public static final TaggedData<SetOfLanguages> reject = TaggedData.create(Construct.SET.ordinal(),null);
 	// Get a set from the cache
 	private TaggedData<?> setInstance(SetOfLanguages s) {
 		return TaggedData.create(Construct.SET.ordinal(), s);
@@ -181,7 +183,7 @@ public class Language {
 	// Identifier lookup by name
 	private Map<String, Id> ids = new HashMap<String, Id>();
 	/**
-	 * Reference an identifier (terminal or nonterminal).
+	 * Reference an identifier.
 	 * 
 	 * @param s The identifier name.
 	 * @return The identifier.
@@ -337,22 +339,6 @@ public class Language {
 	}
 	public String toString(TaggedData<?> language) {
 		return beginTraversal(new Printer(this), language).toString();
-	}
-	/**
-	 * Is the identifier a nonterminal?
-	 * @param s The identifier label
-	 * @return Whether the identifier is a nonterminal
-	 */
-	public boolean isNonterminal(String s) {
-		return beginTraversal(new Nonterminal(this, s), s);
-	}
-	/**
-	 * Is the identifier a terminal?
-	 * @param s The identifier label
-	 * @return Whether the identifier is a terminal
-	 */
-	public boolean isTerminal(String s) {
-		return !beginTraversal(new Nonterminal(this, s), s);
 	}
 	/**
 	 * Compute the first set for identifier s.
