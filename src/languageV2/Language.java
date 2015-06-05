@@ -48,7 +48,7 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		TaggedDataPair pair = new TaggedDataPair(left, right);
-		return new TaggedData<TaggedDataPair>(Construct.LIST.ordinal(), pair);
+		return TaggedData.create(Construct.LIST.ordinal(), pair);
 	}
 	private TaggedData<?> list(TaggedData<?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -84,7 +84,7 @@ public class Language {
 	public static final TaggedData<SetOfLanguages> reject = TaggedData.create(Construct.SET.ordinal(),null);
 	// Get a set from the cache
 	private TaggedData<?> setInstance(SetOfLanguages s) {
-		return new TaggedData<SetOfLanguages>(Construct.SET.ordinal(), s);
+		return TaggedData.create(Construct.SET.ordinal(), s);
 	}
 	// Set union
 	private TaggedData<?> merge(TaggedData<SetOfLanguages> set, TaggedData<?> item) {
@@ -168,7 +168,7 @@ public class Language {
 		// Avoid creating a new loop, if possible
 		if (language == empty || language == reject) { return empty; }
 		if (constructs[language.tag] == Construct.LOOP) return language;
-		return new TaggedData<TaggedData<?>>(Construct.LOOP.ordinal(), language);
+		return TaggedData.create(Construct.LOOP.ordinal(), language);
 	}
 	
 	/** Identifiers are nonterminals. Identifiers enable recursion. */
