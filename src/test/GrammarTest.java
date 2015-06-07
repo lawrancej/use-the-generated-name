@@ -15,8 +15,8 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("S", id("S"), symbol('+'), id("S"));
 			derives("S", symbol('1'));
+//			debug = true;
 		}};
-//		g.debug = true;
 		if (g.debug) {
 			try {
 				System.in.read();
@@ -24,7 +24,8 @@ public class GrammarTest {
 				e.printStackTrace();
 			}
 		}
-		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertFalse(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
 	}
 
 	@Test
