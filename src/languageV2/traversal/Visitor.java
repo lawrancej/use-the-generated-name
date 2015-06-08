@@ -3,7 +3,6 @@ package languageV2.traversal;
 import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedData;
-import util.TaggedDataPair;
 
 /**
  * Traverse a language specification.

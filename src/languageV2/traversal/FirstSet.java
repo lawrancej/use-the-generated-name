@@ -4,7 +4,6 @@ import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedData;
-import util.TaggedDataPair;
 
 // Compute the first set
 public class FirstSet extends AbstractVisitor<TaggedData<?>> {

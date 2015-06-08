@@ -7,7 +7,6 @@ import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedData;
-import util.TaggedDataPair;
 
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;

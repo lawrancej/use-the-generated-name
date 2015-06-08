@@ -4,7 +4,6 @@ import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedData;
-import util.TaggedDataPair;
 
 /**
  * Is the identifier a nonterminal?

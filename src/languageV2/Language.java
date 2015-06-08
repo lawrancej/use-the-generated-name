@@ -26,7 +26,7 @@ public class Language {
 	/** Match any character, equivalent to regular expression dot. */
 	public static final TaggedData<Character> any = TaggedData.create(Construct.SYMBOL.ordinal(), null);
 	/** Match the empty list (empty sequence). */
-	public static final TaggedData<TaggedDataPair> empty = TaggedData.create(Construct.LIST.ordinal(), null);
+	public static final TaggedData<Node<?>> empty = TaggedData.create(Construct.LIST.ordinal(), null);
 	/** Reject everything (the empty set). */
 	public static final TaggedData<SetOfLanguages> reject = TaggedData.create(Construct.SET.ordinal(),null);
 
@@ -43,7 +43,7 @@ public class Language {
 		}
 		return symbols.get(c);
 	}
-	
+/*	
 	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
 		// Avoid creating a new list, if possible
 		if (left == reject || right == reject) {
@@ -61,6 +61,7 @@ public class Language {
 			return listInstance(nodes[i], list(nodes, i+1));
 		}
 	}
+	*/
 	private TaggedData<?> listInstance(Node<? extends TaggedData<?>> list) {
 		return TaggedData.create(Construct.LIST.ordinal(), list);
 	}
@@ -132,7 +133,7 @@ public class Language {
 		for (int i = 0; i < s.length(); i++) {
 			array[i] = symbol(s.charAt(i));
 		}
-		return list(array, 0);
+		return list(array);
 	}
 	
 	// Get a set from the cache
