@@ -2,6 +2,7 @@ package languageV2.traversal;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
+import util.Node;
 import util.TaggedData;
 import util.TaggedDataPair;
 
@@ -16,11 +17,11 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> loop(TaggedData<?> loop) {
 		return g.visit(this, loop);
 	}
-	public TaggedData<?> list(TaggedDataPair pair) {
-		if (pair == null) return bottom();
-		TaggedData<?> result = g.visit(this, pair.left);
-		if (g.nullable(pair.left)) {
-			result = g.or(result, g.visit(this, pair.right));
+	public TaggedData<?> list(Node<TaggedData<?>> list) {
+		if (list == null) return bottom();
+		TaggedData<?> result = g.visit(this, list.data);
+		if (g.nullable(list.data)) {
+			result = g.or(result, list(list.next));
 		}
 		return result;
 	}

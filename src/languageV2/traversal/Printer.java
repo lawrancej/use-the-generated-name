@@ -2,6 +2,7 @@ package languageV2.traversal;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
+import util.Node;
 import util.TaggedData;
 import util.TaggedDataPair;
 
@@ -20,14 +21,19 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer list(TaggedDataPair list) {
+	public StringBuffer list(Node<TaggedData<?>> list) {
 		if (list == null) {
 			buffer.append("\u03b5");
 		} else {
 			buffer.append('(');
-			g.visit(this, list.left);
-			buffer.append(' ');
-			g.visit(this, list.right);
+			Node<TaggedData<?>> pointer = list;
+			g.visit(this, pointer.data);
+			pointer = pointer.next;
+			while (pointer != null) {
+				buffer.append(' ');
+				g.visit(this, pointer.data);
+				pointer = pointer.next;
+			}
 			buffer.append(')');
 		}
 		return buffer;

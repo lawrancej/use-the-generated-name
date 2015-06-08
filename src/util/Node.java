@@ -1,13 +1,21 @@
 package util;
 
 /**
- * Cycle-tolerant singly-linked list.
+ * Singly-linked list.
  *
  * @param <T>
  */
 public class Node<T> {
 	public T data;
 	public Node<T> next;
+	
+	private Node() {}
+	
+	public static <T> Node<T> create(final T item) {
+		return new Node<T>() {{
+			data = item; next = null;
+		}};
+	}
 	
 	/**
 	 * List cons: add item to the front of the list. O(1)
@@ -29,32 +37,12 @@ public class Node<T> {
 	 */
 	public static <T> Node<T> find(final T item, final Node<T> list) {
 		Node<T> pointer = list;
-		if (pointer == null) {
-			return null;
-		}
-		do {
+		while (pointer != null) {
 			if (list.data == item) {
 				return pointer;
 			}
-			pointer = pointer.next;
-		} while (pointer != null || pointer != list);
-		return null;
-	}
-	
-	/**
-	 * Is the list cyclic? O(n)
-	 * @param list
-	 * @return
-	 */
-	public static <T> boolean cyclic(final Node<T> list) {
-		Node<T> pointer = list;
-		if (pointer == null) {
-			return false;
 		}
-		do {
-			pointer = pointer.next;
-		} while (pointer != null || pointer != list);
-		return pointer == list;
+		return pointer;
 	}
 	
 	/**
@@ -68,24 +56,16 @@ public class Node<T> {
 	}
 	
 	/**
-	 * Removes an item in the list. If cyclic, we must ensure the loop is closed. O(n)
-	 * @param item
+	 * The length of the list
 	 * @param list
-	 * @return
+	 * @return the length
 	 */
-	public static <T> Node<T> remove(final T item, final Node<T> list) {
+	public static <T> int length(final Node<T> list) {
+		int result = 0;
 		Node<T> pointer = list;
-		if (pointer == null) {
-			return null;
+		while (pointer != null) {
+			result++;
 		}
-		do {
-			if (list.data == item) {
-				
-				return pointer;
-			}
-			pointer = pointer.next;
-		} while (pointer != null || pointer != list);
-		return null;
+		return result;
 	}
 }
-

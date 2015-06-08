@@ -5,6 +5,7 @@ import java.util.Set;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
+import util.Node;
 import util.TaggedData;
 import util.TaggedDataPair;
 
@@ -16,9 +17,9 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean symbol(Character c) {
 		return false;
 	}
-	public Boolean list(TaggedDataPair list) {
+	public Boolean list(Node<TaggedData<?>> list) {
 		if (list == null) return true;
-		boolean result = g.visit(this, list.left) && g.visit(this, list.right);
+		boolean result = g.visit(this, list.data) && list(list.next);
 		return result;
 	}
 	public Boolean loop(TaggedData<?> language) {

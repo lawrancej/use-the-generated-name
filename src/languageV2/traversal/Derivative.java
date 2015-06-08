@@ -5,6 +5,7 @@ import java.util.Set;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
+import util.Node;
 import util.TaggedData;
 import util.TaggedDataPair;
 
@@ -20,11 +21,11 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		return bottom();
 	}
-	public TaggedData<?> list(TaggedDataPair list) {
+	public TaggedData<?> list(Node<TaggedData<?>> list) {
 		if (list == null) return bottom();
-		TaggedData<?> result = g.list(g.visit(this, list.left), list.right);
-		if (g.nullable(list.left)) {
-			return g.or(result, g.visit(this, list.right));
+		TaggedData<?> result = g.list(g.visit(this, list.data), list.next);
+		if (g.nullable(list.data)) {
+			return g.or(result, list(list.next));
 		}
 		return result;
 	}

@@ -1,6 +1,7 @@
 package languageV2.traversal;
 
 import languageV2.SetOfLanguages;
+import util.Node;
 import util.TaggedData;
 import util.TaggedDataPair;
 
@@ -25,7 +26,7 @@ public interface Visitor<T> {
 	 * Visit a list of languages `abc...`
 	 * @param list The language list
 	 */
-	T list(TaggedDataPair list);
+	T list(Node<TaggedData<?>> list);
 	/**
 	 * Visit a language loop `a*`
 	 * @param loop The language `a`

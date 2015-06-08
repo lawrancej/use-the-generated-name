@@ -1,5 +1,6 @@
 package languageV2.traversal;
 
+import util.Node;
 import util.TaggedData;
 import util.TaggedDataPair;
 import languageV2.Language;
@@ -12,12 +13,12 @@ public class GC extends AbstractVisitor<Void> {
 	public Void symbol(Character c) {
 		return null;
 	}
-	public Void list(TaggedDataPair list) {
+	public Void list(Node<TaggedData<?>> list) {
 		if (list == null) {
 			return null;
 		}
-		g.visit(this, list.left);
-		g.visit(this, list.right);
+		g.visit(this, list.data);
+		list(list.next);
 		return null;
 	}
 	public Void loop(TaggedData<?> language) {

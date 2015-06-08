@@ -61,14 +61,65 @@ public class Language {
 			return listInstance(nodes[i], list(nodes, i+1));
 		}
 	}
+	private TaggedData<?> listInstance(Node<? extends TaggedData<?>> list) {
+		return TaggedData.create(Construct.LIST.ordinal(), list);
+	}
+	public TaggedData<?> list(TaggedData<?> language, Node<TaggedData<?>> list) {
+		if (language == empty) {
+			return listInstance(list);
+		} else if (language == reject) {
+			return reject;
+		} else {
+			return listInstance(Node.cons(language, list));
+		}
+	}
 	/**
-	 * Match a sequence of languages
-	 * 
-	 * @param nodes A sequence of languages
-	 * @return A language matching the languages in order
+	 * Match a sequence of languages.
+	 *
+	 * @param languages languages to match, in order
+	 * @return A language matching the sequence
 	 */
-	public TaggedData<?> list(TaggedData<?>... nodes) {
-		return list(nodes, 0);
+	public TaggedData<?> list(TaggedData<?>... languages) {
+		// Return the empty list for an empty list
+		if (languages.length == 0) {
+			return empty;
+		}
+		// Don't create a list if we don't need to
+		if (languages.length == 1) {
+			return languages[0];
+		}
+		// If anything rejects, reject
+		for (TaggedData<?> language : languages) {
+			if (language == reject) {
+				return reject;
+			}
+		}
+		Node<? extends TaggedData<?>> node = null;
+		Node<? extends TaggedData<?>> pointer = node;
+		for (TaggedData<?> language : languages) {
+			// Skip the empty language
+			if (language == empty) {
+				continue;
+			// Create a node for the first legit language
+			} else if (node == null) {
+				node = Node.create(language);
+				pointer = node;
+			// Set the next node to the subsequent legit language, and advance
+			} else {
+				pointer.next = Node.create(language);
+				pointer = pointer.next;
+			}
+		}
+		// Guarantee that lists are either empty or at least two elements long
+		if (node == null) {
+			return empty;
+		}
+		else if (node.next == null) {
+			return node.data;
+		}
+		else {
+			return TaggedData.create(Construct.LIST.ordinal(), node);
+		}
 	}
 	/**
 	 * Match String s literally.
@@ -272,7 +323,7 @@ public class Language {
 			visitor.getWorkList().todo((String)language.data);
 			return visitor.id((String)language.data);
 		case LIST:
-			return visitor.list((TaggedDataPair)language.data);
+			return visitor.list((Node<TaggedData<?>>)language.data);
 		case LOOP:
 			return visitor.loop((TaggedData<?>)language.data);
 		case SET:

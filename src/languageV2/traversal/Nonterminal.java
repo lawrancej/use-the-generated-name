@@ -2,6 +2,7 @@ package languageV2.traversal;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
+import util.Node;
 import util.TaggedData;
 import util.TaggedDataPair;
 
@@ -17,9 +18,9 @@ public class Nonterminal extends AbstractVisitor<Boolean> {
 	public Boolean symbol(Character c) {
 		return false;
 	}
-	public Boolean list(TaggedDataPair list) {
+	public Boolean list(Node<TaggedData<?>> list) {
 		if (list == null) return false;
-		return g.visit(this, list.left) || g.visit(this, list.right);
+		return g.visit(this, list.data) || list(list.next);
 	}
 	public Boolean loop(TaggedData<?> language) {
 		return g.visit(this, language);
