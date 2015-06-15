@@ -1,15 +1,11 @@
 package util;
 
-import java.util.Random;
-
 // A treap implementation
 public class Treap<T extends Comparable<T>> {
-	public int priority;
-	public T key;
+	public final int priority;
+	public final T key;
 	public Treap<T> left;
 	public Treap<T> right;
-	
-	private static Random rand = new Random();
 	
 	public static <T extends Comparable<T>> int priority(Treap<T> treap) {
 		if (treap == null) {
@@ -18,8 +14,14 @@ public class Treap<T extends Comparable<T>> {
 		return treap.priority;
 	}
 	
+	private Treap(T key, int priority, Treap<T> left, Treap<T> right) {
+		this.priority = priority;
+		this.key = key;
+		this.left = left;
+		this.right = right;
+	}
 	private Treap(T key, Treap<T> left, Treap<T> right) {
-		this.priority = rand.nextInt();
+		this.priority = this.hashCode();
 		this.key = key;
 		this.left = left;
 		this.right = right;
@@ -27,6 +29,24 @@ public class Treap<T extends Comparable<T>> {
 	
 	public static <T extends Comparable<T>> Treap<T> create(T key) {
 		return new Treap<T>(key, null, null);
+	}
+	
+	public static <T extends Comparable<T>> Treap<T> create(T key, int priority) {
+		return new Treap<T>(key, priority, null, null);
+	}
+	
+	public static <T extends Comparable<T>> boolean in(Treap<T> treap, T key) {
+		if (treap == null) {
+			return false;
+		}
+		int comparison = key.compareTo(treap.key);
+		if (comparison < 0) {
+			return in(treap.left, key);
+		} else if (comparison > 0) {
+			return in(treap.right, key);
+		} else {
+			return true;
+		}
 	}
 	
 	public static <T extends Comparable<T>> Treap<T> insert(T item, Treap<T> treap) {
@@ -98,6 +118,28 @@ public class Treap<T extends Comparable<T>> {
 		result = size(result, treap.right);
 		return result;
 	}
+	
+	/*
+	public static <T extends Comparable<T>> Treap<T> split(Treap<T> less, Treap<T> greater, Treap<T> r, T key) {
+		Treap<T> root;
+		// this is broken, btw, because less and greater are pass by value reference, not by reference
+		if (r == null) {
+			less = greater = null;
+			return null;
+		}
+		root = create(key, r.priority);
+		int comparison = r.key.compareTo(key);
+		if (comparison == 0) {
+			less = r.left;
+			greater = r.right;
+			return root;
+		} else if (comparison > 0) {
+			
+		} else if (comparison < 0) {
+			
+		}
+	}
+	*/
 	
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
