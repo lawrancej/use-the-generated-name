@@ -1,19 +1,25 @@
 package util;
 
+import java.util.Random;
+
 // A treap implementation
 public class Treap<T extends Comparable<T>> {
+	public int priority;
 	public T key;
 	public Treap<T> left;
 	public Treap<T> right;
+	
+	private static Random rand = new Random();
 	
 	public static <T extends Comparable<T>> int priority(Treap<T> treap) {
 		if (treap == null) {
 			return Integer.MIN_VALUE;
 		}
-		return treap.key.hashCode();
+		return treap.priority;
 	}
 	
 	private Treap(T key, Treap<T> left, Treap<T> right) {
+		this.priority = rand.nextInt();
 		this.key = key;
 		this.left = left;
 		this.right = right;

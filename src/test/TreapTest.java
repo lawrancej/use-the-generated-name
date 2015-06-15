@@ -8,11 +8,11 @@ public class TreapTest {
 	
 	@Test
 	public void testInt() {
-		Treap<String> treap = Treap.insert("" + 0, null);
-		for (int i = 1; i < 2525; i++) {
+		Treap<String> treap = null;
+		for (int i = 0; i < 1000000; i++) {
 			treap = Treap.insert("" + i, treap);
 		}
-		System.out.println(treap);
+//		System.out.println(treap);
 		System.out.println(Treap.height(treap));
 		System.out.println(Treap.size(0, treap));
 	}
