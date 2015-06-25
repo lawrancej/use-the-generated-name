@@ -9,10 +9,10 @@ import util.TaggedDataPair;
  * Is the identifier a nonterminal?
  */
 public class Nonterminal extends AbstractVisitor<Boolean> {
-	String label;
+	Language.Id label;
 	public Nonterminal(Language g, String label) {
-		super(g, new WorkList<String>());
-		this.label = label;
+		super(g, new WorkList<Language.Id>());
+		this.label = g.id(label);
 	}
 	public Boolean symbol(Character c) {
 		return false;
@@ -32,10 +32,10 @@ public class Nonterminal extends AbstractVisitor<Boolean> {
 		}
 		return result;
 	}
-	public Boolean id(String id) {
+	public Boolean id(Language.Id id) {
 		return todo.visited(label);
 	}
-	public Boolean rule(String id, TaggedData<?> rhs) {
+	public Boolean rule(Language.Id id, TaggedData<?> rhs) {
 		return g.visit(this, rhs);
 	}
 	public Boolean bottom() {

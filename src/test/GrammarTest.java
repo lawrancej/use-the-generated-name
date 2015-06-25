@@ -15,7 +15,8 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("S", id("S"), symbol('+'), id("S"));
 			derives("S", symbol('1'));
-//			debug = true;
+
+			//debug = true;
 		}};
 		if (g.debug) {
 			try {

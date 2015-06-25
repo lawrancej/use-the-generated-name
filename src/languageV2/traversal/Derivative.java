@@ -12,7 +12,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
 	Set<String> ids = new HashSet<String>();
 	public Derivative(Language g) {
-		super(g, new WorkList<String>());
+		super(g, new WorkList<Language.Id>());
 	}
 	public TaggedData<?> symbol(Character c) {
 		if (c == null || this.c == c) {
@@ -40,7 +40,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		return result;
 	}
-	public TaggedData<?> id(String id) {
+	public TaggedData<?> id(Language.Id id) {
 		String dc = "D" + c + id;
 		// If we're looking it already (i.e., id -> id), return the identifier
 		if (todo.visiting(id)) {
@@ -51,18 +51,18 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 			g.visit(this, id);
 		}
 		// If the rule doesn't derive empty set, return the identifier
-		if (ids.contains(id)) {
+		if (ids.contains(id.data)) {
 			return g.id(dc);
 		}
 		return bottom();
 	}
-	public TaggedData<?> rule(String id, TaggedData<?> rhs) {
+	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
 		String dc = "D" + c + id;
 		TaggedData<?> derivation = g.visit(this,  rhs);
 		if (derivation == bottom()) {
 			return derivation;
 		} else {
-			ids.add(id);
+			ids.add(id.data);
 		}
 		TaggedData<?> result = g.derives(dc, derivation);
 		return result;

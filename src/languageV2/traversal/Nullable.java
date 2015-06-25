@@ -9,9 +9,9 @@ import util.TaggedData;
 import util.TaggedDataPair;
 
 public class Nullable extends AbstractVisitor<Boolean> {
-	Set<String> nulls = new HashSet<String>();
+	Set<Language.Id> nulls = new HashSet<Language.Id>();
 	public Nullable(Language g) {
-		super(g, new WorkList<String>());
+		super(g, new WorkList<Language.Id>());
 	}
 	public Boolean symbol(Character c) {
 		return false;
@@ -33,7 +33,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		}
 		return false;
 	}
-	public Boolean id(String id) {
+	public Boolean id(Language.Id id) {
 		if (todo.visited(id)) {
 			return nulls.contains(id);
 		} else {
@@ -44,7 +44,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 			return result;
 		}
 	}
-	public Boolean rule(String id, TaggedData<?> rhs) {
+	public Boolean rule(Language.Id id, TaggedData<?> rhs) {
 		return g.visit(this, rhs);
 	}
 	public Boolean bottom() {

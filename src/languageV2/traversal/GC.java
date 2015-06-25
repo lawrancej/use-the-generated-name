@@ -7,7 +7,7 @@ import languageV2.SetOfLanguages;
 
 public class GC extends AbstractVisitor<Void> {
 	public GC(Language g) {
-		super(g, new WorkList<String>());
+		super(g, new WorkList<Language.Id>());
 	}
 	public Void symbol(Character c) {
 		return null;
@@ -33,10 +33,10 @@ public class GC extends AbstractVisitor<Void> {
 		}
 		return null;
 	}
-	public Void id(String id) {
+	public Void id(Language.Id id) {
 		return null;
 	}
-	public Void rule(String id, TaggedData<?> rhs) {
+	public Void rule(Language.Id id, TaggedData<?> rhs) {
 		g.visit(this, rhs);
 		return null;
 	}

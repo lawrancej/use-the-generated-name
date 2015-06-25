@@ -172,13 +172,15 @@ public class Language {
 		if (constructs[language.tag] == Construct.LOOP) return language;
 		return TaggedData.create(Construct.LOOP.ordinal(), language);
 	}
-	
 	/** Identifiers are nonterminals. Identifiers enable recursion. */
-	private static class Id extends TaggedData<String> {
-		public Id(String data) {
-			super(Construct.ID.ordinal(), data);
+	public static class Id extends TaggedData<String> {
+		public Id() {
+			super(Construct.ID.ordinal(), null);
 		}
-		private TaggedData<?> rhs;
+		public Id(String label) {
+			super(Construct.ID.ordinal(), label);
+		}
+		private TaggedData<?> rhs = reject;
 	}
 	// Identifier lookup by name
 	private Map<String, Id> ids = new HashMap<String, Id>();
@@ -193,19 +195,6 @@ public class Language {
 			ids.put(s, new Id(s));
 		}
 		return ids.get(s);
-	}
-	// Get the right hand side
-	private TaggedData<?> rhs(String s) {
-		// An unused identifier rejects
-		if (!ids.containsKey(s)) {
-			return reject;
-		}
-		Id result = ids.get(s);
-		// An undeclared identifier rejects
-		if (result.rhs == null) {
-			return reject;
-		}
-		return ids.get(s).rhs;
 	}
 	/** The language definition. The root of all traversal. */
 	private TaggedData<?> definition = reject;
@@ -231,7 +220,7 @@ public class Language {
 		if (definition == reject) {
 			definition = result;
 		}
-		result.rhs = or(rhs(id), rhs);
+		result.rhs = or(result.rhs, rhs);
 		return result;
 	}
 	
@@ -255,9 +244,9 @@ public class Language {
 	 * @param id
 	 * @return
 	 */
-	public <T> T visit(Visitor<T> visitor, String id) {
+	public <T> T visit(Visitor<T> visitor, Id id) {
 		visitor.getWorkList().done(id);
-		return visitor.rule(id, rhs(id));
+		return visitor.rule(id, id.rhs);
 	}
 	/**
 	 * Visit a language.
@@ -269,8 +258,8 @@ public class Language {
 	public <T> T visit(Visitor<T> visitor, TaggedData<?> language) {
 		switch(constructs[language.tag]) {
 		case ID:
-			visitor.getWorkList().todo((String)language.data);
-			return visitor.id((String)language.data);
+			visitor.getWorkList().todo((Id)language);
+			return visitor.id((Id)language);
 		case LIST:
 			return visitor.list((TaggedDataPair)language.data);
 		case LOOP:
@@ -289,16 +278,7 @@ public class Language {
 	 * @param id
 	 */
 	public <T> T beginTraversal(Visitor<T> visitor, String id) {
-		visitor.getWorkList().clear();
-		visitor.getWorkList().todo(id);
-		T accumulator = visitor.bottom();
-		for (String identifier : visitor.getWorkList()) {
-			accumulator = visitor.reduce(accumulator, visit(visitor, identifier));
-			if (visitor.done(accumulator)) {
-				return accumulator;
-			}
-		}
-		return accumulator;
+		return beginTraversal(visitor, id(id));
 	}
 	/**
 	 * Begin traversal of a language
@@ -307,13 +287,21 @@ public class Language {
 	 * @return
 	 */
 	public <T> T beginTraversal(Visitor<T> visitor, TaggedData<?> language) {
+		visitor.getWorkList().clear();
 		// Visit a grammar
 		if (language.tag == Construct.ID.ordinal()) {
-			return beginTraversal(visitor, (String)language.data);
+			visitor.getWorkList().todo((Id)language);
+			T accumulator = visitor.bottom();
+			for (Id identifier : visitor.getWorkList()) {
+				accumulator = visitor.reduce(accumulator, visit(visitor, identifier));
+				if (visitor.done(accumulator)) {
+					return accumulator;
+				}
+			}
+			return accumulator;
 		}
 		// Visit a regex
 		else {
-			visitor.getWorkList().clear();
 			return visit(visitor, language);
 		}
 	}
@@ -412,11 +400,11 @@ public class Language {
 	 */
 	public void gc(TaggedData<?> language) {
 		beginTraversal(collector, language);
-		WorkQueue<String> list = collector.getWorkList();
+		WorkQueue<Id> list = collector.getWorkList();
 		Iterator<Entry<String, Id>> iterator = ids.entrySet().iterator();
 		while(iterator.hasNext()) {
 			Entry<String, Id> entry = iterator.next();
-			if (!list.visited(entry.getKey())) {
+			if (!list.visited(entry.getValue())) {
 				iterator.remove();
 			}
 		}
@@ -451,6 +439,7 @@ public class Language {
 				if (ids.size() > 0) {
 					System.out.println("top: " + (String)language.data);
 					System.out.println("ids: " + ids.size() + " " + ids.keySet());
+					System.out.println(toString(language));
 				}
 				System.out.println(s.charAt(i));
 			}

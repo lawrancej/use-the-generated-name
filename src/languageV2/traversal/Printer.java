@@ -7,7 +7,7 @@ import util.TaggedDataPair;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Language g) {
-		super(g, new WorkList<String>());
+		super(g, new WorkList<Language.Id>());
 	}
 	private StringBuffer buffer = new StringBuffer();
 	public StringBuffer symbol(Character c) {
@@ -27,6 +27,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 			buffer.append('(');
 			g.visit(this, list.left);
 			buffer.append(' ');
+//			buffer.append(list.right.hashCode());
 			g.visit(this, list.right);
 			buffer.append(')');
 		}
@@ -38,6 +39,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		} else {
 			buffer.append('(');
 			boolean flag = false;
+//			buffer.append(set.hashCode());
 			for (TaggedData<?> l : set) {
 				if (flag) {
 					buffer.append('|');
@@ -56,13 +58,13 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		buffer.append(")*");
 		return buffer;
 	}
-	public StringBuffer id(String id) {
+	public StringBuffer id(Language.Id id) {
 		buffer.append('<');
-		buffer.append(id);
+		buffer.append(id.data);
 		buffer.append('>');
 		return buffer;
 	}
-	public StringBuffer rule(String id, TaggedData<?> rhs) {
+	public StringBuffer rule(Language.Id id, TaggedData<?> rhs) {
 		this.id(id);
 		buffer.append(" ::= ");
 		g.visit(this, rhs);

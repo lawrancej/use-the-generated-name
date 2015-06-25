@@ -1,5 +1,6 @@
 package languageV2.traversal;
 
+import languageV2.Language;
 import languageV2.SetOfLanguages;
 import util.TaggedData;
 import util.TaggedDataPair;
@@ -40,18 +41,18 @@ public interface Visitor<T> {
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
 	 */
-	WorkQueue<String> getWorkList();
+	WorkQueue<Language.Id> getWorkList();
 	/**
 	 * Visit an identifier (on the right hand side).
 	 * @param id The identifier label
 	 */
-	T id(String id);
+	T id(Language.Id id);
 	/**
 	 * Visit a rule of the form `id -> rhs`
 	 * @param id The identifier label
 	 * @param rhs The identifier definition
 	 */
-	T rule(String id, TaggedData<?> rhs);
+	T rule(Language.Id id, TaggedData<?> rhs);
 	/**
 	 * The default result.
 	 * 
