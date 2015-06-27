@@ -3,7 +3,6 @@ package test;
 import java.io.IOException;
 
 import languageV2.Language;
-import languageV2.traversal.Nonterminal;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -119,35 +118,10 @@ public class GrammarTest {
 			derives("L",id("L"),symbol('x'));
 			derives("L");
 		}};
-//		Assert.assertTrue(g.isNonterminal("L"));
-		Assert.assertTrue(g.beginTraversal(new Nonterminal(g, "L")));
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
 		Assert.assertFalse(g.matches("L"));
-	}
-	
-	@Test
-	public void testNonterminal() {
-		Language g = new Language() {{
-			derives("S",or(id("A"), id("nope")));
-			derives("A",many(id("S")));
-			derives("nope",any);
-		}};
-		Assert.assertTrue(g.beginTraversal(new Nonterminal(g, "S")));
-		Assert.assertTrue(g.beginTraversal(new Nonterminal(g, "A")));
-		Assert.assertFalse(g.beginTraversal(new Nonterminal(g, "nope")));
-	}
-
-	
-	@Test
-	public void testNonterminal2() {
-		Language g = new Language() {{
-			derives("S",or(many(id("S")), id("nope")));
-			derives("nope",any);
-		}};
-		Assert.assertTrue(g.beginTraversal(new Nonterminal(g, "S")));
-		Assert.assertFalse(g.beginTraversal(new Nonterminal(g, "nope")));
 	}
 	
 	@Test
@@ -205,10 +179,6 @@ public class GrammarTest {
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
 		}};
-		Assert.assertTrue(regex.beginTraversal(new Nonterminal(regex, "regex")));
-		Assert.assertTrue(regex.beginTraversal(new Nonterminal(regex, "term")));
-		Assert.assertTrue(regex.beginTraversal(new Nonterminal(regex, "factor")));
-		Assert.assertTrue(regex.beginTraversal(new Nonterminal(regex, "base")));
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
 		Assert.assertTrue(regex.matches("a|b**"));

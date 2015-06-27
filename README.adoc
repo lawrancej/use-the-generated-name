@@ -8,7 +8,17 @@ Dictorobitary is a parsing library that:
 * sips memory
 * chooses the appropriate parsing algorithm based on the grammar
 * is non-blocking
-* is unicode-capable
+* is a library (drop in to your source folder)
+* all CFGs
+* allows regexes
+* cacheable partial parses
+* easy to embed and extend
+* restartable
+* thread safe
+* reconfigurable
+* context-sensitive allowed
+* compositionality
+* is unicode-capable (or not)
 * will not leak memory
 * is easy to embed in your code
 * is easy to extend in your code
