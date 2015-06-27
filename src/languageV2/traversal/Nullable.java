@@ -11,7 +11,7 @@ import util.TaggedDataPair;
 public class Nullable extends AbstractVisitor<Boolean> {
 	Set<Language.Id> nulls = new HashSet<Language.Id>();
 	public Nullable(Language g) {
-		super(g, new WorkList<Language.Id>());
+		super(g);
 	}
 	public Boolean symbol(Character c) {
 		return false;

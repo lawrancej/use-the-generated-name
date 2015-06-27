@@ -7,7 +7,7 @@ import util.TaggedDataPair;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Language g) {
-		super(g, new WorkList<Language.Id>());
+		super(g);
 	}
 	private StringBuffer buffer = new StringBuffer();
 	public StringBuffer symbol(Character c) {

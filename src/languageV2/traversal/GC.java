@@ -7,7 +7,7 @@ import languageV2.SetOfLanguages;
 
 public class GC extends AbstractVisitor<Void> {
 	public GC(Language g) {
-		super(g, new WorkList<Language.Id>());
+		super(g);
 	}
 	public Void symbol(Character c) {
 		return null;

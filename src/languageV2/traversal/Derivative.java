@@ -10,9 +10,9 @@ import util.TaggedDataPair;
 
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
-	Set<String> ids = new HashSet<String>();
+	Set<Language.Id> ids = new HashSet<Language.Id>();
 	public Derivative(Language g) {
-		super(g, new WorkList<Language.Id>());
+		super(g);
 	}
 	public TaggedData<?> symbol(Character c) {
 		if (c == null || this.c == c) {
@@ -51,7 +51,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 			g.visit(this, id);
 		}
 		// If the rule doesn't derive empty set, return the identifier
-		if (ids.contains(id.data)) {
+		if (ids.contains(id)) {
 			return g.id(dc);
 		}
 		return bottom();
@@ -62,7 +62,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		if (derivation == bottom()) {
 			return derivation;
 		} else {
-			ids.add(id.data);
+			ids.add(id);
 		}
 		TaggedData<?> result = g.derives(dc, derivation);
 		return result;

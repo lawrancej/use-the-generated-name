@@ -8,7 +8,7 @@ import util.TaggedDataPair;
 // Compute the first set
 public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public FirstSet(Language g) {
-		super(g, new WorkList<Language.Id>());
+		super(g);
 	}
 	public TaggedData<?> symbol(Character c) {
 		return g.symbol(c);
