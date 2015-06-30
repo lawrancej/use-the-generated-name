@@ -14,13 +14,13 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Derivative(Language g) {
 		super(g);
 	}
-	public TaggedData<?> symbol(Character c) {
+	public TaggedData<?> symbol(int id, Character c) {
 		if (c == null || this.c == c) {
 			return Language.empty;
 		}
 		return bottom();
 	}
-	public TaggedData<?> list(TaggedDataPair list) {
+	public TaggedData<?> list(int id, TaggedDataPair list) {
 		if (list == null) return bottom();
 		TaggedData<?> result = g.list(g.visit(this, list.left), list.right);
 		if (g.nullable(list.left)) {
@@ -28,11 +28,11 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		return result;
 	}
-	public TaggedData<?> loop(TaggedData<?> language) {
+	public TaggedData<?> loop(int id, TaggedData<?> language) {
 		return g.visit(this, g.list(language, g.many(language)));
 //		return g.list(g.visit(this, language), g.many(language));
 	}
-	public TaggedData<?> set(SetOfLanguages set) {
+	public TaggedData<?> set(int id, SetOfLanguages set) {
 		TaggedData<?> result = bottom();
 		if (set == null) return result;
 		for (TaggedData<?> l : set) {

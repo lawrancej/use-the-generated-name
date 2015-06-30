@@ -11,4 +11,6 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public WorkQueue<Language.Id> getWorkList() {
 		return todo;
 	}
+	public void begin() {}
+	public void end() {}
 }

@@ -10,7 +10,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		super(g);
 	}
 	private StringBuffer buffer = new StringBuffer();
-	public StringBuffer symbol(Character c) {
+	public StringBuffer symbol(int id, Character c) {
 		if (c == null) {
 			buffer.append("<any character>");
 		} else {
@@ -20,7 +20,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer list(TaggedDataPair list) {
+	public StringBuffer list(int id, TaggedDataPair list) {
 		if (list == null) {
 			buffer.append("\u03b5");
 		} else {
@@ -33,7 +33,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer set(SetOfLanguages set) {
+	public StringBuffer set(int id, SetOfLanguages set) {
 		if (set == null) {
 			buffer.append("\u2205");
 		} else {
@@ -52,7 +52,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer loop(TaggedData<?> loop) {
+	public StringBuffer loop(int id, TaggedData<?> loop) {
 		buffer.append('(');
 		g.visit(this,loop);
 		buffer.append(")*");

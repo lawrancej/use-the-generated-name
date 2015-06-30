@@ -9,10 +9,10 @@ public class GC extends AbstractVisitor<Void> {
 	public GC(Language g) {
 		super(g);
 	}
-	public Void symbol(Character c) {
+	public Void symbol(int id, Character c) {
 		return null;
 	}
-	public Void list(TaggedDataPair list) {
+	public Void list(int id, TaggedDataPair list) {
 		if (list == null) {
 			return null;
 		}
@@ -20,11 +20,11 @@ public class GC extends AbstractVisitor<Void> {
 		g.visit(this, list.right);
 		return null;
 	}
-	public Void loop(TaggedData<?> language) {
+	public Void loop(int id, TaggedData<?> language) {
 		g.visit(this, language);
 		return null;
 	}
-	public Void set(SetOfLanguages set) {
+	public Void set(int id, SetOfLanguages set) {
 		if (set == null) {
 			return null;
 		}

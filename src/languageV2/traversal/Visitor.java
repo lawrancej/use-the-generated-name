@@ -19,24 +19,28 @@ import util.TaggedDataPair;
 public interface Visitor<T> {
 	/**
 	 * Visit symbol `c`
+	 * @param id TODO
 	 * @param c Character
 	 */
-	T symbol(Character c);
+	T symbol(int id, Character c);
 	/**
 	 * Visit a list of languages `abc...`
+	 * @param id TODO
 	 * @param list The language list
 	 */
-	T list(TaggedDataPair list);
+	T list(int id, TaggedDataPair list);
 	/**
 	 * Visit a language loop `a*`
+	 * @param id TODO
 	 * @param loop The language `a`
 	 */
-	T loop(TaggedData<?> language);
+	T loop(int id, TaggedData<?> language);
 	/**
 	 * Visit a set of languages `a|b|c|...`
+	 * @param id TODO
 	 * @param set A set of languages
 	 */
-	T set(SetOfLanguages set);
+	T set(int id, SetOfLanguages set);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
@@ -72,4 +76,12 @@ public interface Visitor<T> {
 	 * @return the result
 	 */
 	T reduce(T accumulator, T current);
+	/**
+	 * Pre-traversal method.
+	 */
+	void begin();
+	/**
+	 * Post-traversal method.
+	 */
+	void end();
 }

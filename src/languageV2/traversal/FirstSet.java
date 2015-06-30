@@ -10,13 +10,13 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public FirstSet(Language g) {
 		super(g);
 	}
-	public TaggedData<?> symbol(Character c) {
+	public TaggedData<?> symbol(int id, Character c) {
 		return g.symbol(c);
 	}
-	public TaggedData<?> loop(TaggedData<?> loop) {
+	public TaggedData<?> loop(int id, TaggedData<?> loop) {
 		return g.visit(this, loop);
 	}
-	public TaggedData<?> list(TaggedDataPair pair) {
+	public TaggedData<?> list(int id, TaggedDataPair pair) {
 		if (pair == null) return bottom();
 		TaggedData<?> result = g.visit(this, pair.left);
 		if (g.nullable(pair.left)) {
@@ -24,7 +24,7 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 		}
 		return result;
 	}
-	public TaggedData<?> set(SetOfLanguages set) {
+	public TaggedData<?> set(int id, SetOfLanguages set) {
 		TaggedData<?> result = bottom();
 		if (set == null) return result;
 		for (TaggedData<?> l : set) {
