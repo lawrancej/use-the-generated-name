@@ -409,14 +409,12 @@ public class Language {
 		return derivative(c, definition);
 	}
 	
-	private GC collector = new GC(this);
 	/**
 	 * Garbage collect unreferenced identifiers (nonterminals).
 	 * @param language the root set language for gc.
 	 */
 	public void gc(TaggedData<?> language) {
-		beginTraversal(collector, language);
-		WorkQueue<Id> list = collector.getWorkList();
+		WorkQueue<Id> list = derivative.getWorkList();
 		Iterator<Entry<String, Id>> iterator = ids.entrySet().iterator();
 		while(iterator.hasNext()) {
 			Entry<String, Id> entry = iterator.next();
