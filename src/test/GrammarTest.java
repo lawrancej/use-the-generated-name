@@ -29,6 +29,26 @@ public class GrammarTest {
 	}
 
 	@Test
+	public void testCox2() {
+		Language g = new Language() {{
+			Language.Id s = id();
+			derives(s, s, symbol('+'), s);
+			derives(s, symbol('1'));
+
+			//debug = true;
+		}};
+		if (g.debug) {
+			try {
+				System.in.read();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertFalse(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
+	}
+
+	@Test
 	public void testSymbol() {
 		Language g = new Language() {{
 			define(symbol('s'));

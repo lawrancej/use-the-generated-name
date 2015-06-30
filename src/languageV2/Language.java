@@ -1,9 +1,11 @@
 package languageV2;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import languageV2.traversal.*;
 import util.*;
@@ -195,7 +197,8 @@ public class Language {
 		private TaggedData<?> rhs = reject;
 	}
 	// Identifier lookup by name
-	private Map<String, Id> ids = new HashMap<String, Id>();
+	private Map<String, Id> labels = new HashMap<String, Id>();
+	private Set<Id> ids = new HashSet<Id>();
 	/**
 	 * Reference an identifier.
 	 * 
@@ -203,11 +206,17 @@ public class Language {
 	 * @return The identifier.
 	 */
 	public Id id(String s) {
-		if (!ids.containsKey(s)) {
-			ids.put(s, new Id(s));
+		if (!labels.containsKey(s)) {
+			labels.put(s, new Id(s));
 		}
-		return ids.get(s);
+		return labels.get(s);
 	}
+	public Id id() {
+		Id result = new Id();
+		ids.add(result);
+		return result;
+	}
+	
 	/** The language definition. The root of all traversal. */
 	private TaggedData<?> definition = reject;
 	/**
@@ -220,14 +229,21 @@ public class Language {
 	 * @return the identifier reference
 	 */
 	public TaggedData<?> derives(String id, TaggedData<?>... languages) {
-		Id result;
+		TaggedData<?> result = derives(id(id), languages);
+		if (result == reject) {
+			labels.remove(id);
+		}
+		return result;
+	}
+	
+	public TaggedData<?> derives(Id id, TaggedData<?>... languages) {
+		Id result = id;
 		TaggedData<?> rhs = list(languages);
 		// If the rhs rejects, remove identifier
 		if (rhs == reject) {
 			ids.remove(id);
 			return reject;
 		}
-		result = id(id);
 		// If the language is undefined, make this the starting nonterminal
 		if (definition == reject) {
 			definition = result;
@@ -415,11 +431,13 @@ public class Language {
 	 */
 	public void gc(TaggedData<?> language) {
 		WorkQueue<Id> list = derivative.getWorkList();
-		Iterator<Entry<String, Id>> iterator = ids.entrySet().iterator();
+		Iterator<Entry<String, Id>> iterator = labels.entrySet().iterator();
 		while(iterator.hasNext()) {
 			Entry<String, Id> entry = iterator.next();
-			if (!list.visited(entry.getValue())) {
+			Id id = entry.getValue();
+			if (!list.visited(id)) {
 				iterator.remove();
+				ids.remove(id);
 			}
 		}
 	}
@@ -430,17 +448,22 @@ public class Language {
 		gc(definition);
 	}
 	
-	private Map<String, Id> startids;
+	private Map<String, Id> startids = new HashMap<String, Id>();
+	private Set<Id> startidSet = new HashSet<Id>();
 	
 	public void backup() {
-		startids = new HashMap<String, Id>();
-		for (Id id : ids.values()) {
+		for (Id id : labels.values()) {
 			startids.put((String)id.data, id);
+		}
+		for (Id id : ids) {
+			startidSet.add(id);
 		}
 	}
 	public void restore() {
+		labels.clear();
 		ids.clear();
-		ids = startids;
+		labels = startids;
+		ids = startidSet;
 	}
 
 	public boolean matches(TaggedData<?> language, String s) {
@@ -450,9 +473,9 @@ public class Language {
 			language = derivative(s.charAt(i), language);
 			gc(language);
 			if (debug) {
-				if (ids.size() > 0) {
+				if (labels.size() > 0) {
 					System.out.println("top: " + (String)language.data);
-					System.out.println("ids: " + ids.size() + " " + ids.keySet());
+					System.out.println("ids: " + labels.size() + " " + labels.keySet());
 					System.out.println(toString(language));
 				}
 				System.out.println(s.charAt(i));
