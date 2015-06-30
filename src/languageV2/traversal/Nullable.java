@@ -13,7 +13,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Nullable(Language g) {
 		super(g);
 	}
-	public Boolean symbol(int id, Character c) {
+	public Boolean symbol(TaggedData<Character> c) {
 		return false;
 	}
 	public Boolean list(TaggedData<TaggedDataPair> language) {
@@ -25,7 +25,8 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean loop(TaggedData<TaggedData<?>> language) {
 		return true;
 	}
-	public Boolean set(int id, SetOfLanguages set) {
+	public Boolean set(TaggedData<SetOfLanguages> language) {
+		SetOfLanguages set = language.data;
 		if (set == null) return false;
 		for (TaggedData<?> l : set) {
 			if (g.visit(this, l)) {

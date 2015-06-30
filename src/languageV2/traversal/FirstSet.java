@@ -10,8 +10,8 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public FirstSet(Language g) {
 		super(g);
 	}
-	public TaggedData<?> symbol(int id, Character c) {
-		return g.symbol(c);
+	public TaggedData<?> symbol(TaggedData<Character> c) {
+		return c;
 	}
 	public TaggedData<?> loop(TaggedData<TaggedData<?>> loop) {
 		return g.visit(this, loop.data);
@@ -25,7 +25,8 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 		}
 		return result;
 	}
-	public TaggedData<?> set(int id, SetOfLanguages set) {
+	public TaggedData<?> set(TaggedData<SetOfLanguages> language) {
+		SetOfLanguages set = language.data;
 		TaggedData<?> result = bottom();
 		if (set == null) return result;
 		for (TaggedData<?> l : set) {

@@ -293,9 +293,9 @@ public class Language {
 		case LOOP:
 			return visitor.loop((TaggedData<TaggedData<?>>)language);
 		case SET:
-			return visitor.set(language.hashCode(), (SetOfLanguages)language.data);
+			return visitor.set((TaggedData<SetOfLanguages>)language);
 		case SYMBOL:
-			return visitor.symbol(language.hashCode(), (Character)language.data);
+			return visitor.symbol((TaggedData<Character>)language);
 		default:
 			return null;
 		}

@@ -22,25 +22,22 @@ public interface Visitor<T> {
 	 * @param id TODO
 	 * @param c Character
 	 */
-	T symbol(int id, Character c);
+	T symbol(TaggedData<Character> language);
 	/**
 	 * Visit a list of languages `abc...`
-	 * @param id TODO
 	 * @param list The language list
 	 */
 	T list(TaggedData<TaggedDataPair> list);
 	/**
 	 * Visit a language loop `a*`
-	 * @param id TODO
-	 * @param loop The language `a`
+	 * @param loop The language `a*`
 	 */
 	T loop(TaggedData<TaggedData<?>> language);
 	/**
 	 * Visit a set of languages `a|b|c|...`
-	 * @param id TODO
 	 * @param set A set of languages
 	 */
-	T set(int id, SetOfLanguages set);
+	T set(TaggedData<SetOfLanguages> set);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.

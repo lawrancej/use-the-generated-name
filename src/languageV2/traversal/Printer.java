@@ -10,7 +10,8 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		super(g);
 	}
 	private StringBuffer buffer = new StringBuffer();
-	public StringBuffer symbol(int id, Character c) {
+	public StringBuffer symbol(TaggedData<Character> language) {
+		Character c = language.data;
 		if (c == null) {
 			buffer.append("<any character>");
 		} else {
@@ -34,7 +35,8 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer set(int id, SetOfLanguages set) {
+	public StringBuffer set(TaggedData<SetOfLanguages> language) {
+		SetOfLanguages set = language.data;
 		if (set == null) {
 			buffer.append("\u2205");
 		} else {
