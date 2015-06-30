@@ -15,13 +15,17 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		super(g);
 	}
 	public TaggedData<?> symbol(int id, Character c) {
+		// Dc(c|.) = e
 		if (c == null || this.c == c) {
 			return Language.empty;
 		}
+		// Dc(c') = 0
 		return bottom();
 	}
 	public TaggedData<?> list(int id, TaggedDataPair list) {
+		// Dc(e) = 0
 		if (list == null) return bottom();
+		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
 		TaggedData<?> result = g.list(g.visit(this, list.left), list.right);
 		if (g.nullable(list.left)) {
 			return g.or(result, g.visit(this, list.right));
