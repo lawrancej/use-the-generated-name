@@ -16,12 +16,13 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean symbol(int id, Character c) {
 		return false;
 	}
-	public Boolean list(int id, TaggedDataPair list) {
+	public Boolean list(TaggedData<TaggedDataPair> language) {
+		TaggedDataPair list = language.data;
 		if (list == null) return true;
 		boolean result = g.visit(this, list.left) && g.visit(this, list.right);
 		return result;
 	}
-	public Boolean loop(int id, TaggedData<?> language) {
+	public Boolean loop(TaggedData<TaggedData<?>> language) {
 		return true;
 	}
 	public Boolean set(int id, SetOfLanguages set) {

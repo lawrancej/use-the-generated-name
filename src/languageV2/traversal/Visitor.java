@@ -28,13 +28,13 @@ public interface Visitor<T> {
 	 * @param id TODO
 	 * @param list The language list
 	 */
-	T list(int id, TaggedDataPair list);
+	T list(TaggedData<TaggedDataPair> list);
 	/**
 	 * Visit a language loop `a*`
 	 * @param id TODO
 	 * @param loop The language `a`
 	 */
-	T loop(int id, TaggedData<?> language);
+	T loop(TaggedData<TaggedData<?>> language);
 	/**
 	 * Visit a set of languages `a|b|c|...`
 	 * @param id TODO
@@ -48,13 +48,13 @@ public interface Visitor<T> {
 	WorkQueue<Language.Id> getWorkList();
 	/**
 	 * Visit an identifier (on the right hand side).
-	 * @param id The identifier label
+	 * @param id The identifier
 	 */
 	T id(Language.Id id);
 	/**
 	 * Visit a rule of the form `id -> rhs`
-	 * @param id The identifier label
-	 * @param rhs The identifier definition
+	 * @param id The identifier
+	 * @param rhs The identifier's right hand side
 	 */
 	T rule(Language.Id id, TaggedData<?> rhs);
 	/**

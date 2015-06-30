@@ -289,9 +289,9 @@ public class Language {
 			visitor.getWorkList().todo((Id)language);
 			return visitor.id((Id)language);
 		case LIST:
-			return visitor.list(language.hashCode(), (TaggedDataPair)language.data);
+			return visitor.list((TaggedData<TaggedDataPair>)language);
 		case LOOP:
-			return visitor.loop(language.hashCode(), (TaggedData<?>)language.data);
+			return visitor.loop((TaggedData<TaggedData<?>>)language);
 		case SET:
 			return visitor.set(language.hashCode(), (SetOfLanguages)language.data);
 		case SYMBOL:

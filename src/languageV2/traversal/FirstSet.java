@@ -13,10 +13,11 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> symbol(int id, Character c) {
 		return g.symbol(c);
 	}
-	public TaggedData<?> loop(int id, TaggedData<?> loop) {
-		return g.visit(this, loop);
+	public TaggedData<?> loop(TaggedData<TaggedData<?>> loop) {
+		return g.visit(this, loop.data);
 	}
-	public TaggedData<?> list(int id, TaggedDataPair pair) {
+	public TaggedData<?> list(TaggedData<TaggedDataPair> language) {
+		TaggedDataPair pair = language.data;
 		if (pair == null) return bottom();
 		TaggedData<?> result = g.visit(this, pair.left);
 		if (g.nullable(pair.left)) {

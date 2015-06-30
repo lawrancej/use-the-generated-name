@@ -20,7 +20,8 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer list(int id, TaggedDataPair list) {
+	public StringBuffer list(TaggedData<TaggedDataPair> language) {
+		TaggedDataPair list = language.data;
 		if (list == null) {
 			buffer.append("\u03b5");
 		} else {
@@ -52,7 +53,8 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer loop(int id, TaggedData<?> loop) {
+	public StringBuffer loop(TaggedData<TaggedData<?>> language) {
+		TaggedData<?> loop = language.data;
 		buffer.append('(');
 		g.visit(this,loop);
 		buffer.append(")*");

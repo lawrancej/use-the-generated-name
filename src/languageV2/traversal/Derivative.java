@@ -22,7 +22,8 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		// Dc(c') = 0
 		return bottom();
 	}
-	public TaggedData<?> list(int id, TaggedDataPair list) {
+	public TaggedData<?> list(TaggedData<TaggedDataPair> language) {
+		TaggedDataPair list = language.data;
 		// Dc(e) = 0
 		if (list == null) return bottom();
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
@@ -32,9 +33,10 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		return result;
 	}
-	public TaggedData<?> loop(int id, TaggedData<?> language) {
-		return g.visit(this, g.list(language, g.many(language)));
-//		return g.list(g.visit(this, language), g.many(language));
+	public TaggedData<?> loop(TaggedData<TaggedData<?>> loop) {
+		TaggedData<?> language = loop.data;
+//		return g.visit(this, g.list(language, loop));
+		return g.list(g.visit(this, language), loop);
 	}
 	public TaggedData<?> set(int id, SetOfLanguages set) {
 		TaggedData<?> result = bottom();
