@@ -42,7 +42,9 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> set(TaggedData<SetOfLanguages> language) {
 		SetOfLanguages set = language.data;
 		TaggedData<?> result = bottom();
+		// Dc(0) = 0
 		if (set == null) return result;
+		// Dc(a+b) = Dc(a) + Dc(b)
 		for (TaggedData<?> l : set) {
 			result = g.or(result, g.visit(this, l));
 		}
@@ -82,7 +84,6 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		if (accumulator == bottom()) return current;
 		else return accumulator;
 	}
-	@Override
 	public boolean done(TaggedData<?> accumulator) {
 		return false;
 	}

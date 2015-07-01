@@ -448,6 +448,8 @@ public class Language {
 		gc(definition);
 	}
 	
+	// FIXME: this code will be unnecessary once we switch to using persistent sets (aka treaps)
+	
 	private Map<String, Id> startids = new HashMap<String, Id>();
 	private Set<Id> startidSet = new HashSet<Id>();
 	
@@ -469,20 +471,23 @@ public class Language {
 	public boolean matches(TaggedData<?> language, String s) {
 		boolean result;
 		backup();
+		GraphViz gv = new GraphViz(this);
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
 			gc(language);
 			if (debug) {
 				if (labels.size() > 0) {
-					System.out.println("top: " + (String)language.data);
-					System.out.println("ids: " + labels.size() + " " + labels.keySet());
-					System.out.println(toString(language));
+//					System.out.println("top: " + (String)language.data);
+//					System.out.println("ids: " + labels.size() + " " + labels.keySet());
+//					System.out.println(toString(language));
+					System.out.println(beginTraversal(gv, language));
 				}
-				System.out.println(s.charAt(i));
+//				System.out.println(s.charAt(i));
 			}
 		}
 		if (debug) {
-			System.out.println(toString(language));
+			System.out.println(beginTraversal(gv, language));
+//			System.out.println(toString(language));
 		}
 		result = nullable(language);
 		restore();

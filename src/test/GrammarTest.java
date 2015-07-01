@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class GrammarTest {
 	
-	@Test
+//	@Test
 	public void testCox() {
 		Language g = new Language() {{
 			derives("S", id("S"), symbol('+'), id("S"));
@@ -35,9 +35,9 @@ public class GrammarTest {
 			derives(s, s, symbol('+'), s);
 			derives(s, symbol('1'));
 
-			//debug = true;
+			debug = true;
 		}};
-		if (g.debug) {
+		if (true) {
 			try {
 				System.in.read();
 			} catch (IOException e) {
