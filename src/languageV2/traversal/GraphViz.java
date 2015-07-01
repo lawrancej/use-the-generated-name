@@ -23,9 +23,9 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 			return buffer;
 		}
 		buffer.append(String.format("%s [label=\"Concat\"];\n", language.hashCode()));
-		g.visit(this, list.left);
+		g.accept(this, list.left);
 		buffer.append(String.format("%s -> %s [label=\"First\"];\n", language.hashCode(), list.left.hashCode()));
-		g.visit(this, list.right);
+		g.accept(this, list.right);
 		buffer.append(String.format("%s -> %s [label=\"Second\"];\n", language.hashCode(), list.right.hashCode()));
 		return buffer;
 	}
@@ -42,7 +42,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		buffer.append(String.format("%s [label=\"Alternative\"];\n", language.hashCode()));
 		for (TaggedData<?> l : set) {
-			g.visit(this, l);
+			g.accept(this, l);
 			buffer.append(String.format("%s -> %s;\n", language.hashCode(), l.hashCode()));
 		}
 		return buffer;
@@ -53,7 +53,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer rule(Id id, TaggedData<?> rhs) {
 		buffer.append(String.format("%s [label=\"Recurrence\"];\n", id.hashCode()));
-		g.visit(this, rhs);
+		g.accept(this, rhs);
 		buffer.append(String.format("%s -> %s;\n", id.hashCode(), rhs.hashCode()));
 		return buffer;
 	}

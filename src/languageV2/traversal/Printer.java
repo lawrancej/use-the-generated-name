@@ -27,10 +27,10 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 			buffer.append("\u03b5");
 		} else {
 			buffer.append('(');
-			g.visit(this, list.left);
+			g.accept(this, list.left);
 			buffer.append(' ');
 //			buffer.append(list.right.hashCode());
-			g.visit(this, list.right);
+			g.accept(this, list.right);
 			buffer.append(')');
 		}
 		return buffer;
@@ -49,7 +49,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 				} else {
 					flag = true;
 				}
-				g.visit(this, l);
+				g.accept(this, l);
 			}
 			buffer.append(')');
 		}
@@ -58,7 +58,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	public StringBuffer loop(TaggedData<TaggedData<?>> language) {
 		TaggedData<?> loop = language.data;
 		buffer.append('(');
-		g.visit(this,loop);
+		g.accept(this,loop);
 		buffer.append(")*");
 		return buffer;
 	}
@@ -71,7 +71,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	public StringBuffer rule(Language.Id id, TaggedData<?> rhs) {
 		this.id(id);
 		buffer.append(" ::= ");
-		g.visit(this, rhs);
+		g.accept(this, rhs);
 		buffer.append("\n");
 		return buffer;
 	}

@@ -272,7 +272,7 @@ public class Language {
 	 * @param id
 	 * @return
 	 */
-	public <T> T visit(Visitor<T> visitor, Id id) {
+	public <T> T accept(Visitor<T> visitor, Id id) {
 		visitor.getWorkList().done(id);
 		return visitor.rule(id, id.rhs);
 	}
@@ -283,7 +283,7 @@ public class Language {
 	 * @param language
 	 * @return
 	 */
-	public <T> T visit(Visitor<T> visitor, TaggedData<?> language) {
+	public <T> T accept(Visitor<T> visitor, TaggedData<?> language) {
 		switch(constructs[language.tag]) {
 		case ID:
 			visitor.getWorkList().todo((Id)language);
@@ -323,7 +323,7 @@ public class Language {
 			visitor.getWorkList().todo((Id)language);
 			accumulator = visitor.bottom();
 			for (Id identifier : visitor.getWorkList()) {
-				accumulator = visitor.reduce(accumulator, visit(visitor, identifier));
+				accumulator = visitor.reduce(accumulator, accept(visitor, identifier));
 				if (visitor.done(accumulator)) {
 					visitor.end();
 					return accumulator;
@@ -332,7 +332,7 @@ public class Language {
 		}
 		// Visit a regex
 		else {
-			accumulator = visit(visitor, language);
+			accumulator = accept(visitor, language);
 		}
 		visitor.end();
 		return accumulator;

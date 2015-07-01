@@ -14,14 +14,14 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 		return c;
 	}
 	public TaggedData<?> loop(TaggedData<TaggedData<?>> loop) {
-		return g.visit(this, loop.data);
+		return g.accept(this, loop.data);
 	}
 	public TaggedData<?> list(TaggedData<TaggedDataPair> language) {
 		TaggedDataPair pair = language.data;
 		if (pair == null) return bottom();
-		TaggedData<?> result = g.visit(this, pair.left);
+		TaggedData<?> result = g.accept(this, pair.left);
 		if (g.nullable(pair.left)) {
-			result = g.or(result, g.visit(this, pair.right));
+			result = g.or(result, g.accept(this, pair.right));
 		}
 		return result;
 	}
@@ -30,7 +30,7 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 		TaggedData<?> result = bottom();
 		if (set == null) return result;
 		for (TaggedData<?> l : set) {
-			result = g.or(result, g.visit(this, l));
+			result = g.or(result, g.accept(this, l));
 		}
 		return result;
 	}
@@ -38,7 +38,7 @@ public class FirstSet extends AbstractVisitor<TaggedData<?>> {
 		return bottom();
 	}
 	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
-		return g.visit(this, rhs);
+		return g.accept(this, rhs);
 	}
 	public TaggedData<?> bottom() {
 		return Language.reject;

@@ -28,16 +28,16 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		// Dc(e) = 0
 		if (list == null) return bottom();
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
-		TaggedData<?> result = g.list(g.visit(this, list.left), list.right);
+		TaggedData<?> result = g.list(g.accept(this, list.left), list.right);
 		if (g.nullable(list.left)) {
-			return g.or(result, g.visit(this, list.right));
+			return g.or(result, g.accept(this, list.right));
 		}
 		return result;
 	}
 	public TaggedData<?> loop(TaggedData<TaggedData<?>> loop) {
 		TaggedData<?> language = loop.data;
 //		return g.visit(this, g.list(language, loop));
-		return g.list(g.visit(this, language), loop);
+		return g.list(g.accept(this, language), loop);
 	}
 	public TaggedData<?> set(TaggedData<SetOfLanguages> language) {
 		SetOfLanguages set = language.data;
@@ -46,7 +46,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		if (set == null) return result;
 		// Dc(a+b) = Dc(a) + Dc(b)
 		for (TaggedData<?> l : set) {
-			result = g.or(result, g.visit(this, l));
+			result = g.or(result, g.accept(this, l));
 		}
 		return result;
 	}
@@ -58,7 +58,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		// If we haven't seen this yet, examine the rule for the identifier
 		if (!todo.visited(id)) {
-			g.visit(this, id);
+			g.accept(this, id);
 		}
 		// If the rule doesn't derive empty set, return the identifier
 		if (ids.contains(id)) {
@@ -68,7 +68,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
 		String dc = "D" + c + id;
-		TaggedData<?> derivation = g.visit(this,  rhs);
+		TaggedData<?> derivation = g.accept(this,  rhs);
 		if (derivation == bottom()) {
 			return derivation;
 		} else {

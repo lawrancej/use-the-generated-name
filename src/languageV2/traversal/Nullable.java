@@ -19,7 +19,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean list(TaggedData<TaggedDataPair> language) {
 		TaggedDataPair list = language.data;
 		if (list == null) return true;
-		boolean result = g.visit(this, list.left) && g.visit(this, list.right);
+		boolean result = g.accept(this, list.left) && g.accept(this, list.right);
 		return result;
 	}
 	public Boolean loop(TaggedData<TaggedData<?>> language) {
@@ -29,7 +29,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		SetOfLanguages set = language.data;
 		if (set == null) return false;
 		for (TaggedData<?> l : set) {
-			if (g.visit(this, l)) {
+			if (g.accept(this, l)) {
 				return true;
 			}
 		}
@@ -39,7 +39,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		if (todo.visited(id)) {
 			return nulls.contains(id);
 		} else {
-			boolean result = g.visit(this, id);
+			boolean result = g.accept(this, id);
 			if (result) {
 				nulls.add(id);
 			}
@@ -47,7 +47,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		}
 	}
 	public Boolean rule(Language.Id id, TaggedData<?> rhs) {
-		return g.visit(this, rhs);
+		return g.accept(this, rhs);
 	}
 	public Boolean bottom() {
 		return false;
