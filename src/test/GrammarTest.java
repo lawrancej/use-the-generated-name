@@ -35,7 +35,7 @@ public class GrammarTest {
 			derives(s, s, symbol('+'), s);
 			derives(s, symbol('1'));
 
-			//debug = true;
+			debug = true;
 		}};
 		/*
 			try {

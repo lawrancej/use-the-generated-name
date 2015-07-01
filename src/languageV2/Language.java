@@ -244,6 +244,10 @@ public class Language {
 			ids.remove(id);
 			return reject;
 		}
+		// If the rhs is just an identifier...
+		if (constructs[rhs.tag] == Construct.ID && result.rhs == reject) {
+			return rhs;
+		}
 		// If the language is undefined, make this the starting nonterminal
 		if (definition == reject) {
 			definition = result;
