@@ -69,11 +69,13 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
 		String dc = "D" + c + id;
 		TaggedData<?> derivation = g.accept(this,  rhs);
+		
+		// Don't create a rule that rejects
 		if (derivation == bottom()) {
 			return derivation;
-		} else {
-			ids.add(id);
 		}
+		
+		ids.add(id);
 		TaggedData<?> result = g.derives(dc, derivation);
 		return result;
 	}
