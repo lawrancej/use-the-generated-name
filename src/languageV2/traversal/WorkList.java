@@ -1,4 +1,4 @@
-package languageV2;
+package languageV2.traversal;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,6 +7,7 @@ import java.util.Set;
 class WorkList<T> implements WorkQueue<T> {
 	private Set<T> todo = new HashSet<T>();
 	private Set<T> done = new HashSet<T>();
+	private T current;
 	public void todo(T s) {
 		if (!done.contains(s)) {
 			todo.add(s);
@@ -31,9 +32,16 @@ class WorkList<T> implements WorkQueue<T> {
 		return todo.iterator().hasNext();
 	}
 	public T next() {
-		return todo.iterator().next();
+		current = todo.iterator().next();
+		return current;
 	}
 	public Iterator<T> iterator() {
 		return this;
+	}
+	public Set<T> visited() {
+		return done;
+	}
+	public boolean visiting(T s) {
+		return s == current;
 	}
 }

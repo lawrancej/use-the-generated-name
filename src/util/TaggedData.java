@@ -1,10 +1,12 @@
-package languageV2;
+package util;
 
-public class TaggedData<T> extends Data<T> {
+
+public class TaggedData<T> {
 	public final int tag;
-	public TaggedData(int type, T data) {
-		super(data);
+	public final T data;
+	protected TaggedData(int type, T data) {
 		this.tag = type;
+		this.data = data;
 	}
 	// Handy shortcut for the constructor call
 	public static <T> TaggedData<T> create(int type, T data) {

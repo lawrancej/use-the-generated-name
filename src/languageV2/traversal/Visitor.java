@@ -1,4 +1,9 @@
-package languageV2;
+package languageV2.traversal;
+
+import languageV2.Language;
+import languageV2.SetOfLanguages;
+import util.TaggedData;
+import util.TaggedDataPair;
 
 /**
  * Traverse a language specification.
@@ -14,40 +19,41 @@ package languageV2;
 public interface Visitor<T> {
 	/**
 	 * Visit symbol `c`
+	 * @param id TODO
 	 * @param c Character
 	 */
-	T symbol(Character c);
+	T symbol(TaggedData<Character> language);
 	/**
 	 * Visit a list of languages `abc...`
 	 * @param list The language list
 	 */
-	T list(LanguagePair list);
+	T list(TaggedData<TaggedDataPair> list);
 	/**
 	 * Visit a language loop `a*`
-	 * @param loop The language `a`
+	 * @param loop The language `a*`
 	 */
-	T loop(TaggedData<?> language);
+	T loop(TaggedData<TaggedData<?>> language);
 	/**
 	 * Visit a set of languages `a|b|c|...`
 	 * @param set A set of languages
 	 */
-	T set(SetOfLanguages set);
+	T set(TaggedData<SetOfLanguages> set);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
 	 */
-	WorkQueue<String> getWorkList();
+	WorkQueue<Language.Id> getWorkList();
 	/**
 	 * Visit an identifier (on the right hand side).
-	 * @param id The identifier label
+	 * @param id The identifier
 	 */
-	T id(String id);
+	T id(Language.Id id);
 	/**
 	 * Visit a rule of the form `id -> rhs`
-	 * @param id The identifier label
-	 * @param rhs The identifier definition
+	 * @param id The identifier
+	 * @param rhs The identifier's right hand side
 	 */
-	T rule(String id, TaggedData<?> rhs);
+	T rule(Language.Id id, TaggedData<?> rhs);
 	/**
 	 * The default result.
 	 * 
@@ -67,4 +73,12 @@ public interface Visitor<T> {
 	 * @return the result
 	 */
 	T reduce(T accumulator, T current);
+	/**
+	 * Pre-traversal method.
+	 */
+	void begin();
+	/**
+	 * Post-traversal method.
+	 */
+	void end();
 }
