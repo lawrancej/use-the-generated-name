@@ -52,22 +52,25 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public TaggedData<?> id(Language.Id id) {
 		String dc = "D" + c + id;
-		// If we're looking it already (i.e., id -> id), return the identifier
+		// Handle left-recursion: return DcId if we're visiting Id -> Id
 		if (todo.visiting(id)) {
 			return g.id(dc);
 		}
-		// If we haven't seen this yet, examine the rule for the identifier
+		// Visit rule Id -> rhs, if we haven't already visited it.
 		if (!todo.visited(id)) {
-			g.accept(this, id);
+			return g.accept(this, id);
 		}
-		// If the rule doesn't derive empty set, return the identifier
+		// By this point, we've seen the identifier on the rhs before.
+		// If the identifier derives a non-empty set, return the identifier
 		if (ids.contains(id)) {
 			return g.id(dc);
 		}
+		// Otherwise, return the empty set
 		return bottom();
 	}
 	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
 		String dc = "D" + c + id;
+		// Visit the rhs
 		TaggedData<?> derivation = g.accept(this,  rhs);
 		
 		// Don't create a rule that rejects
@@ -75,6 +78,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 			return derivation;
 		}
 		
+		// Make a note of identifiers that derive non-empty sets
 		ids.add(id);
 		TaggedData<?> result = g.derives(dc, derivation);
 		return result;
