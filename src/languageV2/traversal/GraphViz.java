@@ -13,24 +13,25 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer symbol(TaggedData<Character> language) {
 		Character c = language.data;
-		buffer.append(String.format("%s [label=\"Lit '%c'\"];\n", language.hashCode(), c));
+		buffer.append(String.format("%s [label=\"'%c'\"];\n", language.hashCode(), c));
 		return buffer;
 	}
 	public StringBuffer list(TaggedData<TaggedDataPair> language) {
 		TaggedDataPair list = language.data;
 		if (list == null) {
-			buffer.append(String.format("%s [label=\"Epsilon\"];\n", language.hashCode()));
+			buffer.append(String.format("%s [label=\"&epsilon;\"];\n", language.hashCode()));
 			return buffer;
 		}
-		buffer.append(String.format("%s [label=\"Concat\"];\n", language.hashCode()));
+		buffer.append(String.format("%s [label=\"{List|{<left> L|<right> R}}\"];\n", language.hashCode()));
 		g.accept(this, list.left);
-		buffer.append(String.format("%s -> %s [label=\"First\"];\n", language.hashCode(), list.left.hashCode()));
+		buffer.append(String.format("%s:left -> %s;\n", language.hashCode(), list.left.hashCode()));
 		g.accept(this, list.right);
-		buffer.append(String.format("%s -> %s [label=\"Second\"];\n", language.hashCode(), list.right.hashCode()));
+		buffer.append(String.format("%s:right -> %s;\n", language.hashCode(), list.right.hashCode()));
 		return buffer;
 	}
 	public StringBuffer loop(TaggedData<TaggedData<?>> language) {
 		buffer.append(String.format("%s [label=\"Loop\"];\n", language.hashCode()));
+		g.accept(this, language.data);
 		buffer.append(String.format("%s -> %s;\n", language.hashCode(), language.data.hashCode()));
 		return buffer;
 	}
@@ -40,7 +41,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 			buffer.append(String.format("%s [label=\"Reject\"];\n", language.hashCode()));
 			return buffer;
 		}
-		buffer.append(String.format("%s [label=\"Alternative\"];\n", language.hashCode()));
+		buffer.append(String.format("%s [label=\"Set\"];\n", language.hashCode()));
 		for (TaggedData<?> l : set) {
 			g.accept(this, l);
 			buffer.append(String.format("%s -> %s;\n", language.hashCode(), l.hashCode()));
@@ -48,11 +49,15 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public StringBuffer id(Id id) {
-		buffer.append(String.format("%s [label=\"Recurrence\"];\n", id.hashCode()));
+		if (id.data == null) {
+			buffer.append(String.format("%s [label=\"Id\"];\n", id.hashCode()));
+		} else {
+			buffer.append(String.format("%s [label=\"Id '%s'\"];\n", id.hashCode(), id.data));
+		}
 		return buffer;
 	}
 	public StringBuffer rule(Id id, TaggedData<?> rhs) {
-		buffer.append(String.format("%s [label=\"Recurrence\"];\n", id.hashCode()));
+		this.id(id);
 		g.accept(this, rhs);
 		buffer.append(String.format("%s -> %s;\n", id.hashCode(), rhs.hashCode()));
 		return buffer;
@@ -61,7 +66,6 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public boolean done(StringBuffer accumulator) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	public StringBuffer reduce(StringBuffer accumulator, StringBuffer current) {
@@ -69,10 +73,10 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	}
 	public void begin() {
 		buffer = new StringBuffer();
-		buffer.append("digraph f { ");
+		buffer.append("digraph f { \n");
+		buffer.append("node [shape=record];\n");
 	}
 	public void end() {
 		buffer.append(" }");
 	}
-
 }
