@@ -1,5 +1,8 @@
 package languageV2.traversal;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import util.TaggedData;
 import util.TaggedDataPair;
 import languageV2.Language;
@@ -10,6 +13,14 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	StringBuffer buffer;
 	public GraphViz(Language g) {
 		super(g);
+	}
+	private Set<String> arrows = new HashSet<String>();
+	private void drawArrow(Object from, int to) {
+		String arrow = String.format("%s -> %s;\n", from, to);
+		if (!arrows.contains(arrow)) {
+			arrows.add(arrow);
+			buffer.append(arrow);
+		}
 	}
 	public StringBuffer symbol(TaggedData<Character> language) {
 		Character c = language.data;
@@ -24,15 +35,15 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		buffer.append(String.format("%s [label=\"{List|{<left> L|<right> R}}\"];\n", language.hashCode()));
 		g.accept(this, list.left);
-		buffer.append(String.format("%s:left -> %s;\n", language.hashCode(), list.left.hashCode()));
+		drawArrow(language.hashCode() + ":left", list.left.hashCode());
 		g.accept(this, list.right);
-		buffer.append(String.format("%s:right -> %s;\n", language.hashCode(), list.right.hashCode()));
+		drawArrow(language.hashCode() + ":right", list.right.hashCode());
 		return buffer;
 	}
 	public StringBuffer loop(TaggedData<TaggedData<?>> language) {
 		buffer.append(String.format("%s [label=\"Loop\"];\n", language.hashCode()));
 		g.accept(this, language.data);
-		buffer.append(String.format("%s -> %s;\n", language.hashCode(), language.data.hashCode()));
+		drawArrow(language.hashCode(), language.data.hashCode());
 		return buffer;
 	}
 	public StringBuffer set(TaggedData<SetOfLanguages> language) {
@@ -44,7 +55,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		buffer.append(String.format("%s [label=\"Set\"];\n", language.hashCode()));
 		for (TaggedData<?> l : set) {
 			g.accept(this, l);
-			buffer.append(String.format("%s -> %s;\n", language.hashCode(), l.hashCode()));
+			drawArrow(language.hashCode(), l.hashCode());
 		}
 		return buffer;
 	}
@@ -59,7 +70,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	public StringBuffer rule(Id id, TaggedData<?> rhs) {
 		this.id(id);
 		g.accept(this, rhs);
-		buffer.append(String.format("%s -> %s;\n", id.hashCode(), rhs.hashCode()));
+		drawArrow(id.hashCode(), rhs.hashCode());
 		return buffer;
 	}
 	public StringBuffer bottom() {
