@@ -38,10 +38,14 @@ public class Language {
 	 */
 	public TaggedData<?> symbol(char c) {
 		if (!symbols.containsKey(c)) {
-			symbols.put(c, TaggedData.create(Construct.SYMBOL.ordinal(), c));
+			TaggedData<?> result = TaggedData.create(Construct.SYMBOL.ordinal(), c);
+			symbols.put(c, result);
+			return result;
 		}
 		return symbols.get(c);
 	}
+	
+	private Map<Integer, TaggedData<?>> listCache = new HashMap<Integer, TaggedData<?>>();
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
 	private TaggedData<?> listInstance(TaggedData<?> left, TaggedData <?> right) {
 		// (1) r0 = 0r = 0
@@ -52,8 +56,14 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// (8) r(st) = (rs)t (FIXME: test to ensure list structures are enforced)
-		TaggedDataPair pair = new TaggedDataPair(left, right);
-		return TaggedData.create(Construct.LIST.ordinal(), pair);
+		// FIXME: this is fast, but a bit dodgy
+		int key = left.hashCode() ^ right.hashCode();
+		if (!listCache.containsKey(key)) {
+			TaggedData<?> result = TaggedData.create(Construct.LIST.ordinal(), new TaggedDataPair(left, right));
+			listCache.put(key, result);
+			return result;
+		}
+		return listCache.get(key);
 	}
 	private TaggedData<?> list(TaggedData<?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -85,6 +95,7 @@ public class Language {
 		return list(array, 0);
 	}
 	
+	// FIXME: use a treap, and sort items by memory address
 	// Get a set from the cache
 	private TaggedData<?> setInstance(SetOfLanguages s) {
 		return TaggedData.create(Construct.SET.ordinal(), s);
