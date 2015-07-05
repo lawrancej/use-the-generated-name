@@ -14,7 +14,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	public GraphViz(Language g) {
 		super(g);
 	}
-	private Set<String> arrows = new HashSet<String>();
+	private Set<String> arrows;
 	private void drawArrow(Object from, int to) {
 		String arrow = String.format("%s -> %s;\n", from, to);
 		if (!arrows.contains(arrow)) {
@@ -83,6 +83,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public void begin() {
+		arrows = new HashSet<String>();
 		buffer = new StringBuffer();
 		buffer.append("digraph f { \n");
 		buffer.append("node [shape=record];\n");
