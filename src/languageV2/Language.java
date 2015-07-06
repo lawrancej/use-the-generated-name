@@ -44,6 +44,13 @@ public class Language {
 		}
 		return symbols.get(c);
 	}
+	public TaggedData<?> range(char from, char to) {
+		TaggedData<?>[] symbols = new TaggedData<?>[to - from];
+		for (char i = from; i < to; i++) {
+			symbols[i-from] = symbol(i);
+		}
+		return or(symbols, 0);
+	}
 	
 	private Map<Integer, TaggedData<?>> listCache = new HashMap<Integer, TaggedData<?>>();
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
@@ -182,8 +189,8 @@ public class Language {
 	 * @param language The language
 	 * @return A language that matches the input language zero or more times
 	 */
-	public TaggedData<?> many(TaggedData<?> language) {
-		assert language != null;
+	public TaggedData<?> many(TaggedData<?>... nodes) {
+		TaggedData<?> language = list(nodes);
 		// Avoid creating a new loop, if possible
 		// (9) 0* = e
 		// (10) e* = e
@@ -280,21 +287,20 @@ public class Language {
 		definition = language;
 	}
 	
-	/** Visitors traverse a tree. */
 	/**
-	 * Visit a rule of the form id ::= rhs.
-	 * Use this method during traversal.
+	 * Accept visitor into a rule of the form id ::= rhs.
+	 * 
 	 * @param visitor
 	 * @param id
 	 * @return
 	 */
-	public <T> T accept(Visitor<T> visitor, Id id) {
+	public <T> T acceptRule(Visitor<T> visitor, Id id) {
 		visitor.getWorkList().done(id);
 		return visitor.rule(id, id.rhs);
 	}
 	/**
-	 * Visit a language.
-	 * Use this method during traversal.
+	 * Accept visitor into a language.
+	 * 
 	 * @param visitor
 	 * @param language
 	 * @return
@@ -339,7 +345,7 @@ public class Language {
 			visitor.getWorkList().todo((Id)language);
 			accumulator = visitor.bottom();
 			for (Id identifier : visitor.getWorkList()) {
-				accumulator = visitor.reduce(accumulator, accept(visitor, identifier));
+				accumulator = visitor.reduce(accumulator, acceptRule(visitor, identifier));
 				if (visitor.done(accumulator)) {
 					visitor.end();
 					return accumulator;

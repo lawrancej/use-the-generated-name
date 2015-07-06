@@ -3,11 +3,75 @@ package test;
 import java.io.IOException;
 
 import languageV2.Language;
+import languageV2.traversal.GraphViz;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class GrammarTest {
+	
+	@Test
+	public void mathExpression() {
+		Language g = new Language() {{
+			Id expression = id("expression");
+			Id term = id("term");
+			Id factor = id("factor");
+			Id digit = id("digit");
+			Id digits = id("digits");
+			derives("expression", term, many(or(symbol('+'), symbol('-')), term));
+			derives("term", factor, many(or(symbol('*'), symbol('/')), factor));
+			derives("factor", or(digits, list(symbol('('), expression, symbol(')'))));
+			derives("digit", range('0', '9'));
+			derives("digits", digit, many(digit));
+		}};
+		GraphViz gv = new GraphViz(g);
+		System.out.println(g.beginTraversal(gv));
+	}
+	
+	@Test
+	public void testGrammar() {
+		Language g = new Language() {{
+			derives("syntax", id("production"), id("syntax"));
+			derives("syntax", empty);
+			derives("production", id("identifier"), symbol('='), id("expression"), symbol('.'));
+			derives("expression", id("term"));
+			derives("expression", id("expression"), symbol('|'), id("term"));
+			derives("term", id("factor"));
+			derives("term", id("term"), id("factor"));
+			derives("factor", or(id("identifier"), id("string")));
+			derives("identifier", id("letter"));
+			derives("identifier", id("identifier"), id("letter"));
+			derives("identifier", id("identifier"), id("digit"));
+			derives("string", id("stringhead"), symbol('"'));
+			derives("stringhead", symbol('"'));
+			derives("stringhead", id("stringhead"), any);
+			derives("digit", range('0', '9'));
+			derives("letter", range('A','Z'));
+			derives("letter", range('a','z'));
+		}};
+		
+	}
+	
+	@Test
+	public void testEBNF() {
+		Language g = new Language() {{
+			Id expression = id("expression");
+			derives("syntax", many(id("production")));
+			derives("production", id("identifier"), symbol('='), expression, symbol('.'));
+			derives("expression", id("term"), many(symbol('|'), id("term")));
+			derives("term", id("factor"), many(id("factor")));
+			derives("factor", or(id("identifier"),
+					id("string"),
+					list(symbol('('), expression, symbol(')')),
+					list(symbol('['), expression, symbol(']')),
+					list(symbol('{'), expression, symbol('}'))));
+			derives("identifier", id("letter"), many(or(id("letter"), id("digit"))));
+			derives("string", symbol('"'), many(id("character")), symbol('"'));
+			derives("letter", range('A', 'Z'));
+			derives("letter", range('a', 'z'));
+			derives("digit", range('0', '9'));
+		}};
+	}
 	
 	@Test
 	public void testCox() {
@@ -137,6 +201,7 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
+			debug = true;
 		}};
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
@@ -176,6 +241,7 @@ public class GrammarTest {
 			));
 			// Loop -> '[' Sequence ']'
 			derives("Loop",symbol('['), id("Sequence"), symbol(']'));
+			// debug = true;
 		}};
 		Assert.assertTrue(g.matches("+"));
 		Assert.assertTrue(g.matches("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
@@ -198,7 +264,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			debug = true;
+			// debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));

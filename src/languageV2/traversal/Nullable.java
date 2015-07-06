@@ -39,7 +39,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		if (todo.visited(id)) {
 			return nulls.contains(id);
 		} else {
-			boolean result = g.accept(this, id);
+			boolean result = g.acceptRule(this, id);
 			if (result) {
 				nulls.add(id);
 			}
