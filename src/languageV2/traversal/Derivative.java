@@ -10,7 +10,6 @@ import util.TaggedDataPair;
 
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
-	// We don't reinitialize ids during begin() because this class is initialized once per language.
 	Set<Language.Id> ids = new HashSet<Language.Id>();
 	public Derivative(Language g) {
 		super(g);
@@ -93,5 +92,8 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	}
 	public boolean done(TaggedData<?> accumulator) {
 		return false;
+	}
+	public void begin() {
+		ids.clear();
 	}
 }
