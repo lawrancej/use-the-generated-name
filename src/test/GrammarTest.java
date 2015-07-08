@@ -5,8 +5,11 @@ import java.io.IOException;
 import languageV2.Language;
 import languageV2.traversal.GraphViz;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+
+import util.Node;
 
 public class GrammarTest {
 	
@@ -18,14 +21,14 @@ public class GrammarTest {
 			Id factor = id("factor");
 			Id digit = id("digit");
 			Id digits = id("digits");
-			derives("expression", term, many(or(symbol('+'), symbol('-')), term));
-			derives("term", factor, many(or(symbol('*'), symbol('/')), factor));
-			derives("factor", or(digits, list(symbol('('), expression, symbol(')'))));
-			derives("digit", range('0', '9'));
-			derives("digits", digit, many(digit));
+			derives(expression, term, many(or(symbol('+'), symbol('-')), term));
+			derives(term, factor, many(or(symbol('*'), symbol('/')), factor));
+			derives(factor, or(digits, list(symbol('('), expression, symbol(')'))));
+			derives(digit, range('0', '9'));
+			derives(digits, digit, many(digit));
 		}};
-		GraphViz gv = new GraphViz(g);
-		System.out.println(g.beginTraversal(gv));
+		// GraphViz gv = new GraphViz(g);
+		// System.out.println(g.beginTraversal(gv));
 	}
 	
 	@Test
@@ -79,15 +82,15 @@ public class GrammarTest {
 			derives("S", id("S"), symbol('+'), id("S"));
 			derives("S", symbol('1'));
 
-			//debug = true;
+			// debug = true;
 		}};
-		if (g.debug) {
+		/*
 			try {
 				System.in.read();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
+		*/
 		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertFalse(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
 	}
@@ -201,7 +204,7 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
-			debug = true;
+			// debug = true;
 		}};
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
@@ -264,11 +267,19 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			// debug = true;
+			//debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
 		Assert.assertTrue(regex.matches("a|b**"));
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
+	}
+	
+//	@After
+	public void summary() {
+		// 1817 non id
+		// 1238 id
+		// 3055 total
+		System.out.println(Node.allocations);
 	}
 }

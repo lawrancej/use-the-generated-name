@@ -101,16 +101,24 @@ public class Language {
 		}
 		return list(array, 0);
 	}
+	private Map<Integer, Node<?>> setCache = new HashMap<Integer, Node<?>>();
+
 	private Node<?> orInstance(Node<?> left, Node <?> right) {
 		// (3) r+0 = 0+r = r
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
 		// (4) r+r = r
 		if (left == right) { return left; }
-		// (5) r+s = s+r (FIXME: need to sort regexes to ensure canonical order)
+		// (5) r+s = s+r (No need to sort regexes to ensure canonical order)
 		// (6) r(s+t) = rs+rt (FIXME: factor out common prefixes)
 		// (7) (r+s)t = rt+st (FIXME: factor out common suffixes)
-		return Node.create(Construct.SET.ordinal(), new TaggedDataPair(left, right));
+		int key = left.hashCode() ^ right.hashCode();
+		if (!setCache.containsKey(key)) {
+			Node<?> result = Node.create(Construct.SET.ordinal(), new TaggedDataPair(left, right));
+			setCache.put(key, result);
+			return result;
+		}
+		return setCache.get(key);
 	}
 	private Node<?> or(Node<?>[] nodes, int i) {
 		if (i >= nodes.length) {
