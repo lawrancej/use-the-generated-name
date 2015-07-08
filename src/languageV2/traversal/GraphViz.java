@@ -55,7 +55,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		g.accept(this, set.left);
 		drawArrow(language.hashCode(), set.left.hashCode());
 		g.accept(this, set.right);
-		drawArrow(language.hashCode(), set.left.hashCode());
+		drawArrow(language.hashCode(), set.right.hashCode());
 		return buffer;
 	}
 	public StringBuffer id(Id id) {
