@@ -1,7 +1,6 @@
 package languageV2.traversal;
 
 import languageV2.Language;
-import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedDataPair;
 
@@ -25,14 +24,10 @@ public class FirstSet extends AbstractVisitor<Node<?>> {
 		}
 		return result;
 	}
-	public Node<?> set(Node<SetOfLanguages> language) {
-		SetOfLanguages set = language.data;
-		Node<?> result = bottom();
-		if (set == null) return result;
-		for (Node<?> l : set) {
-			result = g.or(result, g.accept(this, l));
-		}
-		return result;
+	public Node<?> set(Node<TaggedDataPair> language) {
+		TaggedDataPair set = language.data;
+		if (set == null) return bottom();
+		return g.or(g.accept(this, set.left), g.accept(this, set.right));
 	}
 	public Node<?> id(Language.Id id) {
 		return bottom();

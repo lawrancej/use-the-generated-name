@@ -1,7 +1,6 @@
 package languageV2.traversal;
 
 import languageV2.Language;
-import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedDataPair;
 
@@ -34,21 +33,15 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer set(Node<SetOfLanguages> language) {
-		SetOfLanguages set = language.data;
+	public StringBuffer set(Node<TaggedDataPair> language) {
+		TaggedDataPair set = language.data;
 		if (set == null) {
 			buffer.append("\u2205");
 		} else {
 			buffer.append('(');
-			boolean flag = false;
-			for (Node<?> l : set) {
-				if (flag) {
-					buffer.append('|');
-				} else {
-					flag = true;
-				}
-				g.accept(this, l);
-			}
+			g.accept(this, set.left);
+			buffer.append('|');
+			g.accept(this, set.right);
 			buffer.append(')');
 		}
 		return buffer;

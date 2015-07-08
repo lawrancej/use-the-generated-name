@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import languageV2.Language;
-import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedDataPair;
 
@@ -25,15 +24,10 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean loop(Node<Node<?>> language) {
 		return true;
 	}
-	public Boolean set(Node<SetOfLanguages> language) {
-		SetOfLanguages set = language.data;
+	public Boolean set(Node<TaggedDataPair> language) {
+		TaggedDataPair set = language.data;
 		if (set == null) return false;
-		for (Node<?> l : set) {
-			if (g.accept(this, l)) {
-				return true;
-			}
-		}
-		return false;
+		return g.accept(this, set.left) || g.accept(this, set.right);
 	}
 	public Boolean id(Language.Id id) {
 		if (todo.visited(id)) {

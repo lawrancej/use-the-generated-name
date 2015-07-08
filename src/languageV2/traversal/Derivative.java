@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import languageV2.Language;
-import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedDataPair;
 
@@ -39,16 +38,12 @@ public class Derivative extends AbstractVisitor<Node<?>> {
 //		return g.visit(this, g.list(language, loop));
 		return g.list(g.accept(this, language), loop);
 	}
-	public Node<?> set(Node<SetOfLanguages> language) {
-		SetOfLanguages set = language.data;
-		Node<?> result = bottom();
+	public Node<?> set(Node<TaggedDataPair> language) {
+		TaggedDataPair set = language.data;
 		// Dc(0) = 0
-		if (set == null) return result;
+		if (set == null) return bottom();
 		// Dc(a+b) = Dc(a) + Dc(b)
-		for (Node<?> l : set) {
-			result = g.or(result, g.accept(this, l));
-		}
-		return result;
+		return g.or(g.accept(this, set.left), g.accept(this, set.right));
 	}
 	private Language.Id getReplacement(Language.Id id) {
 		if (!ids.containsKey(id)) {

@@ -27,7 +27,7 @@ public class Language {
 	/** Match the empty list (empty sequence). */
 	public static final Node<TaggedDataPair> empty = Node.create(Construct.LIST.ordinal(), null);
 	/** Reject everything (the empty set). */
-	public static final Node<SetOfLanguages> reject = Node.create(Construct.SET.ordinal(),null);
+	public static final Node<TaggedDataPair> reject = Node.create(Construct.SET.ordinal(),null);
 
 	private Map<Character, Node<?>> symbols = new HashMap<Character, Node<?>>();
 	/**
@@ -101,35 +101,6 @@ public class Language {
 		}
 		return list(array, 0);
 	}
-	
-	// FIXME: use a treap, and sort items by memory address
-	// Get a set from the cache
-	private Node<?> setInstance(SetOfLanguages s) {
-		return Node.create(Construct.SET.ordinal(), s);
-	}
-	// Set union
-	private Node<?> merge(Node<SetOfLanguages> set, Node<?> item) {
-		if (set.data.contains(item)) {
-			return set;
-		} else {
-			SetOfLanguages s = (SetOfLanguages)set.data.clone();
-			s.add(item);
-			return setInstance(s);
-		}
-	}
-	// Set union
-	private Node<?> mergeAll(Node<SetOfLanguages> set, Node<SetOfLanguages> set2) {
-		if (set.data.containsAll(set2.data)) {
-			return set;
-		} else if (set2.data.containsAll(set.data)) {
-			return set2;
-		}
-		else {
-			SetOfLanguages s = (SetOfLanguages)set.data.clone();
-			s.addAll(set2.data);
-			return setInstance(s);
-		}
-	}
 	private Node<?> orInstance(Node<?> left, Node <?> right) {
 		// (3) r+0 = 0+r = r
 		if (left == reject) { return right; }
@@ -139,24 +110,7 @@ public class Language {
 		// (5) r+s = s+r (FIXME: need to sort regexes to ensure canonical order)
 		// (6) r(s+t) = rs+rt (FIXME: factor out common prefixes)
 		// (7) (r+s)t = rt+st (FIXME: factor out common suffixes)
-		SetOfLanguages setOfLanguages;
-		// Do the types differ?
-		if (left.tag != right.tag) {
-			if (constructs[left.tag] == Construct.SET) {
-				return merge((Node<SetOfLanguages>)left, right);
-			}
-			else if (constructs[right.tag] == Construct.SET) {
-				return merge((Node<SetOfLanguages>)right, left);
-			}
-		}
-		// If they're both sets, merge them together
-		else if (constructs[left.tag] == Construct.SET) {
-			return mergeAll((Node<SetOfLanguages>)left, (Node<SetOfLanguages>)right);
-		}
-		setOfLanguages = new SetOfLanguages();
-		setOfLanguages.add(left);
-		setOfLanguages.add(right);
-		return setInstance(setOfLanguages);
+		return Node.create(Construct.SET.ordinal(), new TaggedDataPair(left, right));
 	}
 	private Node<?> or(Node<?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -315,7 +269,7 @@ public class Language {
 		case LOOP:
 			return visitor.loop((Node<Node<?>>)language);
 		case SET:
-			return visitor.set((Node<SetOfLanguages>)language);
+			return visitor.set((Node<TaggedDataPair>)language);
 		case SYMBOL:
 			return visitor.symbol((Node<Character>)language);
 		default:

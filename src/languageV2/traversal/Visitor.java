@@ -1,7 +1,6 @@
 package languageV2.traversal;
 
 import languageV2.Language;
-import languageV2.SetOfLanguages;
 import util.Node;
 import util.TaggedDataPair;
 
@@ -37,7 +36,7 @@ public interface Visitor<T> {
 	 * Visit a set of languages `a|b|c|...`
 	 * @param set A set of languages
 	 */
-	T set(Node<SetOfLanguages> set);
+	T set(Node<TaggedDataPair> set);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.

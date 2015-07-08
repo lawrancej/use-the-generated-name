@@ -7,7 +7,6 @@ import util.Node;
 import util.TaggedDataPair;
 import languageV2.Language;
 import languageV2.Language.Id;
-import languageV2.SetOfLanguages;
 
 public class GraphViz extends AbstractVisitor<StringBuffer> {
 	StringBuffer buffer;
@@ -46,17 +45,17 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		drawArrow(language.hashCode(), language.data.hashCode());
 		return buffer;
 	}
-	public StringBuffer set(Node<SetOfLanguages> language) {
-		SetOfLanguages set = language.data;
+	public StringBuffer set(Node<TaggedDataPair> language) {
+		TaggedDataPair set = language.data;
 		if (set == null) {
 			buffer.append(String.format("%s [label=\"Reject\"];\n", language.hashCode()));
 			return buffer;
 		}
 		buffer.append(String.format("%s [label=\"Set\"];\n", language.hashCode()));
-		for (Node<?> l : set) {
-			g.accept(this, l);
-			drawArrow(language.hashCode(), l.hashCode());
-		}
+		g.accept(this, set.left);
+		drawArrow(language.hashCode(), set.left.hashCode());
+		g.accept(this, set.right);
+		drawArrow(language.hashCode(), set.left.hashCode());
 		return buffer;
 	}
 	public StringBuffer id(Id id) {
