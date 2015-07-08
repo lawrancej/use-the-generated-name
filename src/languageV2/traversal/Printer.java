@@ -29,7 +29,6 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 			buffer.append('(');
 			g.accept(this, list.left);
 			buffer.append(' ');
-//			buffer.append(list.right.hashCode());
 			g.accept(this, list.right);
 			buffer.append(')');
 		}
@@ -42,7 +41,6 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		} else {
 			buffer.append('(');
 			boolean flag = false;
-//			buffer.append(set.hashCode());
 			for (TaggedData<?> l : set) {
 				if (flag) {
 					buffer.append('|');
@@ -64,7 +62,11 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer id(Language.Id id) {
 		buffer.append('<');
-		buffer.append(id.data);
+		if (id.data == null) {
+			buffer.append(id.hashCode());
+		} else {
+			buffer.append(id.data);
+		}
 		buffer.append('>');
 		return buffer;
 	}
