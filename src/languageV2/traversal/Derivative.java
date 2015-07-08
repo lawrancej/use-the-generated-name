@@ -1,7 +1,7 @@
 package languageV2.traversal;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
@@ -10,7 +10,7 @@ import util.TaggedDataPair;
 
 public class Derivative extends AbstractVisitor<TaggedData<?>> {
 	public Character c;
-	Set<Language.Id> ids = new HashSet<Language.Id>();
+	Map<Language.Id, Language.Id> ids = new HashMap<Language.Id, Language.Id>();
 	public Derivative(Language g) {
 		super(g);
 	}
@@ -50,11 +50,20 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		return result;
 	}
+	private Language.Id getReplacement(Language.Id id) {
+		if (!ids.containsKey(id)) {
+			Language.Id replacement = g.id();
+			ids.put(id, replacement);
+			return replacement;
+		}
+		else {
+			return ids.get(id);
+		}
+	}
 	public TaggedData<?> id(Language.Id id) {
-		String dc = "D" + c + id;
 		// Handle left-recursion: return DcId if we're visiting Id -> Id
 		if (todo.visiting(id)) {
-			return g.id(dc);
+			return getReplacement(id);
 		}
 		// Visit rule Id -> rhs, if we haven't already visited it.
 		if (!todo.visited(id)) {
@@ -62,14 +71,13 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		// By this point, we've seen the identifier on the rhs before.
 		// If the identifier derives a non-empty set, return the identifier
-		if (ids.contains(id)) {
-			return g.id(dc);
+		if (ids.containsKey(id)) {
+			return ids.get(id);
 		}
 		// Otherwise, return the empty set
 		return bottom();
 	}
 	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
-		String dc = "D" + c + id;
 		// Visit the rhs
 		TaggedData<?> derivation = g.accept(this,  rhs);
 		
@@ -79,8 +87,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		
 		// Make a note of identifiers that derive non-empty sets
-		ids.add(id);
-		TaggedData<?> result = g.derives(dc, derivation);
+		TaggedData<?> result = g.derives(getReplacement(id), derivation);
 		return result;
 	}
 	public TaggedData<?> bottom() {
