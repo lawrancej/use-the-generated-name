@@ -2,7 +2,7 @@ package languageV2.traversal;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
-import util.TaggedData;
+import util.Node;
 import util.TaggedDataPair;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
@@ -10,7 +10,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		super(g);
 	}
 	private StringBuffer buffer = new StringBuffer();
-	public StringBuffer symbol(TaggedData<Character> language) {
+	public StringBuffer symbol(Node<Character> language) {
 		Character c = language.data;
 		if (c == null) {
 			buffer.append("<any character>");
@@ -21,7 +21,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer list(TaggedData<TaggedDataPair> language) {
+	public StringBuffer list(Node<TaggedDataPair> language) {
 		TaggedDataPair list = language.data;
 		if (list == null) {
 			buffer.append("\u03b5");
@@ -34,14 +34,14 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer set(TaggedData<SetOfLanguages> language) {
+	public StringBuffer set(Node<SetOfLanguages> language) {
 		SetOfLanguages set = language.data;
 		if (set == null) {
 			buffer.append("\u2205");
 		} else {
 			buffer.append('(');
 			boolean flag = false;
-			for (TaggedData<?> l : set) {
+			for (Node<?> l : set) {
 				if (flag) {
 					buffer.append('|');
 				} else {
@@ -53,8 +53,8 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer loop(TaggedData<TaggedData<?>> language) {
-		TaggedData<?> loop = language.data;
+	public StringBuffer loop(Node<Node<?>> language) {
+		Node<?> loop = language.data;
 		buffer.append('(');
 		g.accept(this,loop);
 		buffer.append(")*");
@@ -70,7 +70,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		buffer.append('>');
 		return buffer;
 	}
-	public StringBuffer rule(Language.Id id, TaggedData<?> rhs) {
+	public StringBuffer rule(Language.Id id, Node<?> rhs) {
 		this.id(id);
 		buffer.append(" ::= ");
 		g.accept(this, rhs);

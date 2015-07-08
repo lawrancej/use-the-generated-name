@@ -3,7 +3,7 @@ package languageV2.traversal;
 import java.util.HashSet;
 import java.util.Set;
 
-import util.TaggedData;
+import util.Node;
 import util.TaggedDataPair;
 import languageV2.Language;
 import languageV2.Language.Id;
@@ -22,12 +22,12 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 			buffer.append(arrow);
 		}
 	}
-	public StringBuffer symbol(TaggedData<Character> language) {
+	public StringBuffer symbol(Node<Character> language) {
 		Character c = language.data;
 		buffer.append(String.format("%s [label=\"'%c'\"];\n", language.hashCode(), c));
 		return buffer;
 	}
-	public StringBuffer list(TaggedData<TaggedDataPair> language) {
+	public StringBuffer list(Node<TaggedDataPair> language) {
 		TaggedDataPair list = language.data;
 		if (list == null) {
 			buffer.append(String.format("%s [label=\"&epsilon;\"];\n", language.hashCode()));
@@ -40,20 +40,20 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		drawArrow(language.hashCode() + ":right", list.right.hashCode());
 		return buffer;
 	}
-	public StringBuffer loop(TaggedData<TaggedData<?>> language) {
+	public StringBuffer loop(Node<Node<?>> language) {
 		buffer.append(String.format("%s [label=\"Loop\"];\n", language.hashCode()));
 		g.accept(this, language.data);
 		drawArrow(language.hashCode(), language.data.hashCode());
 		return buffer;
 	}
-	public StringBuffer set(TaggedData<SetOfLanguages> language) {
+	public StringBuffer set(Node<SetOfLanguages> language) {
 		SetOfLanguages set = language.data;
 		if (set == null) {
 			buffer.append(String.format("%s [label=\"Reject\"];\n", language.hashCode()));
 			return buffer;
 		}
 		buffer.append(String.format("%s [label=\"Set\"];\n", language.hashCode()));
-		for (TaggedData<?> l : set) {
+		for (Node<?> l : set) {
 			g.accept(this, l);
 			drawArrow(language.hashCode(), l.hashCode());
 		}
@@ -67,7 +67,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer rule(Id id, TaggedData<?> rhs) {
+	public StringBuffer rule(Id id, Node<?> rhs) {
 		this.id(id);
 		g.accept(this, rhs);
 		drawArrow(id.hashCode(), rhs.hashCode());

@@ -2,52 +2,52 @@ package languageV2.traversal;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
-import util.TaggedData;
+import util.Node;
 import util.TaggedDataPair;
 
 // Compute the first set
-public class FirstSet extends AbstractVisitor<TaggedData<?>> {
+public class FirstSet extends AbstractVisitor<Node<?>> {
 	public FirstSet(Language g) {
 		super(g);
 	}
-	public TaggedData<?> symbol(TaggedData<Character> c) {
+	public Node<?> symbol(Node<Character> c) {
 		return c;
 	}
-	public TaggedData<?> loop(TaggedData<TaggedData<?>> loop) {
+	public Node<?> loop(Node<Node<?>> loop) {
 		return g.accept(this, loop.data);
 	}
-	public TaggedData<?> list(TaggedData<TaggedDataPair> language) {
+	public Node<?> list(Node<TaggedDataPair> language) {
 		TaggedDataPair pair = language.data;
 		if (pair == null) return bottom();
-		TaggedData<?> result = g.accept(this, pair.left);
+		Node<?> result = g.accept(this, pair.left);
 		if (g.nullable(pair.left)) {
 			result = g.or(result, g.accept(this, pair.right));
 		}
 		return result;
 	}
-	public TaggedData<?> set(TaggedData<SetOfLanguages> language) {
+	public Node<?> set(Node<SetOfLanguages> language) {
 		SetOfLanguages set = language.data;
-		TaggedData<?> result = bottom();
+		Node<?> result = bottom();
 		if (set == null) return result;
-		for (TaggedData<?> l : set) {
+		for (Node<?> l : set) {
 			result = g.or(result, g.accept(this, l));
 		}
 		return result;
 	}
-	public TaggedData<?> id(Language.Id id) {
+	public Node<?> id(Language.Id id) {
 		return bottom();
 	}
-	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
+	public Node<?> rule(Language.Id id, Node<?> rhs) {
 		return g.accept(this, rhs);
 	}
-	public TaggedData<?> bottom() {
+	public Node<?> bottom() {
 		return Language.reject;
 	}
-	public TaggedData<?> reduce(TaggedData<?> accumulator, TaggedData<?> current) {
+	public Node<?> reduce(Node<?> accumulator, Node<?> current) {
 		return g.or(accumulator, current);
 	}
 	@Override
-	public boolean done(TaggedData<?> accumulator) {
+	public boolean done(Node<?> accumulator) {
 		return false;
 	}
 }

@@ -5,16 +5,16 @@ import java.util.Map;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
-import util.TaggedData;
+import util.Node;
 import util.TaggedDataPair;
 
-public class Derivative extends AbstractVisitor<TaggedData<?>> {
+public class Derivative extends AbstractVisitor<Node<?>> {
 	public Character c;
 	Map<Language.Id, Language.Id> ids = new HashMap<Language.Id, Language.Id>();
 	public Derivative(Language g) {
 		super(g);
 	}
-	public TaggedData<?> symbol(TaggedData<Character> language) {
+	public Node<?> symbol(Node<Character> language) {
 		Character c = language.data;
 		// Dc(c|.) = e
 		if (c == null || this.c == c) {
@@ -23,29 +23,29 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		// Dc(c') = 0
 		return bottom();
 	}
-	public TaggedData<?> list(TaggedData<TaggedDataPair> language) {
+	public Node<?> list(Node<TaggedDataPair> language) {
 		TaggedDataPair list = language.data;
 		// Dc(e) = 0
 		if (list == null) return bottom();
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
-		TaggedData<?> result = g.list(g.accept(this, list.left), list.right);
+		Node<?> result = g.list(g.accept(this, list.left), list.right);
 		if (g.nullable(list.left)) {
 			return g.or(result, g.accept(this, list.right));
 		}
 		return result;
 	}
-	public TaggedData<?> loop(TaggedData<TaggedData<?>> loop) {
-		TaggedData<?> language = loop.data;
+	public Node<?> loop(Node<Node<?>> loop) {
+		Node<?> language = loop.data;
 //		return g.visit(this, g.list(language, loop));
 		return g.list(g.accept(this, language), loop);
 	}
-	public TaggedData<?> set(TaggedData<SetOfLanguages> language) {
+	public Node<?> set(Node<SetOfLanguages> language) {
 		SetOfLanguages set = language.data;
-		TaggedData<?> result = bottom();
+		Node<?> result = bottom();
 		// Dc(0) = 0
 		if (set == null) return result;
 		// Dc(a+b) = Dc(a) + Dc(b)
-		for (TaggedData<?> l : set) {
+		for (Node<?> l : set) {
 			result = g.or(result, g.accept(this, l));
 		}
 		return result;
@@ -60,7 +60,7 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 			return ids.get(id);
 		}
 	}
-	public TaggedData<?> id(Language.Id id) {
+	public Node<?> id(Language.Id id) {
 		// Handle left-recursion: return DcId if we're visiting Id -> Id
 		if (todo.visiting(id)) {
 			return getReplacement(id);
@@ -77,9 +77,9 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		// Otherwise, return the empty set
 		return bottom();
 	}
-	public TaggedData<?> rule(Language.Id id, TaggedData<?> rhs) {
+	public Node<?> rule(Language.Id id, Node<?> rhs) {
 		// Visit the rhs
-		TaggedData<?> derivation = g.accept(this,  rhs);
+		Node<?> derivation = g.accept(this,  rhs);
 		
 		// Don't create a rule that rejects
 		if (derivation == bottom()) {
@@ -87,17 +87,17 @@ public class Derivative extends AbstractVisitor<TaggedData<?>> {
 		}
 		
 		// Make a note of identifiers that derive non-empty sets
-		TaggedData<?> result = g.derives(getReplacement(id), derivation);
+		Node<?> result = g.derives(getReplacement(id), derivation);
 		return result;
 	}
-	public TaggedData<?> bottom() {
+	public Node<?> bottom() {
 		return Language.reject;
 	}
-	public TaggedData<?> reduce(TaggedData<?> accumulator, TaggedData<?> current) {
+	public Node<?> reduce(Node<?> accumulator, Node<?> current) {
 		if (accumulator == bottom()) return current;
 		else return accumulator;
 	}
-	public boolean done(TaggedData<?> accumulator) {
+	public boolean done(Node<?> accumulator) {
 		return false;
 	}
 	public void begin() {

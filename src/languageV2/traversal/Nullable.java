@@ -5,7 +5,7 @@ import java.util.Set;
 
 import languageV2.Language;
 import languageV2.SetOfLanguages;
-import util.TaggedData;
+import util.Node;
 import util.TaggedDataPair;
 
 public class Nullable extends AbstractVisitor<Boolean> {
@@ -13,22 +13,22 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Nullable(Language g) {
 		super(g);
 	}
-	public Boolean symbol(TaggedData<Character> c) {
+	public Boolean symbol(Node<Character> c) {
 		return false;
 	}
-	public Boolean list(TaggedData<TaggedDataPair> language) {
+	public Boolean list(Node<TaggedDataPair> language) {
 		TaggedDataPair list = language.data;
 		if (list == null) return true;
 		boolean result = g.accept(this, list.left) && g.accept(this, list.right);
 		return result;
 	}
-	public Boolean loop(TaggedData<TaggedData<?>> language) {
+	public Boolean loop(Node<Node<?>> language) {
 		return true;
 	}
-	public Boolean set(TaggedData<SetOfLanguages> language) {
+	public Boolean set(Node<SetOfLanguages> language) {
 		SetOfLanguages set = language.data;
 		if (set == null) return false;
-		for (TaggedData<?> l : set) {
+		for (Node<?> l : set) {
 			if (g.accept(this, l)) {
 				return true;
 			}
@@ -46,7 +46,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 			return result;
 		}
 	}
-	public Boolean rule(Language.Id id, TaggedData<?> rhs) {
+	public Boolean rule(Language.Id id, Node<?> rhs) {
 		return g.accept(this, rhs);
 	}
 	public Boolean bottom() {

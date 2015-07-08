@@ -2,7 +2,7 @@ package languageV2;
 
 import java.util.HashSet;
 
-import util.TaggedData;
+import util.Node;
 
 @SuppressWarnings("serial")
-public class SetOfLanguages extends HashSet<TaggedData<?>> {}
+public class SetOfLanguages extends HashSet<Node<?>> {}
