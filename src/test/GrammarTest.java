@@ -27,6 +27,12 @@ public class GrammarTest {
 			derives(digit, range('0', '9'));
 			derives(digits, digit, many(digit));
 		}};
+		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertTrue(g.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertFalse(g.matches("1+"));
+		Assert.assertFalse(g.matches("27+"));
+		Assert.assertTrue(g.matches("27+34"));
+
 		// GraphViz gv = new GraphViz(g);
 		// System.out.println(g.beginTraversal(gv));
 	}
@@ -82,7 +88,7 @@ public class GrammarTest {
 			derives("S", id("S"), symbol('+'), id("S"));
 			derives("S", symbol('1'));
 
-			// debug = true;
+			//debug = true;
 		}};
 		/*
 			try {
@@ -111,8 +117,15 @@ public class GrammarTest {
 				e.printStackTrace();
 			}
 		*/
+		long before, after;
+		before = System.nanoTime();
 		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		after = System.nanoTime();
+		System.out.println(after - before);
+		before = System.nanoTime();
 		Assert.assertFalse(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
+		after = System.nanoTime();
+		System.out.println(after - before);
 	}
 
 	@Test
@@ -209,6 +222,7 @@ public class GrammarTest {
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
+		Assert.assertTrue(g.matches("xxxxxxxxxxxxxxxxxxxxxxx"));
 		Assert.assertFalse(g.matches("L"));
 	}
 	
@@ -267,7 +281,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			//debug = true;
+			debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
@@ -275,7 +289,7 @@ public class GrammarTest {
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
 	
-//	@After
+	@After
 	public void summary() {
 		// 1817 non id
 		// 1238 id
