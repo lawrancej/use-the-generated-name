@@ -76,7 +76,7 @@ public class Derivative extends AbstractVisitor<Node<?>> {
 		// Visit the rhs
 		Node<?> derivation = g.accept(this,  rhs);
 		
-		// Don't create a rule that rejects
+		// Don't create a rule that rejects or is empty
 		if (derivation == Language.reject || derivation == Language.empty) {
 			return derivation;
 		}
