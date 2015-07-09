@@ -55,11 +55,11 @@ public class Language {
 	private Map<Integer, Node<?>> listCache = new HashMap<Integer, Node<?>>();
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
 	private Node<?> listInstance(Node<?> left, Node <?> right) {
-		// (1) r0 = 0r = 0
+		// r0 = 0r = 0
 		if (left == reject || right == reject) {
 			return reject;
 		}
-		// (2) re = er = r
+		// re = er = r
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// (8) r(st) = (rs)t (FIXME: test to ensure list structures are enforced)
@@ -104,14 +104,15 @@ public class Language {
 	private Map<Integer, Node<?>> setCache = new HashMap<Integer, Node<?>>();
 
 	private Node<?> orInstance(Node<?> left, Node <?> right) {
-		// (3) r+0 = 0+r = r
+		// r+0 = 0+r = r
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
-		// (4) r+r = r
+		// r+r = r
 		if (left == right) { return left; }
-		// (5) r+s = s+r (No need to sort regexes to ensure canonical order)
-		// (6) r(s+t) = rs+rt (FIXME: factor out common prefixes)
-		// (7) (r+s)t = rt+st (FIXME: factor out common suffixes)
+		// r+s = s+r (No need to sort regexes to ensure canonical order)
+		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
+		// r(s+t) = rs+rt (FIXME: factor out common prefixes)
+		// (r+s)t = rt+st (FIXME: factor out common suffixes)
 		int key = left.hashCode() ^ right.hashCode();
 		if (!setCache.containsKey(key)) {
 			Node<?> result = Node.create(Construct.SET.ordinal(), new TaggedDataPair(left, right));
@@ -154,15 +155,14 @@ public class Language {
 	public Node<?> many(Node<?>... nodes) {
 		Node<?> language = list(nodes);
 		// Avoid creating a new loop, if possible
-		// (9) 0* = e
-		// (10) e* = e
+		// 0* = e* = e
+		if (language == empty || language == reject) { return empty; }
 		// (11) (e+r)+ = r* (FIXME: need plus loop)
 		// (12) (e+r)* = r* (FIXME: check for this condition)
 		// (13) r*(e+r) = (e+r)r* = r* (FIXME: check for this condition)
 		// (14) r*s+s = r*s (FIXME: check for this condition)
 		// (15) r(sr)* = (rs)*r (FIXME: check for this condition)
 		// (16) (r+s)* = (r*s)*r* = (s*r)*s* (FIXME: check for this condition)
-		if (language == empty || language == reject) { return empty; }
 		if (constructs[language.tag] == Construct.LOOP) return language;
 		return Node.create(Construct.LOOP.ordinal(), language);
 	}
