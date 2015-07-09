@@ -77,13 +77,12 @@ public class Derivative extends AbstractVisitor<Node<?>> {
 		Node<?> derivation = g.accept(this,  rhs);
 		
 		// Don't create a rule that rejects
-		if (derivation == bottom()) {
+		if (derivation == Language.reject || derivation == Language.empty) {
 			return derivation;
 		}
 		
-		// Make a note of identifiers that derive non-empty sets
-		Node<?> result = g.derives(getReplacement(id), derivation);
-		return result;
+		// Create a new rule
+		return g.derives(getReplacement(id), derivation);
 	}
 	public Node<?> bottom() {
 		return Language.reject;
