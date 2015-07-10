@@ -290,7 +290,7 @@ public class GrammarTest {
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
 	
-	@After
+//	@After
 	public void summary() {
 		// 1817 non id
 		// 1238 id

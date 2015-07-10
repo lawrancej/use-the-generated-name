@@ -113,6 +113,20 @@ public class Language {
 		if (left == right) { return left; }
 		// r+s = s+r (No need to sort regexes to ensure canonical order)
 		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
+		if (constructs[left.tag] == Construct.SET) {
+			Node<?,?> l = (Node<?,?>) left;
+			// (r+s)+r = r+s
+			if (l.left == right) return l;
+			// (s+r)+r = s+r
+			if (l.right == right) return l;
+		}
+		if (constructs[right.tag] == Construct.SET) {
+			Node<?,?> r = (Node<?,?>) right;
+			// (r+s)+r = r+s
+			if (r.left == left) return r;
+			// (s+r)+r = s+r
+			if (r.right == left) return r;
+		}
 		// r(s+t) = rs+rt (FIXME: factor out common prefixes)
 		// (r+s)t = rt+st (FIXME: factor out common suffixes)
 		int key = left.hashCode() ^ right.hashCode();
