@@ -56,9 +56,11 @@ public class Language {
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
 	private Node<?,?> listInstance(Node<?,?> left, Node<?,?> right) {
 		if (left.tag == Node.Tag.ID && left.right != reject) {
+			ids.remove(left);
 			left = (Node<?, ?>) left.right;
 		}
 		if (right.tag == Node.Tag.ID && right.right != reject) {
+			ids.remove(right);
 			right = (Node<?,?>) right.right;
 		}
 		// r0 = 0r = 0
@@ -111,9 +113,11 @@ public class Language {
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
 		if (left.tag == Node.Tag.ID && left.right != reject) {
+			ids.remove(left);
 			left = (Node<?, ?>) left.right;
 		}
 		if (right.tag == Node.Tag.ID && right.right != reject) {
+			ids.remove(right);
 			right = (Node<?,?>) right.right;
 		}
 		// r+0 = 0+r = r
@@ -181,6 +185,7 @@ public class Language {
 	public Node<?,?> many(Node<?,?>... nodes) {
 		Node<?,?> language = list(nodes);
 		if (language.tag == Node.Tag.ID && language.right != reject) {
+			ids.remove(language);
 			language = (Node<?, ?>) language.right;
 		}
 		// Avoid creating a new loop, if possible
