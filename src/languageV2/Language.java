@@ -21,14 +21,12 @@ import util.*;
 public class Language {
 	/** Construct a language specification */
 	public Language() {}
-	/** The language constructs (set, list, symbol, loop, id) */
-	private static final Construct[] constructs = Construct.values();
 	/** Match any character, equivalent to regular expression dot. */
-	public static final Node<Character,Character> any = Node.create(Construct.SYMBOL.ordinal(), null, null);
+	public static final Node<Character,Character> any = Node.create(Node.Tag.SYMBOL, null, null);
 	/** Match the empty list (empty sequence). */
-	public static final Node<Node<?,?>,Node<?,?>> empty = Node.create(Construct.LIST.ordinal(), null,null);
+	public static final Node<Node<?,?>,Node<?,?>> empty = Node.create(Node.Tag.LIST, null,null);
 	/** Reject everything (the empty set). */
-	public static final Node<Node<?,?>,Node<?,?>> reject = Node.create(Construct.SET.ordinal(),null,null);
+	public static final Node<Node<?,?>,Node<?,?>> reject = Node.create(Node.Tag.SET,null,null);
 
 	private Map<Integer, Node<Character,Character>> symbols = new HashMap<Integer, Node<Character,Character>>();
 	/**
@@ -48,7 +46,7 @@ public class Language {
 		}
 		int key = (from << 16) | to;
 		if (!symbols.containsKey(key)) {
-			Node<Character,Character> result = Node.create(Construct.SYMBOL.ordinal(), from,to);
+			Node<Character,Character> result = Node.create(Node.Tag.SYMBOL, from,to);
 			symbols.put(key, result);
 			return result;
 		}
@@ -69,7 +67,7 @@ public class Language {
 		// FIXME: this is fast, but a bit dodgy
 		int key = left.hashCode() ^ right.hashCode();
 		if (!listCache.containsKey(key)) {
-			Node<?,?> result = Node.create(Construct.LIST.ordinal(), left, right);
+			Node<?,?> result = Node.create(Node.Tag.LIST, left, right);
 			listCache.put(key, (Node<Node<?, ?>, Node<?, ?>>) result);
 			return result;
 		}
@@ -114,14 +112,14 @@ public class Language {
 		if (left == right) { return left; }
 		// r+s = s+r (No need to sort regexes to ensure canonical order)
 		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
-		if (constructs[left.tag] == Construct.SET) {
+		if (left.tag == Node.Tag.SET) {
 			Node<?,?> l = (Node<?,?>) left;
 			// (r+s)+r = r+s
 			if (l.left == right) return l;
 			// (s+r)+r = s+r
 			if (l.right == right) return l;
 		}
-		if (constructs[right.tag] == Construct.SET) {
+		if (right.tag == Node.Tag.SET) {
 			Node<?,?> r = (Node<?,?>) right;
 			// (r+s)+r = r+s
 			if (r.left == left) return r;
@@ -132,7 +130,7 @@ public class Language {
 		// (r+s)t = rt+st (FIXME: factor out common suffixes)
 		int key = left.hashCode() ^ right.hashCode();
 		if (!setCache.containsKey(key)) {
-			Node<?,?> result = Node.create(Construct.SET.ordinal(), left, right);
+			Node<?,?> result = Node.create(Node.Tag.SET, left, right);
 			setCache.put(key, result);
 			return result;
 		}
@@ -180,17 +178,17 @@ public class Language {
 		// (14) r*s+s = r*s (FIXME: check for this condition)
 		// (15) r(sr)* = (rs)*r (FIXME: check for this condition)
 		// (16) (r+s)* = (r*s)*r* = (s*r)*s* (FIXME: check for this condition)
-		if (constructs[language.tag] == Construct.LOOP) return language;
+		if (language.tag == Node.Tag.LOOP) return language;
 		// Any specifies a character range, but we can use that language to encode two small numbers. Win.
-		return Node.create(Construct.LOOP.ordinal(), language, any);
+		return Node.create(Node.Tag.LOOP, language, any);
 	}
 	/** Identifiers are nonterminals. Identifiers enable recursion. */
 	public static class Id extends Node<String,Node<?,?>> {
 		public Id() {
-			super(Construct.ID.ordinal(), null, null);
+			super(Node.Tag.ID, null, null);
 		}
 		public Id(String label) {
-			super(Construct.ID.ordinal(), label, null);
+			super(Node.Tag.ID, label, null);
 		}
 		private Node<?,?> right = reject;
 	}
@@ -248,7 +246,7 @@ public class Language {
 			return reject;
 		}
 		// If the right is just an identifier...
-		if (constructs[right.tag] == Construct.ID && result.right == reject) {
+		if (right.tag == Node.Tag.ID && result.right == reject) {
 			ids.remove(id);
 			return right;
 		}
@@ -291,7 +289,7 @@ public class Language {
 	 * @return
 	 */
 	public <T> T accept(Visitor<T> visitor, Node<?,?> language) {
-		switch(constructs[language.tag]) {
+		switch(language.tag) {
 		case ID:
 			visitor.getWorkList().todo((Id)language);
 			return visitor.id((Id)language);
@@ -326,7 +324,7 @@ public class Language {
 		visitor.begin();
 		T accumulator;
 		// Visit a grammar
-		if (language.tag == Construct.ID.ordinal()) {
+		if (language.tag == Node.Tag.ID) {
 			visitor.getWorkList().todo((Id)language);
 			accumulator = visitor.bottom();
 			for (Id identifier : visitor.getWorkList()) {
