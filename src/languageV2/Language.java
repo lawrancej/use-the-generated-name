@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import languageV2.traversal.*;
-import util.*;
 
 /**
  * A language specification
@@ -56,6 +55,12 @@ public class Language {
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
 	private Node<?,?> listInstance(Node<?,?> left, Node<?,?> right) {
+		if (left.tag == Node.Tag.ID && left.right != reject) {
+			left = (Node<?, ?>) left.right;
+		}
+		if (right.tag == Node.Tag.ID && right.right != reject) {
+			right = (Node<?,?>) right.right;
+		}
 		// r0 = 0r = 0
 		if (left == reject || right == reject) {
 			return reject;
@@ -105,6 +110,12 @@ public class Language {
 	private Map<Integer, Node<?,?>> setCache = new HashMap<Integer, Node<?,?>>();
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
+		if (left.tag == Node.Tag.ID && left.right != reject) {
+			left = (Node<?, ?>) left.right;
+		}
+		if (right.tag == Node.Tag.ID && right.right != reject) {
+			right = (Node<?,?>) right.right;
+		}
 		// r+0 = 0+r = r
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
@@ -169,6 +180,9 @@ public class Language {
 	 */
 	public Node<?,?> many(Node<?,?>... nodes) {
 		Node<?,?> language = list(nodes);
+		if (language.tag == Node.Tag.ID && language.right != reject) {
+			language = (Node<?, ?>) language.right;
+		}
 		// Avoid creating a new loop, if possible
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
@@ -185,12 +199,12 @@ public class Language {
 	/** Identifiers are nonterminals. Identifiers enable recursion. */
 	public static class Id extends Node<String,Node<?,?>> {
 		public Id() {
-			super(Node.Tag.ID, null, null);
+			super(Node.Tag.ID, null, reject);
 		}
 		public Id(String label) {
-			super(Node.Tag.ID, label, null);
+			super(Node.Tag.ID, label, reject);
 		}
-		private Node<?,?> right = reject;
+//		private Node<?,?> right = reject;
 	}
 	// Identifier lookup by name
 	private Map<String, Id> labels = new HashMap<String, Id>();

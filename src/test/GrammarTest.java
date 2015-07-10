@@ -260,7 +260,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			debug = true;
+			// debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
@@ -274,10 +274,5 @@ public class GrammarTest {
 		// 1238 id
 		// 3055 total
 		System.out.println(Node.allocations);
-		long before, after;
-		before = System.nanoTime();
-		after = 1000000;
-		after += System.nanoTime();
-		System.out.println(after - before);
 	}
 }
