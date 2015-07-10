@@ -42,4 +42,8 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 	public boolean done(Node<?,?> accumulator) {
 		return false;
 	}
+	@Override
+	public Node<?, ?> end(Node<?, ?> accumulator) {
+		return accumulator;
+	}
 }

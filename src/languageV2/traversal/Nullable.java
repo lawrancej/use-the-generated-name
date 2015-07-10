@@ -50,4 +50,8 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public boolean done(Boolean accumulator) {
 		return true;
 	}
+	@Override
+	public Boolean end(Boolean accumulator) {
+		return accumulator;
+	}
 }

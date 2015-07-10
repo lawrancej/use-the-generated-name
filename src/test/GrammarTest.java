@@ -1,9 +1,6 @@
 package test;
 
-import java.io.IOException;
-
 import languageV2.Language;
-import languageV2.traversal.GraphViz;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -33,8 +30,6 @@ public class GrammarTest {
 		Assert.assertFalse(g.matches("27+"));
 		Assert.assertTrue(g.matches("27+34"));
 
-		// GraphViz gv = new GraphViz(g);
-		// System.out.println(g.beginTraversal(gv));
 	}
 	
 	@Test
@@ -89,13 +84,6 @@ public class GrammarTest {
 
 			//debug = true;
 		}};
-		/*
-			try {
-				System.in.read();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		*/
 		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertFalse(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
 	}
@@ -109,13 +97,6 @@ public class GrammarTest {
 
 			//debug = true;
 		}};
-		/*
-			try {
-				System.in.read();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		*/
 		long before, after;
 		before = System.nanoTime();
 		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
@@ -280,10 +261,8 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			debug = true;
+			//debug = true;
 		}};
-//		GraphViz gv = new GraphViz(regex);
-//		System.out.println(regex.beginTraversal(gv));
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
 		Assert.assertTrue(regex.matches("a|b**"));

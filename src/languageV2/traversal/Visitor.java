@@ -73,5 +73,5 @@ public interface Visitor<T> {
 	/**
 	 * Post-traversal method.
 	 */
-	void end();
+	T end(T accumulator);
 }

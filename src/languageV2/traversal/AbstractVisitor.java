@@ -12,5 +12,4 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 		return todo;
 	}
 	public void begin() {}
-	public void end() {}
 }

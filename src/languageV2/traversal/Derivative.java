@@ -93,4 +93,12 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public void begin() {
 		ids.clear();
 	}
+	@Override
+	public Node<?, ?> end(Node<?, ?> accumulator) {
+		if (ids.size() > 0) {
+			return g.derives(g.id(), accumulator);
+		} else {
+			return accumulator;
+		}
+	}
 }

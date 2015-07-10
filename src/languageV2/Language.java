@@ -1,5 +1,6 @@
 package languageV2;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -326,8 +327,7 @@ public class Language {
 			for (Id identifier : visitor.getWorkList()) {
 				accumulator = visitor.reduce(accumulator, acceptRule(visitor, identifier));
 				if (visitor.done(accumulator)) {
-					visitor.end();
-					return accumulator;
+					return visitor.end(accumulator);
 				}
 			}
 		}
@@ -335,8 +335,7 @@ public class Language {
 		else {
 			accumulator = accept(visitor, language);
 		}
-		visitor.end();
-		return accumulator;
+		return visitor.end(accumulator);
 	}
 	/**
 	 * Begin traversal of the language specification
@@ -473,11 +472,24 @@ public class Language {
 		boolean result;
 		backup();
 		GraphViz gv = new GraphViz(this);
+		if (debug) {
+			System.out.println(beginTraversal(gv, language));
+			try {
+				System.in.read();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
 			gc(language);
 			if (debug) {
 				System.out.println(beginTraversal(gv, language));
+				try {
+					System.in.read();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		if (debug) {

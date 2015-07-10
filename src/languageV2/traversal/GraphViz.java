@@ -90,4 +90,8 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	public void end() {
 		buffer.append(" }");
 	}
+	@Override
+	public StringBuffer end(StringBuffer accumulator) {
+		return accumulator;
+	}
 }
