@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import languageV2.Language;
-import util.Node;
+import languageV2.Node;
 
 public class Nullable extends AbstractVisitor<Boolean> {
 	Set<Language.Id> nulls = new HashSet<Language.Id>();

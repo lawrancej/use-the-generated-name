@@ -1,12 +1,11 @@
 package test;
 
 import languageV2.Language;
+import languageV2.Node;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-
-import util.Node;
 
 public class GrammarTest {
 	
@@ -261,7 +260,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			//debug = true;
+			debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));

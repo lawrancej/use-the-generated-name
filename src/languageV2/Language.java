@@ -479,22 +479,24 @@ public class Language {
 		GraphViz gv = new GraphViz(this);
 		if (debug) {
 			System.out.println(beginTraversal(gv, language));
+			/*
 			try {
 				System.in.read();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
 			gc(language);
 			if (debug) {
 				System.out.println(beginTraversal(gv, language));
-				try {
+				/*try {
 					System.in.read();
 				} catch (IOException e) {
 					e.printStackTrace();
-				}
+				}*/
 			}
 		}
 		if (debug) {

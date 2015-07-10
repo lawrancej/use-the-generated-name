@@ -3,8 +3,8 @@ package languageV2.traversal;
 import java.util.HashSet;
 import java.util.Set;
 
-import util.Node;
 import languageV2.Language;
+import languageV2.Node;
 import languageV2.Language.Id;
 
 public class GraphViz extends AbstractVisitor<StringBuffer> {

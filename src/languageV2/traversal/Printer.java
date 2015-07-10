@@ -1,7 +1,7 @@
 package languageV2.traversal;
 
 import languageV2.Language;
-import util.Node;
+import languageV2.Node;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Language g) {

@@ -1,7 +1,7 @@
 package languageV2.traversal;
 
 import languageV2.Language;
-import util.Node;
+import languageV2.Node;
 
 /**
  * Traverse a language specification.
