@@ -237,6 +237,11 @@ public class Language {
 	public Node<?,?> derives(Id id, Node<?,?>... languages) {
 		Id result = id;
 		Node<?,?> right = list(languages);
+		// If Id -> Id literally, reject
+		//if (id == right) {
+		//	ids.remove(id);
+		//	return reject;
+		//}
 		// If the right rejects, remove identifier
 		if (right == reject) {
 			ids.remove(id);
