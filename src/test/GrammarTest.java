@@ -196,13 +196,17 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
-			// debug = true;
+			debug = true;
 		}};
+		Assert.assertTrue(g.matches("xxxx"));
+		/*
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
+		Assert.assertTrue(g.matches("xxx"));
 		Assert.assertTrue(g.matches("xxxxxxxxxxxxxxxxxxxxxxx"));
 		Assert.assertFalse(g.matches("L"));
+		*/
 	}
 	
 	@Test
