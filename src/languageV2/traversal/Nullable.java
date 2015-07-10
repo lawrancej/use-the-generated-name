@@ -5,28 +5,25 @@ import java.util.Set;
 
 import languageV2.Language;
 import util.Node;
-import util.TaggedDataPair;
 
 public class Nullable extends AbstractVisitor<Boolean> {
 	Set<Language.Id> nulls = new HashSet<Language.Id>();
 	public Nullable(Language g) {
 		super(g);
 	}
-	public Boolean symbol(Node<Character> c) {
+	public Boolean symbol(Node<Character,Character> c) {
 		return false;
 	}
-	public Boolean list(Node<TaggedDataPair> language) {
-		TaggedDataPair list = language.data;
-		if (list == null) return true;
+	public Boolean list(Node<Node<?,?>,Node<?,?>> list) {
+		if (list == Language.empty) return true;
 		boolean result = g.accept(this, list.left) && g.accept(this, list.right);
 		return result;
 	}
-	public Boolean loop(Node<Node<?>> language) {
+	public Boolean loop(Node<Node<?,?>,Node<?,?>> language) {
 		return true;
 	}
-	public Boolean set(Node<TaggedDataPair> language) {
-		TaggedDataPair set = language.data;
-		if (set == null) return false;
+	public Boolean set(Node<Node<?,?>,Node<?,?>> set) {
+		if (set == Language.reject) return false;
 		return g.accept(this, set.left) || g.accept(this, set.right);
 	}
 	public Boolean id(Language.Id id) {
@@ -40,7 +37,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 			return result;
 		}
 	}
-	public Boolean rule(Language.Id id, Node<?> rhs) {
+	public Boolean rule(Language.Id id, Node<?,?> rhs) {
 		return g.accept(this, rhs);
 	}
 	public Boolean bottom() {

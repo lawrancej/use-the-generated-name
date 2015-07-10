@@ -280,7 +280,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-//			debug = true;
+			debug = true;
 		}};
 //		GraphViz gv = new GraphViz(regex);
 //		System.out.println(regex.beginTraversal(gv));

@@ -23,38 +23,40 @@ public class Language {
 	/** The language constructs (set, list, symbol, loop, id) */
 	private static final Construct[] constructs = Construct.values();
 	/** Match any character, equivalent to regular expression dot. */
-	public static final Node<Character> any = Node.create(Construct.SYMBOL.ordinal(), null);
+	public static final Node<Character,Character> any = Node.create(Construct.SYMBOL.ordinal(), null, null);
 	/** Match the empty list (empty sequence). */
-	public static final Node<TaggedDataPair> empty = Node.create(Construct.LIST.ordinal(), null);
+	public static final Node<Node<?,?>,Node<?,?>> empty = Node.create(Construct.LIST.ordinal(), null,null);
 	/** Reject everything (the empty set). */
-	public static final Node<TaggedDataPair> reject = Node.create(Construct.SET.ordinal(),null);
+	public static final Node<Node<?,?>,Node<?,?>> reject = Node.create(Construct.SET.ordinal(),null,null);
 
-	private Map<Character, Node<?>> symbols = new HashMap<Character, Node<?>>();
+	private Map<Integer, Node<Character,Character>> symbols = new HashMap<Integer, Node<Character,Character>>();
 	/**
 	 * Match a character
 	 * 
 	 * @param c The character
 	 * @return A language matching character c.
 	 */
-	public Node<?> symbol(char c) {
-		if (!symbols.containsKey(c)) {
-			Node<?> result = Node.create(Construct.SYMBOL.ordinal(), c);
-			symbols.put(c, result);
+	public Node<Character,Character> symbol(char c) {
+		return range(c,c);
+	}
+	public Node<Character,Character> range(char from, char to) {
+		char tmp = from;
+		if (from > to) {
+			from = to;
+			to = tmp;
+		}
+		int key = (from << 16) | to;
+		if (!symbols.containsKey(key)) {
+			Node<Character,Character> result = Node.create(Construct.SYMBOL.ordinal(), from,to);
+			symbols.put(key, result);
 			return result;
 		}
-		return symbols.get(c);
-	}
-	public Node<?> range(char from, char to) {
-		Node<?>[] symbols = new Node<?>[to - from];
-		for (char i = from; i < to; i++) {
-			symbols[i-from] = symbol(i);
-		}
-		return or(symbols, 0);
+		return symbols.get(key);
 	}
 	
-	private Map<Integer, Node<?>> listCache = new HashMap<Integer, Node<?>>();
+	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
-	private Node<?> listInstance(Node<?> left, Node <?> right) {
+	private Node<?,?> listInstance(Node<?,?> left, Node<?,?> right) {
 		// r0 = 0r = 0
 		if (left == reject || right == reject) {
 			return reject;
@@ -66,13 +68,13 @@ public class Language {
 		// FIXME: this is fast, but a bit dodgy
 		int key = left.hashCode() ^ right.hashCode();
 		if (!listCache.containsKey(key)) {
-			Node<?> result = Node.create(Construct.LIST.ordinal(), new TaggedDataPair(left, right));
-			listCache.put(key, result);
+			Node<?,?> result = Node.create(Construct.LIST.ordinal(), left, right);
+			listCache.put(key, (Node<Node<?, ?>, Node<?, ?>>) result);
 			return result;
 		}
 		return listCache.get(key);
 	}
-	private Node<?> list(Node<?>[] nodes, int i) {
+	private Node<?,?> list(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
 			return empty;
 		} else {
@@ -85,7 +87,7 @@ public class Language {
 	 * @param nodes A sequence of languages
 	 * @return A language matching the languages in order
 	 */
-	public Node<?> list(Node<?>... nodes) {
+	public Node<?,?> list(Node<?,?>... nodes) {
 		return list(nodes, 0);
 	}
 	/**
@@ -94,16 +96,16 @@ public class Language {
 	 * @param s the String to match
 	 * @return A language matching String s.
 	 */
-	public Node<?> string(String s) {
-		Node<?>[] array = new Node<?>[s.length()];
+	public Node<?,?> string(String s) {
+		Node<?,?>[] array = new Node<?,?>[s.length()];
 		for (int i = 0; i < s.length(); i++) {
 			array[i] = symbol(s.charAt(i));
 		}
 		return list(array, 0);
 	}
-	private Map<Integer, Node<?>> setCache = new HashMap<Integer, Node<?>>();
+	private Map<Integer, Node<?,?>> setCache = new HashMap<Integer, Node<?,?>>();
 
-	private Node<?> orInstance(Node<?> left, Node <?> right) {
+	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
 		// r+0 = 0+r = r
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
@@ -115,13 +117,13 @@ public class Language {
 		// (r+s)t = rt+st (FIXME: factor out common suffixes)
 		int key = left.hashCode() ^ right.hashCode();
 		if (!setCache.containsKey(key)) {
-			Node<?> result = Node.create(Construct.SET.ordinal(), new TaggedDataPair(left, right));
+			Node<?,?> result = Node.create(Construct.SET.ordinal(), left, right);
 			setCache.put(key, result);
 			return result;
 		}
 		return setCache.get(key);
 	}
-	private Node<?> or(Node<?>[] nodes, int i) {
+	private Node<?,?> or(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
 			return reject;
 		} else {
@@ -134,7 +136,7 @@ public class Language {
 	 * @param nodes Languages to match
 	 * @return A language matching one of the languages
 	 */
-	public Node<?> or(Node<?>... nodes) {
+	public Node<?,?> or(Node<?,?>... nodes) {
 		return or(nodes, 0);
 	}
 	/**
@@ -142,7 +144,7 @@ public class Language {
 	 * @param language The language to match
 	 * @return A language matching one of the languages, optionally.
 	 */
-	public Node<?> option(Node<?> language) {
+	public Node<?,?> option(Node<?,?> language) {
 		return or(language, empty);
 	}
 	
@@ -152,8 +154,8 @@ public class Language {
 	 * @param language The language
 	 * @return A language that matches the input language zero or more times
 	 */
-	public Node<?> many(Node<?>... nodes) {
-		Node<?> language = list(nodes);
+	public Node<?,?> many(Node<?,?>... nodes) {
+		Node<?,?> language = list(nodes);
 		// Avoid creating a new loop, if possible
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
@@ -164,17 +166,18 @@ public class Language {
 		// (15) r(sr)* = (rs)*r (FIXME: check for this condition)
 		// (16) (r+s)* = (r*s)*r* = (s*r)*s* (FIXME: check for this condition)
 		if (constructs[language.tag] == Construct.LOOP) return language;
-		return Node.create(Construct.LOOP.ordinal(), language);
+		// Any specifies a character range, but we can use that language to encode two small numbers. Win.
+		return Node.create(Construct.LOOP.ordinal(), language, any);
 	}
 	/** Identifiers are nonterminals. Identifiers enable recursion. */
-	public static class Id extends Node<String> {
+	public static class Id extends Node<String,Node<?,?>> {
 		public Id() {
-			super(Construct.ID.ordinal(), null);
+			super(Construct.ID.ordinal(), null, null);
 		}
 		public Id(String label) {
-			super(Construct.ID.ordinal(), label);
+			super(Construct.ID.ordinal(), label, null);
 		}
-		private Node<?> rhs = reject;
+		private Node<?,?> right = reject;
 	}
 	// Identifier lookup by name
 	private Map<String, Id> labels = new HashMap<String, Id>();
@@ -198,9 +201,9 @@ public class Language {
 	}
 	
 	/** The language definition. The root of all traversal. */
-	private Node<?> definition = reject;
+	private Node<?,?> definition = reject;
 	/**
-	 * Define an identifier: `id -> rhs`
+	 * Define an identifier: `id -> right`
 	 * 
 	 * If the list of languages rejects, then this removes the identifier.
 	 * 
@@ -208,32 +211,32 @@ public class Language {
 	 * @param languages the right hand side
 	 * @return the identifier reference
 	 */
-	public Node<?> derives(String id, Node<?>... languages) {
-		Node<?> result = derives(id(id), languages);
+	public Node<?,?> derives(String id, Node<?,?>... languages) {
+		Node<?,?> result = derives(id(id), languages);
 		if (result == reject) {
 			labels.remove(id);
 		}
 		return result;
 	}
 	
-	public Node<?> derives(Id id, Node<?>... languages) {
+	public Node<?,?> derives(Id id, Node<?,?>... languages) {
 		Id result = id;
-		Node<?> rhs = list(languages);
-		// If the rhs rejects, remove identifier
-		if (rhs == reject) {
+		Node<?,?> right = list(languages);
+		// If the right rejects, remove identifier
+		if (right == reject) {
 			ids.remove(id);
 			return reject;
 		}
-		// If the rhs is just an identifier...
-		if (constructs[rhs.tag] == Construct.ID && result.rhs == reject) {
+		// If the right is just an identifier...
+		if (constructs[right.tag] == Construct.ID && result.right == reject) {
 			ids.remove(id);
-			return rhs;
+			return right;
 		}
 		// If the language is undefined, make this the starting nonterminal
 		if (definition == reject) {
 			definition = result;
 		}
-		result.rhs = or(result.rhs, rhs);
+		result.right = or(result.right, right);
 		return result;
 	}
 	
@@ -245,12 +248,12 @@ public class Language {
 	 * 
 	 * @param language The language
 	 */
-	public void define(Node<?> language) {
+	public void define(Node<?,?> language) {
 		definition = language;
 	}
 	
 	/**
-	 * Accept visitor into a rule of the form id ::= rhs.
+	 * Accept visitor into a rule of the form id ::= right.
 	 * 
 	 * @param visitor
 	 * @param id
@@ -258,7 +261,7 @@ public class Language {
 	 */
 	public <T> T acceptRule(Visitor<T> visitor, Id id) {
 		visitor.getWorkList().done(id);
-		return visitor.rule(id, id.rhs);
+		return visitor.rule(id, id.right);
 	}
 	/**
 	 * Accept visitor into a language.
@@ -267,19 +270,19 @@ public class Language {
 	 * @param language
 	 * @return
 	 */
-	public <T> T accept(Visitor<T> visitor, Node<?> language) {
+	public <T> T accept(Visitor<T> visitor, Node<?,?> language) {
 		switch(constructs[language.tag]) {
 		case ID:
 			visitor.getWorkList().todo((Id)language);
 			return visitor.id((Id)language);
 		case LIST:
-			return visitor.list((Node<TaggedDataPair>)language);
+			return visitor.list((Node<Node<?,?>,Node<?,?>>)language);
 		case LOOP:
-			return visitor.loop((Node<Node<?>>)language);
+			return visitor.loop((Node<Node<?,?>,Node<?,?>>)language);
 		case SET:
-			return visitor.set((Node<TaggedDataPair>)language);
+			return visitor.set((Node<Node<?,?>,Node<?,?>>)language);
 		case SYMBOL:
-			return visitor.symbol((Node<Character>)language);
+			return visitor.symbol((Node<Character,Character>)language);
 		default:
 			return null;
 		}
@@ -298,7 +301,7 @@ public class Language {
 	 * @param language
 	 * @return
 	 */
-	public <T> T beginTraversal(Visitor<T> visitor, Node<?> language) {
+	public <T> T beginTraversal(Visitor<T> visitor, Node<?,?> language) {
 		visitor.getWorkList().clear();
 		visitor.begin();
 		T accumulator;
@@ -341,7 +344,7 @@ public class Language {
 	public String toString(String id) {
 		return beginTraversal(new Printer(this), id).toString();
 	}
-	public String toString(Node<?> language) {
+	public String toString(Node<?,?> language) {
 		return beginTraversal(new Printer(this), language).toString();
 	}
 	/**
@@ -350,7 +353,7 @@ public class Language {
 	 * @param id the identifier
 	 * @return The first set for the identifier.
 	 */
-	public Node<?> first(String id) {
+	public Node<?,?> first(String id) {
 		return beginTraversal(new FirstSet(this), id);
 	}
 	/**
@@ -358,7 +361,7 @@ public class Language {
 	 * 
 	 * @return The first set (the set of symbols appearing first in any derivation)
 	 */
-	public Node<?> first() {
+	public Node<?,?> first() {
 		return beginTraversal(new FirstSet(this));
 	}
 	
@@ -368,7 +371,7 @@ public class Language {
 	 * 
 	 * @param language
 	 */
-	public boolean nullable(Node<?> language) {
+	public boolean nullable(Node<?,?> language) {
 		return beginTraversal(nullable, language);
 	}
 	/**
@@ -394,7 +397,7 @@ public class Language {
 	 * @param language
 	 * @return
 	 */
-	public Node<?> derivative(char c, Node<?> language) {
+	public Node<?,?> derivative(char c, Node<?,?> language) {
 		derivative.c = c;
 		return beginTraversal(derivative, language);
 	}
@@ -405,7 +408,7 @@ public class Language {
 	 * @param language
 	 * @return
 	 */
-	public Node<?> derivative(char c) {
+	public Node<?,?> derivative(char c) {
 		return derivative(c, definition);
 	}
 	
@@ -413,7 +416,7 @@ public class Language {
 	 * Garbage collect unreferenced identifiers (nonterminals).
 	 * @param language the root set language for gc.
 	 */
-	public void gc(Node<?> language) {
+	public void gc(Node<?,?> language) {
 		WorkQueue<Id> list = derivative.getWorkList();
 		Iterator<Entry<String, Id>> iterator = labels.entrySet().iterator();
 		while(iterator.hasNext()) {
@@ -439,7 +442,7 @@ public class Language {
 	
 	public void backup() {
 		for (Id id : labels.values()) {
-			startids.put((String)id.data, id);
+			startids.put((String)id.left, id);
 		}
 		for (Id id : ids) {
 			startidSet.add(id);
@@ -452,7 +455,7 @@ public class Language {
 		ids = startidSet;
 	}
 
-	public boolean matches(Node<?> language, String s) {
+	public boolean matches(Node<?,?> language, String s) {
 		boolean result;
 		backup();
 		GraphViz gv = new GraphViz(this);
@@ -460,18 +463,11 @@ public class Language {
 			language = derivative(s.charAt(i), language);
 			gc(language);
 			if (debug) {
-				if (labels.size() > 0) {
-//					System.out.println("top: " + (String)language.data);
-//					System.out.println("ids: " + labels.size() + " " + labels.keySet());
-//					System.out.println(toString(language));
-					System.out.println(beginTraversal(gv, language));
-				}
-//				System.out.println(s.charAt(i));
+				System.out.println(beginTraversal(gv, language));
 			}
 		}
 		if (debug) {
 			System.out.println(beginTraversal(gv, language));
-//			System.out.println(toString(language));
 		}
 		result = nullable(language);
 		restore();

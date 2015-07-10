@@ -2,7 +2,6 @@ package languageV2.traversal;
 
 import languageV2.Language;
 import util.Node;
-import util.TaggedDataPair;
 
 /**
  * Traverse a language specification.
@@ -18,25 +17,20 @@ import util.TaggedDataPair;
 public interface Visitor<T> {
 	/**
 	 * Visit symbol `c`
-	 * @param id TODO
-	 * @param c Character
 	 */
-	T symbol(Node<Character> language);
+	T symbol(Node<Character,Character> language);
 	/**
 	 * Visit a list of languages `abc...`
-	 * @param list The language list
 	 */
-	T list(Node<TaggedDataPair> list);
+	T list(Node<Node<?,?>,Node<?,?>> language);
 	/**
 	 * Visit a language loop `a*`
-	 * @param loop The language `a*`
 	 */
-	T loop(Node<Node<?>> language);
+	T loop(Node<Node<?,?>,Node<?,?>> language);
 	/**
 	 * Visit a set of languages `a|b|c|...`
-	 * @param set A set of languages
 	 */
-	T set(Node<TaggedDataPair> set);
+	T set(Node<Node<?,?>,Node<?,?>> set);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
@@ -52,7 +46,7 @@ public interface Visitor<T> {
 	 * @param id The identifier
 	 * @param rhs The identifier's right hand side
 	 */
-	T rule(Language.Id id, Node<?> rhs);
+	T rule(Language.Id id, Node<?,?> rhs);
 	/**
 	 * The default result.
 	 * 
