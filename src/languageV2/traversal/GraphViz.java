@@ -87,11 +87,9 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		buffer.append("digraph f { \n");
 		buffer.append("node [shape=record];\n");
 	}
-	public void end() {
-		buffer.append(" }");
-	}
 	@Override
 	public StringBuffer end(StringBuffer accumulator) {
+		buffer.append(" }");
 		return accumulator;
 	}
 }
