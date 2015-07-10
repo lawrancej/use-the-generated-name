@@ -54,7 +54,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public Node<?,?> id(Language.Id id) {
 		// Handle left-recursion: return DcId if we're visiting Id -> Id
 		if (todo.visiting(id)) {
-			return id;
+			return getReplacement(id);
 		}
 		// Visit rule Id -> rhs, if we haven't already visited it.
 		if (!todo.visited(id)) {
@@ -97,10 +97,6 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	}
 	@Override
 	public Node<?, ?> end(Node<?, ?> accumulator) {
-		if (ids.size() > 0) {
-			return g.derives(g.id(), accumulator);
-		} else {
-			return accumulator;
-		}
+		return accumulator;
 	}
 }
