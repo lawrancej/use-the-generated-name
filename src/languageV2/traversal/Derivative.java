@@ -14,7 +14,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	}
 	public Node<?,?> symbol(Node<Character,Character> language) {
 		// Dc(c|.) = e
-		if (language == Language.any || (this.c >= language.left && this.c <= language.right)) {
+		if (language == Language.any || this.c == language.left || (this.c > language.left && this.c <= language.right)) {
 			return Language.empty;
 		}
 		// Dc(c') = 0
@@ -31,6 +31,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		return result;
 	}
 	public Node<?,?> loop(Node<Node<?,?>,Node<?,?>> loop) {
+		// D(a*)=D(a)a*
 //		return g.visit(this, g.list(language, loop));
 		return g.list(g.accept(this, loop.left), loop);
 	}
