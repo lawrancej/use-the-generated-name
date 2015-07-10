@@ -204,7 +204,6 @@ public class Language {
 		public Id(String label) {
 			super(Node.Tag.ID, label, reject);
 		}
-//		private Node<?,?> right = reject;
 	}
 	// Identifier lookup by name
 	private Map<String, Id> labels = new HashMap<String, Id>();
