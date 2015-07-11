@@ -55,6 +55,7 @@ public class Language {
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
 	private Node<?,?> listInstance(Node<?,?> left, Node<?,?> right) {
+		// Skip through defined identifiers
 		if (left.tag == Node.Tag.ID && left.right != reject) {
 			ids.remove(left);
 			left = (Node<?, ?>) left.right;
@@ -112,6 +113,7 @@ public class Language {
 	private Map<Integer, Node<?,?>> setCache = new HashMap<Integer, Node<?,?>>();
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
+		// Skip through defined identifiers
 		if (left.tag == Node.Tag.ID && left.right != reject) {
 			ids.remove(left);
 			left = (Node<?, ?>) left.right;
@@ -184,6 +186,7 @@ public class Language {
 	 */
 	public Node<?,?> many(Node<?,?>... nodes) {
 		Node<?,?> language = list(nodes);
+		// Skip through defined identifiers
 		if (language.tag == Node.Tag.ID && language.right != reject) {
 			ids.remove(language);
 			language = (Node<?, ?>) language.right;
