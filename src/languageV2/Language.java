@@ -256,20 +256,20 @@ public class Language {
 	public Node<?,?> derives(Id id, Node<?,?>... languages) {
 		Id result = id;
 		Node<?,?> right = list(languages);
-		// If Id -> Id literally, reject
-		//if (id == right) {
-		//	ids.remove(id);
-		//	return reject;
-		//}
-		// If the right rejects, remove identifier
+		// If the right rejects, remove the identifier
 		if (right == reject) {
 			ids.remove(id);
 			return reject;
 		}
-		// If the right is just an identifier...
+		// If we defined this language already with a different identifier, return the existing identifier
 		if (right.tag == Node.Tag.ID && result.right == reject) {
 			ids.remove(id);
 			return right;
+		}
+		// If Id -> Id literally, reject
+		if (id == right) {
+			ids.remove(id);
+			return reject;
 		}
 		// If the language is undefined, make this the starting nonterminal
 		if (definition == reject) {
