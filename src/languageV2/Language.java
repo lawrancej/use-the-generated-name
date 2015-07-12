@@ -3,9 +3,7 @@ package languageV2;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import languageV2.traversal.*;
@@ -71,7 +69,6 @@ public class Language {
 		// re = er = r
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
-		// (8) r(st) = (rs)t (FIXME: test to ensure list structures are enforced)
 		// FIXME: this is fast, but a bit dodgy
 		int key = left.hashCode() ^ right.hashCode();
 		if (!listCache.containsKey(key)) {
@@ -461,9 +458,14 @@ public class Language {
 		GraphViz gv = new GraphViz(this);
 		if (debug) {
 			System.out.println(beginTraversal(gv, language));
+			System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
 		}
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
+			if (debug) {
+				beginTraversal(gv, language);
+				System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
+			}
 		}
 		if (debug) {
 			System.out.println(beginTraversal(gv, language));
