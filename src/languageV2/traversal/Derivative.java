@@ -72,11 +72,8 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		// Visit the rhs
 		Node<?,?> derivation = g.accept(this,  rhs);
 		
-		// Don't create a rule that rejects or is empty (or doesn't contain its replacement?)
+		// Don't create a rule that rejects or is empty
 		if (derivation == Language.reject || derivation == Language.empty) {
-			return derivation;
-		}
-		if (ids.containsKey(id) && todo.visited(ids.get(id))) {
 			return derivation;
 		}
 		// Create a new rule
