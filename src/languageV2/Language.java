@@ -252,7 +252,15 @@ public class Language {
 		}
 		return result;
 	}
-	
+	/**
+	 * Define an identifier: `id -> right`
+	 * 
+	 * If the list of languages rejects, then this removes the identifier.
+	 * 
+	 * @param id the identifier
+	 * @param languages the right hand side
+	 * @return the identifier reference
+	 */
 	public Node<?,?> derives(Id id, Node<?,?>... languages) {
 		Id result = id;
 		Node<?,?> right = list(languages);
@@ -448,81 +456,19 @@ public class Language {
 	public Node<?,?> derivative(char c) {
 		return derivative(c, definition);
 	}
-	
-	/**
-	 * Garbage collect unreferenced identifiers (nonterminals).
-	 * @param language the root set language for gc.
-	 */
-	public void gc(Node<?,?> language) {
-		WorkQueue<Id> list = derivative.getWorkList();
-		Iterator<Entry<String, Id>> iterator = labels.entrySet().iterator();
-		while(iterator.hasNext()) {
-			Entry<String, Id> entry = iterator.next();
-			Id id = entry.getValue();
-			if (!list.visited(id)) {
-				iterator.remove();
-				ids.remove(id);
-			}
-		}
-	}
-	/**
-	 * Garbage collect unreferenced identifiers (nonterminals).
-	 */
-	public void gc() {
-		gc(definition);
-	}
-	
-	// FIXME: this code will be unnecessary once we switch to using persistent sets (aka treaps)
-	
-	private Map<String, Id> startids = new HashMap<String, Id>();
-	private Set<Id> startidSet = new HashSet<Id>();
-	
-	public void backup() {
-		for (Id id : labels.values()) {
-			startids.put((String)id.left, id);
-		}
-		for (Id id : ids) {
-			startidSet.add(id);
-		}
-	}
-	public void restore() {
-		labels.clear();
-		ids.clear();
-		labels = startids;
-		ids = startidSet;
-	}
-
 	public boolean matches(Node<?,?> language, String s) {
 		boolean result;
-		backup();
 		GraphViz gv = new GraphViz(this);
 		if (debug) {
 			System.out.println(beginTraversal(gv, language));
-			/*
-			try {
-				System.in.read();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			*/
 		}
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
-			gc(language);
-			if (debug) {
-				System.out.println(beginTraversal(gv, language));
-				/*try {
-					System.in.read();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}*/
-			}
 		}
 		if (debug) {
 			System.out.println(beginTraversal(gv, language));
 		}
 		result = nullable(language);
-		restore();
 		return result;
 	}
 	public boolean matches(String s) {
