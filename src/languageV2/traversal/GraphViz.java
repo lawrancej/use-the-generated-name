@@ -7,6 +7,10 @@ import languageV2.Language;
 import languageV2.Node;
 import languageV2.Language.Id;
 
+/**
+ * Debug grammar through GraphViz output and also query the size of the graph.
+ * @author Joseph Lawrance
+ */
 public class GraphViz extends AbstractVisitor<StringBuffer> {
 	StringBuffer buffer;
 	public GraphViz(Language g) {
@@ -109,5 +113,11 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	public StringBuffer end(StringBuffer accumulator) {
 		buffer.append(" }");
 		return accumulator;
+	}
+	public int edges() {
+		return edges.size();
+	}
+	public int nodes() {
+		return nodes.size();
 	}
 }
