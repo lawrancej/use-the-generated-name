@@ -38,12 +38,7 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 	public Node<?,?> reduce(Node<?,?> accumulator, Node<?,?> current) {
 		return g.or(accumulator, current);
 	}
-	@Override
 	public boolean done(Node<?,?> accumulator) {
 		return false;
-	}
-	@Override
-	public Node<?, ?> end(Node<?, ?> accumulator) {
-		return accumulator;
 	}
 }

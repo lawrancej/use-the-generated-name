@@ -79,8 +79,4 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	public boolean done(StringBuffer accumulator) {
 		return false;
 	}
-	@Override
-	public StringBuffer end(StringBuffer accumulator) {
-		return accumulator;
-	}
 }
