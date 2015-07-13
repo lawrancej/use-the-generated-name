@@ -22,12 +22,13 @@ public class GrammarTest {
 			derives(factor, or(digits, list(symbol('('), expression, symbol(')'))));
 			derives(digit, range('0', '9'));
 			derives(digits, digit, many(digit));
+			// debug = true;
 		}};
-		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertTrue(g.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertFalse(g.matches("1+"));
 		Assert.assertFalse(g.matches("27+"));
 		Assert.assertTrue(g.matches("27+34"));
+		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 
 	}
 	
@@ -196,7 +197,7 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
-			debug = true;
+			// debug = true;
 		}};
 		Assert.assertTrue(g.matches("xxxx"));
 		/*
@@ -253,6 +254,20 @@ public class GrammarTest {
 		Assert.assertTrue(g.matches("+[.+]+"));
 		Assert.assertFalse(g.matches("boo"));
 	}
+	
+	@Test
+	public void testCommonPrefix() {
+		Language g = new Language() {{
+			define(or(list(symbol('r'), symbol('t')), list(symbol('r'), symbol('s'))));
+			//debug = true;
+		}};
+		Assert.assertTrue(g.matches("rs"));
+		Language f = new Language() {{
+			define(list(symbol('r'), or(symbol('s'), symbol('t'))));
+			// debug = true;
+		}};
+		Assert.assertTrue(f.matches("rs"));
+	}
 
 	@Test
 	public void testRegexGrammar() {
@@ -264,12 +279,12 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			// debug = true;
+			debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
 		Assert.assertTrue(regex.matches("a|b**"));
-		Assert.assertTrue(regex.matches("(hello)|(world)"));
+		Assert.assertTrue(regex.matches("(hello)|(world)*"));
 	}
 	
 //	@After

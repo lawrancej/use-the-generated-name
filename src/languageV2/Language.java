@@ -141,6 +141,16 @@ public class Language {
 			if (r.right == left) return r;
 		}
 		// r(s+t) = rs+rt (FIXME: factor out common prefixes)
+		if (left.tag == Node.Tag.LIST && right.tag == Node.Tag.LIST) {
+			Node<?,?> l = (Node<?,?>) left;
+			Node<?,?> r = (Node<?,?>) right;
+			if (l.left == r.left) {
+				return listInstance((Node<?,?>)l.left, orInstance((Node<?,?>)l.right, (Node<?,?>)r.right));
+			}
+			if (l.right == r.right) {
+				return listInstance(orInstance((Node<?,?>)l.left, (Node<?,?>)r.left), (Node<?,?>)l.right);
+			}
+		}
 		// (r+s)t = rt+st (FIXME: factor out common suffixes)
 		int key = left.hashCode() ^ right.hashCode();
 		if (!setCache.containsKey(key)) {
