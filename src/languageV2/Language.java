@@ -69,6 +69,18 @@ public class Language {
 		// re = er = r
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
+		// (e+r)r* = r*
+		if (left.tag == Node.Tag.SET && right.tag == Node.Tag.LOOP) {
+			if (left.left == empty && left.right == right) {
+				return right;
+			}
+		}
+		// r*(e+r) = r*
+		if (right.tag == Node.Tag.SET && left.tag == Node.Tag.LOOP) {
+			if (right.left == empty && right.right == left) {
+				return left;
+			}
+		}
 		// FIXME: this is fast, but a bit dodgy
 		int key = left.hashCode() ^ right.hashCode();
 		if (!listCache.containsKey(key)) {
@@ -124,24 +136,45 @@ public class Language {
 		if (right == reject) { return left; }
 		// r+r = r
 		if (left == right) { return left; }
-		// r+s = s+r (No need to sort regexes to ensure canonical order)
-		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
+//		Node <?,?> temp;
+		// r+s = s+r (Sort regexes by hashcode to ensure canonical order)
+//		if (left.hashCode() > right.hashCode()) {
+//			temp = left;
+//			left = right;
+//			left = temp;
+//		}
+		// Furthermore, put empty on the left
+//		if (right == empty) {
+//			right = left;
+//			left = empty;
+//		}
 		if (left.tag == Node.Tag.SET) {
-			Node<?,?> l = (Node<?,?>) left;
 			// (r+s)+r = r+s
-			if (l.left == right) return l;
+			if (left.left == right) return left;
 			// (s+r)+r = s+r
-			if (l.right == right) return l;
+			if (left.right == right) return left;
 		}
 		if (right.tag == Node.Tag.SET) {
-			Node<?,?> r = (Node<?,?>) right;
-			// (r+s)+r = r+s
-			if (r.left == left) return r;
-			// (s+r)+r = s+r
-			if (r.right == left) return r;
+			// r+(r+s) = r+s
+			if (right.left == left) return right;
+			// r+(s+r) = s+r
+			if (right.right == left) return right;
 		}
-		// r(s+t) = rs+rt (FIXME: factor out common prefixes)
-		// (r+s)t = rt+st (FIXME: factor out common suffixes)
+		// r*s+s = r*s
+		if (left.tag == Node.Tag.LIST && left != empty) {
+			Node<?,?> l = (Node<?,?>)left.left;
+			if (l.tag == Node.Tag.LOOP && left.right == right) {
+				return left;
+			}
+		}
+		// s+r*s = r*s
+		if (right.tag == Node.Tag.LIST && right != empty) {
+			Node<?,?> r = (Node<?,?>)right.left;
+			if (r.tag == Node.Tag.LOOP && right.right == left) {
+				return right;
+			}
+		}
+		// Okay, fine. Create a set (union)
 		int key = left.hashCode() ^ right.hashCode();
 		if (!setCache.containsKey(key)) {
 			Node<?,?> result = Node.create(Node.Tag.SET, left, right);
@@ -191,10 +224,10 @@ public class Language {
 		// Avoid creating a new loop, if possible
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
-		// (11) (e+r)+ = r* (FIXME: need plus loop)
-		// (12) (e+r)* = r* (FIXME: check for this condition)
-		// (13) r*(e+r) = (e+r)r* = r* (FIXME: check for this condition)
-		// (14) r*s+s = r*s (FIXME: check for this condition)
+		// (e+r)* = r*
+		if (language.tag == Node.Tag.SET && (language.left == empty || language.right == empty)) {
+			return many((Node<?,?>)language.right);
+		}
 		// (15) r(sr)* = (rs)*r (FIXME: check for this condition)
 		// (16) (r+s)* = (r*s)*r* = (s*r)*s* (FIXME: check for this condition)
 		if (language.tag == Node.Tag.LOOP) return language;
