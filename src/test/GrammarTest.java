@@ -96,15 +96,15 @@ public class GrammarTest {
 
 			//debug = true;
 		}};
-		long before, after;
-		before = System.nanoTime();
+//		long before, after;
+//		before = System.nanoTime();
 		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
-		after = System.nanoTime();
-		System.out.println(after - before);
-		before = System.nanoTime();
+//		after = System.nanoTime();
+//		System.out.println(after - before);
+//		before = System.nanoTime();
 		Assert.assertFalse(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
-		after = System.nanoTime();
-		System.out.println(after - before);
+//		after = System.nanoTime();
+//		System.out.println(after - before);
 	}
 
 	@Test
@@ -196,7 +196,7 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
-			debug = true;
+			//debug = true;
 		}};
 		Assert.assertTrue(g.matches("xxxx"));
 		/*
@@ -259,12 +259,30 @@ public class GrammarTest {
 		Language regex = new Language() {{
 			derives("regex",id("term"),symbol('|'),id("regex"));
 			derives("regex",id("term"));
+			derives("term",id("factor"),id("term"));
+			derives("term");
+			derives("factor",id("base"), option(symbol('*')));
+			derives("base",any);
+			derives("base",symbol('\\'), any);
+			derives("base",symbol('('), id("regex"), symbol(')'));
+			//debug = true;
+		}};
+		Assert.assertTrue(regex.matches("a"));
+		Assert.assertTrue(regex.matches("a|b"));
+		Assert.assertTrue(regex.matches("a|b**"));
+		Assert.assertTrue(regex.matches("(hello)|(world)"));
+	}
+	@Test
+	public void testRegexGrammar2() {
+		Language regex = new Language() {{
+			derives("regex",id("term"),symbol('|'),id("regex"));
+			derives("regex",id("term"));
 			derives("term",many(id("factor")));
 			derives("factor",id("base"), option(symbol('*')));
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			// debug = true;
+			debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
