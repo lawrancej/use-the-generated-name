@@ -469,6 +469,7 @@ public class Language {
 		}
 		if (debug) {
 			System.out.println(beginTraversal(gv, language));
+			System.out.println(toString(language));
 		}
 		result = nullable(language);
 		return result;

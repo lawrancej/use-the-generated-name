@@ -196,7 +196,7 @@ public class GrammarTest {
 		Language g = new Language() {{
 			derives("L",id("L"),symbol('x'));
 			derives("L");
-			debug = true;
+			// debug = true;
 		}};
 		Assert.assertTrue(g.matches("xxxx"));
 		/*
@@ -264,7 +264,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			// debug = true;
+			debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));

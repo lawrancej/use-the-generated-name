@@ -24,7 +24,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
-		if (list == null) {
+		if (list == Language.empty) {
 			buffer.append("\u03b5");
 		} else {
 			buffer.append('(');
@@ -36,7 +36,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
-		if (set == null) {
+		if (set == Language.reject) {
 			buffer.append("\u2205");
 		} else {
 			buffer.append('(');
