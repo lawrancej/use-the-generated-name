@@ -3,16 +3,11 @@ package languageV2;
 /**
  * A language is a set of strings (lists of symbols).
  * 
- * Specifying a finite language requires symbols, lists, and sets.
- * Specifying an infinite language also requires repetition or recursion.
- * Loops specify repetition, and identifiers enable recursion.
+ * Recursion and repetition specify infinite languages.
  */
 public class Node<L,R> {
 	public enum Tag {
-		// Finite language specifiers
-		SYMBOL,	LIST, SET,
-		// Infinite language specifiers
-		LOOP, ID,
+		SYMBOL,	LIST, SET, ID
 	}
 	public final Tag tag;
 	public final L left;

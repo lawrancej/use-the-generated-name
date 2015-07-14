@@ -53,15 +53,6 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> language) {
-		if (!nodes.contains(language)) {
-			nodes.add(language);
-			buffer.append(String.format("%s [label=\"Loop\"];\n", language.hashCode()));
-			g.accept(this, language.left);
-			drawEdge(language.hashCode(), language.left.hashCode());
-		}
-		return buffer;
-	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
 		if (!nodes.contains(set)) {
 			nodes.add(set);

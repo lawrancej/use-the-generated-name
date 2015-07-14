@@ -47,12 +47,6 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> loop) {
-		buffer.append('(');
-		g.accept(this,loop.left);
-		buffer.append(")*");
-		return buffer;
-	}
 	public StringBuffer id(Language.Id id) {
 		buffer.append('<');
 		if (id.left == null) {

@@ -11,9 +11,6 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 	public Node<?,?> symbol(Node<Character,Character> c) {
 		return c;
 	}
-	public Node<?,?> loop(Node<Node<?,?>,Node<?,?>> loop) {
-		return g.accept(this, loop.left);
-	}
 	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> pair) {
 		if (pair == Language.empty) return bottom();
 		Node<?,?> result = g.accept(this, pair.left);

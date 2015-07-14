@@ -24,10 +24,6 @@ public interface Visitor<T> {
 	 */
 	T list(Node<Node<?,?>,Node<?,?>> language);
 	/**
-	 * Visit a language loop `a*`
-	 */
-	T loop(Node<Node<?,?>,Node<?,?>> language);
-	/**
 	 * Visit a set of languages `a|b|c|...`
 	 */
 	T set(Node<Node<?,?>,Node<?,?>> set);

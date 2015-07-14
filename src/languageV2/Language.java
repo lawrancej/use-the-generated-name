@@ -25,7 +25,7 @@ public class Language {
 	/** Reject everything (the empty set). */
 	public static final Node<Node<?,?>,Node<?,?>> reject = Node.create(Node.Tag.SET,null,null);
 
-	private Map<Integer, Node<Character,Character>> symbols = new HashMap<Integer, Node<Character,Character>>();
+	private Map<Integer, Node<Character,Character>> alphabet = new HashMap<Integer, Node<Character,Character>>();
 	/**
 	 * Match a character
 	 * 
@@ -42,12 +42,12 @@ public class Language {
 			to = tmp;
 		}
 		int key = (from << 16) | to;
-		if (!symbols.containsKey(key)) {
+		if (!alphabet.containsKey(key)) {
 			Node<Character,Character> result = Node.create(Node.Tag.SYMBOL, from,to);
-			symbols.put(key, result);
+			alphabet.put(key, result);
 			return result;
 		}
-		return symbols.get(key);
+		return alphabet.get(key);
 	}
 	
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
@@ -124,7 +124,6 @@ public class Language {
 		if (right == reject) { return left; }
 		// r+r = r
 		if (left == right) { return left; }
-		// r+s = s+r (No need to sort regexes to ensure canonical order)
 		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
 		if (left.tag == Node.Tag.SET) {
 			Node<?,?> l = (Node<?,?>) left;
@@ -140,8 +139,6 @@ public class Language {
 			// (s+r)+r = s+r
 			if (r.right == left) return r;
 		}
-		// r(s+t) = rs+rt (FIXME: factor out common prefixes)
-		// (r+s)t = rt+st (FIXME: factor out common suffixes)
 		int key = left.hashCode() ^ right.hashCode();
 		if (!setCache.containsKey(key)) {
 			Node<?,?> result = Node.create(Node.Tag.SET, left, right);
@@ -172,7 +169,7 @@ public class Language {
 	 * @return A language matching one of the languages, optionally.
 	 */
 	public Node<?,?> option(Node<?,?> language) {
-		return or(language, empty);
+		return or(empty, language);
 	}
 	
 	/**
@@ -191,15 +188,16 @@ public class Language {
 		// Avoid creating a new loop, if possible
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
-		// (11) (e+r)+ = r* (FIXME: need plus loop)
-		// (12) (e+r)* = r* (FIXME: check for this condition)
-		// (13) r*(e+r) = (e+r)r* = r* (FIXME: check for this condition)
-		// (14) r*s+s = r*s (FIXME: check for this condition)
-		// (15) r(sr)* = (rs)*r (FIXME: check for this condition)
-		// (16) (r+s)* = (r*s)*r* = (s*r)*s* (FIXME: check for this condition)
-		if (language.tag == Node.Tag.LOOP) return language;
-		// Any specifies a character range, but we can use that language to encode two small numbers. Win.
-		return Node.create(Node.Tag.LOOP, language, any);
+		Id loop = id();
+		if (definition == reject) {
+			derives(loop, language, loop);
+			derives(loop);
+			definition = reject;
+		} else {
+			derives(loop, language, loop);
+			derives(loop);
+		}
+		return loop;
 	}
 	/** Identifiers are nonterminals. Identifiers enable recursion. */
 	public static class Id extends Node<String,Node<?,?>> {
@@ -321,8 +319,6 @@ public class Language {
 			return visitor.id((Id)language);
 		case LIST:
 			return visitor.list((Node<Node<?,?>,Node<?,?>>)language);
-		case LOOP:
-			return visitor.loop((Node<Node<?,?>,Node<?,?>>)language);
 		case SET:
 			return visitor.set((Node<Node<?,?>,Node<?,?>>)language);
 		case SYMBOL:
