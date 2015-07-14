@@ -301,8 +301,8 @@ public class Language {
 	 * 
 	 * @param language The language
 	 */
-	public void define(Node<?,?> language) {
-		definition = language;
+	public void define(Node<?,?>... language) {
+		definition = list(language);
 	}
 	
 	/**
