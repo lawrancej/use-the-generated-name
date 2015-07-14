@@ -129,7 +129,7 @@ public class GrammarTest {
 		Assert.assertFalse(g.matches(""));
 		Language f = new Language() {{
 			derives("hi",many(symbol('a')),many(symbol('b')));
-			debug = true;
+			// debug = true;
 		}};
 		Assert.assertTrue(f.matches("ab"));
 		Assert.assertTrue(f.matches(""));
