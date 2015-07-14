@@ -27,14 +27,20 @@ public class Language {
 
 	private Map<Integer, Node<Character,Character>> alphabet = new HashMap<Integer, Node<Character,Character>>();
 	/**
-	 * Match a character
+	 * Match a character.
 	 * 
-	 * @param c The character
-	 * @return A language matching character c.
+	 * @param character to match (e.g., <code>c</code>)
+	 * @return A language matching the character: <code>c</code>
 	 */
-	public Node<Character,Character> symbol(char c) {
-		return range(c,c);
+	public Node<Character,Character> symbol(char character) {
+		return range(character,character);
 	}
+	/**
+	 * Match a range of characters (i.e., character class).
+	 * @param from character
+	 * @param to character
+	 * @return A language matching <code>[from-to]</code>
+	 */
 	public Node<Character,Character> range(char from, char to) {
 		char tmp = from;
 		if (from > to) {
@@ -51,17 +57,18 @@ public class Language {
 	}
 	
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
+	private Node<?,?> skipDefinedIdentifier(Node<?,?> language) {
+		if (language.tag == Node.Tag.ID && language.right != reject) {
+			ids.remove(language);
+			language = (Node<?, ?>) language.right;
+		}
+		return language;
+	}
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
 	private Node<?,?> listInstance(Node<?,?> left, Node<?,?> right) {
 		// Skip through defined identifiers
-		if (left.tag == Node.Tag.ID && left.right != reject) {
-			ids.remove(left);
-			left = (Node<?, ?>) left.right;
-		}
-		if (right.tag == Node.Tag.ID && right.right != reject) {
-			ids.remove(right);
-			right = (Node<?,?>) right.right;
-		}
+		left = skipDefinedIdentifier(left);
+		right = skipDefinedIdentifier(right);
 		// r0 = 0r = 0
 		if (left == reject || right == reject) {
 			return reject;
@@ -86,24 +93,24 @@ public class Language {
 		}
 	}
 	/**
-	 * Match a sequence of languages
+	 * Match a sequence of languages.
 	 * 
-	 * @param nodes A sequence of languages
-	 * @return A language matching the languages in order
+	 * @param sequence of languages (a,b,c,...)
+	 * @return A language matching the sequence in order: <code>abcd...</code>
 	 */
-	public Node<?,?> list(Node<?,?>... nodes) {
-		return list(nodes, 0);
+	public Node<?,?> list(Node<?,?>... sequence) {
+		return list(sequence, 0);
 	}
 	/**
-	 * Match String s literally.
+	 * Match a string literally.
 	 * 
-	 * @param s the String to match
-	 * @return A language matching String s.
+	 * @param string to match literally (e.g., <code>hello</code>)
+	 * @return A language matching the string: <code>hello<code>
 	 */
-	public Node<?,?> string(String s) {
-		Node<?,?>[] array = new Node<?,?>[s.length()];
-		for (int i = 0; i < s.length(); i++) {
-			array[i] = symbol(s.charAt(i));
+	public Node<?,?> string(String string) {
+		Node<?,?>[] array = new Node<?,?>[string.length()];
+		for (int i = 0; i < string.length(); i++) {
+			array[i] = symbol(string.charAt(i));
 		}
 		return list(array, 0);
 	}
@@ -111,14 +118,8 @@ public class Language {
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
 		// Skip through defined identifiers
-		if (left.tag == Node.Tag.ID && left.right != reject) {
-			ids.remove(left);
-			left = (Node<?, ?>) left.right;
-		}
-		if (right.tag == Node.Tag.ID && right.right != reject) {
-			ids.remove(right);
-			right = (Node<?,?>) right.right;
-		}
+		left = skipDefinedIdentifier(left);
+		right = skipDefinedIdentifier(right);
 		// r+0 = 0+r = r
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
@@ -155,36 +156,34 @@ public class Language {
 		}
 	}
 	/**
-	 * Match one of the languages
+	 * Match any of the options.
 	 * 
-	 * @param nodes Languages to match
-	 * @return A language matching one of the languages
+	 * @param options to match (a,b,c,...,z)
+	 * @return A language matching one of the options <code>(a|b|c|...|z)</code>
 	 */
-	public Node<?,?> or(Node<?,?>... nodes) {
-		return or(nodes, 0);
+	public Node<?,?> or(Node<?,?>... options) {
+		return or(options, 0);
 	}
 	/**
-	 * Match a language, optionally.
-	 * @param language The language to match
-	 * @return A language matching one of the languages, optionally.
+	 * Match a sequence, optionally.
+	 * 
+	 * @param sequence to match optionally (a,b,c,...,z)
+	 * @return A language matching the sequence optionally <code>(abc...z)?</code>
 	 */
-	public Node<?,?> option(Node<?,?> language) {
-		return or(empty, language);
+	public Node<?,?> option(Node<?,?>... sequence) {
+		return or(empty, list(sequence));
 	}
 	
 	/**
-	 * Match a language zero or more times
+	 * Match a sequence zero or more times.
 	 * 
-	 * @param language The language
-	 * @return A language that matches the input language zero or more times
+	 * @param sequence to match repeatedly (e.g., <code>ab</code>)
+	 * @return A language matching the sequence zero or more times: <code>(ab)*</code>
 	 */
-	public Node<?,?> many(Node<?,?>... nodes) {
-		Node<?,?> language = list(nodes);
+	public Node<?,?> many(Node<?,?>... sequence) {
+		Node<?,?> language = list(sequence);
 		// Skip through defined identifiers
-		if (language.tag == Node.Tag.ID && language.right != reject) {
-			ids.remove(language);
-			language = (Node<?, ?>) language.right;
-		}
+		language = skipDefinedIdentifier(language);
 		// Avoid creating a new loop, if possible
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
@@ -212,17 +211,21 @@ public class Language {
 	private Map<String, Id> labels = new HashMap<String, Id>();
 	private Set<Id> ids = new HashSet<Id>();
 	/**
-	 * Reference an identifier.
+	 * Create or use an identifier (a terminal or nonterminal variable).
 	 * 
-	 * @param s The identifier name.
+	 * @param label for the identifier.
 	 * @return The identifier.
 	 */
-	public Id id(String s) {
-		if (!labels.containsKey(s)) {
-			labels.put(s, new Id(s));
+	public Id id(String label) {
+		if (!labels.containsKey(label)) {
+			labels.put(label, new Id(label));
 		}
-		return labels.get(s);
+		return labels.get(label);
 	}
+	/**
+	 * Create an identifier (a terminal or nonterminal variable).
+	 * @return The identifier
+	 */
 	public Id id() {
 		Id result = new Id();
 		ids.add(result);
@@ -232,33 +235,41 @@ public class Language {
 	/** The language definition. The root of all traversal. */
 	private Node<?,?> definition = reject;
 	/**
-	 * Define an identifier: `id -> right`
+	 * Define an identifier.
 	 * 
-	 * If the list of languages rejects, then this removes the identifier.
+	 * <p>
+	 * <code>label -> rhs</code>
+	 * <p>
+	 * Side effect: the first call to <code>derives</code> defines the starting identifier.
+	 * Subsequent calls to <code>derives</code> add rules for the identifier.
 	 * 
-	 * @param id the identifier
-	 * @param languages the right hand side
-	 * @return the identifier reference
+	 * @param label for the identifier
+	 * @param rhs the right hand side
+	 * @return The identifier, or reject (if the rhs rejects or <code>id -> id</code>).
 	 */
-	public Node<?,?> derives(String id, Node<?,?>... languages) {
-		Node<?,?> result = derives(id(id), languages);
+	public Node<?,?> derives(String label, Node<?,?>... rhs) {
+		Node<?,?> result = derives(id(label), rhs);
 		if (result == reject) {
-			labels.remove(id);
+			labels.remove(label);
 		}
 		return result;
 	}
 	/**
-	 * Define an identifier: `id -> right`
+	 * Define an identifier.
 	 * 
-	 * If the list of languages rejects, then this removes the identifier.
+	 * <p>
+	 * <code>id -> rhs</code>
+	 * <p>
+	 * Side effect: the first call to <code>derives</code> defines the starting identifier.
+	 * Subsequent calls to <code>derives</code> add rules for the identifier.
 	 * 
 	 * @param id the identifier
-	 * @param languages the right hand side
-	 * @return the identifier reference
+	 * @param rhs the right hand side
+	 * @return The identifier, or reject (if the rhs rejects or <code>id -> id</code>).
 	 */
-	public Node<?,?> derives(Id id, Node<?,?>... languages) {
+	public Node<?,?> derives(Id id, Node<?,?>... rhs) {
 		Id result = id;
-		Node<?,?> right = list(languages);
+		Node<?,?> right = list(rhs);
 		// If the right rejects, remove the identifier
 		if (right == reject) {
 			ids.remove(id);
@@ -284,8 +295,8 @@ public class Language {
 	
 	/**
 	 * Specify a language.
-	 * 
-	 * For regular expressions, surround the definition with define().
+	 * <p>
+	 * For regular expressions, surround the definition with <code>define()</code>.
 	 * For grammars, the first derivation is the starting nonterminal.
 	 * 
 	 * @param language The language
@@ -295,7 +306,7 @@ public class Language {
 	}
 	
 	/**
-	 * Accept visitor into a rule of the form id ::= right.
+	 * Accept visitor into a rule of the form: <code>id -> right</code>
 	 * 
 	 * @param visitor
 	 * @param id
@@ -370,6 +381,9 @@ public class Language {
 	public <T> T beginTraversal(Visitor<T> visitor) {
 		return beginTraversal(visitor, definition);
 	}
+	/**
+	 * Debug output
+	 */
 	public boolean debug = false;
 	public String toString() {
 		return beginTraversal(new Printer(this)).toString();
