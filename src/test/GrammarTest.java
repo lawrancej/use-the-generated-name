@@ -22,7 +22,9 @@ public class GrammarTest {
 			derives(factor, or(digits, list(symbol('('), expression, symbol(')'))));
 			derives(digit, range('0', '9'));
 			derives(digits, digit, many(digit));
+			//debug = true;
 		}};
+		//System.out.println(g.toString());
 		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertTrue(g.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertFalse(g.matches("1+"));
@@ -125,6 +127,15 @@ public class GrammarTest {
 		}};
 		Assert.assertTrue(g.matches("abcdefg"));
 		Assert.assertFalse(g.matches(""));
+		Language f = new Language() {{
+			derives("hi",many(symbol('a')),many(symbol('b')));
+			debug = true;
+		}};
+		Assert.assertTrue(f.matches("ab"));
+		Assert.assertTrue(f.matches(""));
+		Assert.assertTrue(f.matches("aaaaaabbbb"));
+		Assert.assertTrue(f.matches("aaaaaaaaaaaaaaaaa"));
+		Assert.assertFalse(f.matches("aaaaaaaaabaaaaaaaa"));
 	}
 
 	@Test
@@ -199,14 +210,12 @@ public class GrammarTest {
 			// debug = true;
 		}};
 		Assert.assertTrue(g.matches("xxxx"));
-		/*
 		Assert.assertTrue(g.matches("xx"));
 		Assert.assertTrue(g.matches(""));
 		Assert.assertTrue(g.matches("x"));
 		Assert.assertTrue(g.matches("xxx"));
 		Assert.assertTrue(g.matches("xxxxxxxxxxxxxxxxxxxxxxx"));
 		Assert.assertFalse(g.matches("L"));
-		*/
 	}
 	
 	@Test
@@ -264,7 +273,7 @@ public class GrammarTest {
 			derives("base",any);
 			derives("base",symbol('\\'), any);
 			derives("base",symbol('('), id("regex"), symbol(')'));
-			debug = true;
+			//debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
@@ -272,11 +281,9 @@ public class GrammarTest {
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
 	
-//	@After
+	@After
 	public void summary() {
-		// 1817 non id
-		// 1238 id
-		// 3055 total
+		// 2335 total
 		System.out.println(Node.allocations);
 	}
 }
