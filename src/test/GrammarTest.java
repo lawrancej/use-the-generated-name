@@ -133,6 +133,8 @@ public class GrammarTest {
 		}};
 		Assert.assertTrue(f.matches("ab"));
 		Assert.assertTrue(f.matches(""));
+		Assert.assertTrue(f.matches("b"));
+		Assert.assertFalse(f.matches("c"));
 		Assert.assertTrue(f.matches("aaaaaabbbb"));
 		Assert.assertTrue(f.matches("aaaaaaaaaaaaaaaaa"));
 		Assert.assertFalse(f.matches("aaaaaaaaabaaaaaaaa"));
