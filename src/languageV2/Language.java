@@ -188,17 +188,15 @@ public class Language {
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
 		Id loop = id();
-		if (definition == reject) {
-			derives(loop, language, loop);
-			derives(loop);
+		boolean flag = (definition == reject);
+		derives(loop, language, loop);
+		derives(loop);
+		if (flag) {
 			definition = reject;
-		} else {
-			derives(loop, language, loop);
-			derives(loop);
 		}
 		return loop;
 	}
-	/** Identifiers are nonterminals. Identifiers enable recursion. */
+	/** Identifiers are terminal or nonterminal variables. */
 	public static class Id extends Node<String,Node<?,?>> {
 		public Id() {
 			super(Node.Tag.ID, null, reject);
