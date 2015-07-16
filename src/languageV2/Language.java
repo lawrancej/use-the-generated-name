@@ -128,17 +128,11 @@ public class Language {
 		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
 		if (left.tag == Node.Tag.SET) {
 			Node<?,?> l = (Node<?,?>) left;
-			// (r+s)+r = r+s
-			if (l.left == right) return l;
-			// (s+r)+r = s+r
-			if (l.right == right) return l;
+			if (l.left == right || l.right == right) return l;
 		}
 		if (right.tag == Node.Tag.SET) {
 			Node<?,?> r = (Node<?,?>) right;
-			// (r+s)+r = r+s
-			if (r.left == left) return r;
-			// (s+r)+r = s+r
-			if (r.right == left) return r;
+			if (r.left == left || r.right == left) return r;
 		}
 		int key = left.hashCode() ^ right.hashCode();
 		if (!setCache.containsKey(key)) {
