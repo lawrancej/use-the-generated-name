@@ -60,7 +60,7 @@ public class Language {
 	private Node<?,?> skipDefinedIdentifier(Node<?,?> language) {
 		int key = language.hashCode();
 		if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
-//			ids.remove(language);
+			ids.remove(language);
 			language = (Node<?, ?>) rules.get(key).right;
 		}
 		return language;
@@ -261,18 +261,18 @@ public class Language {
 		Node<?,?> right = list(rhs);
 		// If the right rejects, remove the identifier
 		if (right == reject) {
-//			ids.remove(id);
+			ids.remove(id);
 			return reject;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
 		int key = id.hashCode();
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-//			ids.remove(id);
+			ids.remove(id);
 			return right;
 		}
 		// If Id -> Id literally, reject
 		if (id == right) {
-//			ids.remove(id);
+			ids.remove(id);
 			return reject;
 		}
 		// If the language is undefined, make this the starting identifier

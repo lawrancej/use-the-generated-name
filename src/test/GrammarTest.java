@@ -260,9 +260,9 @@ public class GrammarTest {
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
 	
-//	@After
+	@After
 	public void summary() {
-		// 2335 total
+		// 3528 total
 		System.out.println(Node.allocations);
 	}
 }
