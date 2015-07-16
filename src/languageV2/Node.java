@@ -11,7 +11,7 @@ public class Node<L,R> {
 	}
 	public final Tag tag;
 	public final L left;
-	public R right;
+	public final R right;
 	public static int allocations = 0;
 	protected Node(Tag type, L left, R right) {
 		this.tag = type;

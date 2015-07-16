@@ -57,16 +57,18 @@ public class Language {
 	}
 	
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
-	// FIXME
 	private Node<?,?> skipDefinedIdentifier(Node<?,?> language) {
-		if (language.tag == Node.Tag.ID && language.right != reject) {
-			ids.remove(language);
-			language = (Node<?, ?>) language.right;
+		int key = language.hashCode();
+		if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
+//			ids.remove(language);
+			language = (Node<?, ?>) rules.get(key).right;
 		}
 		return language;
 	}
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
 	private Node<?,?> listInstance(Node<?,?> left, Node<?,?> right) {
+		assert left != null;
+		assert right != null;
 		// Skip through defined identifiers
 		left = skipDefinedIdentifier(left);
 		right = skipDefinedIdentifier(right);
@@ -200,6 +202,7 @@ public class Language {
 	 * @return The identifier.
 	 */
 	public Node<String,Void> id(String label) {
+		assert label != null;
 		if (!labels.containsKey(label)) {
 			labels.put(label, Node.create(Node.Tag.ID, label, (Void)null));
 		}
@@ -223,14 +226,16 @@ public class Language {
 	 * <p>
 	 * <code>label -> rhs</code>
 	 * <p>
-	 * Side effect: the first call to <code>derives</code> defines the starting identifier.
-	 * Subsequent calls to <code>derives</code> add rules for the identifier.
+	 * Side effect: the first call to <code>rule</code> defines the starting identifier.
+	 * Subsequent calls to <code>rule</code> add rules for the identifier.
 	 * 
 	 * @param label for the identifier
 	 * @param rhs the right hand side
 	 * @return The identifier, or reject (if the rhs rejects or <code>id -> id</code>).
 	 */
 	public Node<?,?> rule(String label, Node<?,?>... rhs) {
+		assert label != null;
+		assert rhs != null;
 		Node<?,?> result = rule(id(label), rhs);
 		if (result == reject) {
 			labels.remove(label);
@@ -251,31 +256,35 @@ public class Language {
 	 * @return The identifier, or reject (if the rhs rejects or <code>id -> id</code>).
 	 */
 	public Node<?,?> rule(Node<String,Void> id, Node<?,?>... rhs) {
-		Node<?,?> result = id;
+		assert id != null;
+		assert rhs != null;
 		Node<?,?> right = list(rhs);
 		// If the right rejects, remove the identifier
 		if (right == reject) {
-			ids.remove(id);
+//			ids.remove(id);
 			return reject;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
-		// FIXME
-		if (right.tag == Node.Tag.ID && result.right == reject) {
-			ids.remove(id);
+		int key = id.hashCode();
+		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
+//			ids.remove(id);
 			return right;
 		}
 		// If Id -> Id literally, reject
 		if (id == right) {
-			ids.remove(id);
+//			ids.remove(id);
 			return reject;
 		}
-		// If the language is undefined, make this the starting nonterminal
+		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
-			definition = result;
+			definition = id; // FIXME?
 		}
-		Node<?,?> rule = Node.create(Node.Tag.RULE, id, right);
-//		result.right = or(result.right, right);
-		return rule;
+		if (!rules.containsKey(key)) {
+			Node<Node<String, Void>, ?> rule = Node.create(Node.Tag.RULE, id, right);
+			rules.put(key, rule);
+			return id;
+		}
+		return rules.get(key);
 	}
 	
 	/**
@@ -289,7 +298,7 @@ public class Language {
 	public void define(Node<?,?>... language) {
 		definition = list(language);
 	}
-	
+	Map<Integer, Node<Node<String,Void>, ?>> rules = new HashMap<Integer, Node<Node<String,Void>, ?>>();
 	/**
 	 * Accept visitor into a rule of the form: <code>id -> right</code>
 	 * 
@@ -299,9 +308,7 @@ public class Language {
 	 */
 	public <T> T acceptRule(Visitor<T> visitor, Node<String,Void> id) {
 		visitor.getWorkList().done(id);
-		// FIXME: lookup rules
-//		return visitor.rule(id, id.right);
-		return null;
+		return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.hashCode()));
 	}
 	/**
 	 * Accept visitor into a language.
@@ -340,6 +347,8 @@ public class Language {
 	 * @return
 	 */
 	public <T> T beginTraversal(Visitor<T> visitor, Node<?,?> language) {
+		assert visitor != null;
+		assert language != null;
 		visitor.getWorkList().clear();
 		visitor.begin();
 		T accumulator;
@@ -387,12 +396,12 @@ public class Language {
 		return beginTraversal(new Printer(this), language).toString();
 	}
 	/**
-	 * Compute the first set for identifier s.
+	 * Compute the first set for an identifier.
 	 * 
 	 * @param id the identifier
 	 * @return The first set for the identifier.
 	 */
-	public Node<?,?> first(String id) {
+	public Node<?,?> first(Node<String,Void> id) {
 		return beginTraversal(new FirstSet(this), id);
 	}
 	/**
@@ -412,14 +421,6 @@ public class Language {
 	 */
 	public boolean nullable(Node<?,?> language) {
 		return beginTraversal(nullable, language);
-	}
-	/**
-	 * Can this identifier derive the empty string?
-	 * 
-	 * @param id
-	 */
-	public boolean nullable(String id) {
-		return beginTraversal(nullable, id);
 	}
 	/**
 	 * Can this language specification derive the empty string?
@@ -460,7 +461,7 @@ public class Language {
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
 			if (debug) {
-				beginTraversal(gv, language);
+				System.out.println(beginTraversal(gv, language));
 				System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
 			}
 		}
