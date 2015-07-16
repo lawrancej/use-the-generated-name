@@ -16,15 +16,15 @@ import languageV2.Node;
  */
 public interface Visitor<T> {
 	/**
-	 * Visit symbol `c`
+	 * Visit symbol: <code>c</code>
 	 */
 	T symbol(Node<Character,Character> language);
 	/**
-	 * Visit a list of languages `abc...`
+	 * Visit a list of languages: <code>abc...</code>
 	 */
 	T list(Node<Node<?,?>,Node<?,?>> language);
 	/**
-	 * Visit a set of languages `a|b|c|...`
+	 * Visit a set of languages <code>a|b|c|...</code>
 	 */
 	T set(Node<Node<?,?>,Node<?,?>> set);
 	/**
