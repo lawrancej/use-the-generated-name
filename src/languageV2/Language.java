@@ -189,8 +189,7 @@ public class Language {
 		if (language == empty || language == reject) { return empty; }
 		Id loop = id();
 		boolean flag = (definition == reject);
-		derives(loop, language, loop);
-		derives(loop);
+		derives(loop, option(language, loop));
 		if (flag) {
 			definition = reject;
 		}
