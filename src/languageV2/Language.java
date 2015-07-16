@@ -277,7 +277,7 @@ public class Language {
 		}
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
-			definition = id; // FIXME?
+			definition = id;
 		}
 		if (!rules.containsKey(key)) {
 			Node<Node<String, Void>, ?> rule = Node.create(Node.Tag.RULE, id, right);
