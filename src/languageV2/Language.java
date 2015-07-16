@@ -57,6 +57,7 @@ public class Language {
 	}
 	
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
+	// FIXME
 	private Node<?,?> skipDefinedIdentifier(Node<?,?> language) {
 		if (language.tag == Node.Tag.ID && language.right != reject) {
 			ids.remove(language);
@@ -181,35 +182,26 @@ public class Language {
 		// Avoid creating a new loop, if possible
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
-		Id loop = id();
+		Node<String,Void> loop = id();
 		boolean flag = (definition == reject);
-		derives(loop, option(language, loop));
+		rule(loop, option(language, loop));
 		if (flag) {
 			definition = reject;
 		}
 		return loop;
 	}
-	/** Identifiers are terminal or nonterminal variables. */
-	public static class Id extends Node<String,Node<?,?>> {
-		public Id() {
-			super(Node.Tag.ID, null, reject);
-		}
-		public Id(String label) {
-			super(Node.Tag.ID, label, reject);
-		}
-	}
 	// Identifier lookup by name
-	private Map<String, Id> labels = new HashMap<String, Id>();
-	private Set<Id> ids = new HashSet<Id>();
+	private Map<String, Node<String,Void>> labels = new HashMap<String, Node<String,Void>>();
+	private Set<Node<String,Void>> ids = new HashSet<Node<String,Void>>();
 	/**
 	 * Create or use an identifier (a terminal or nonterminal variable).
 	 * 
 	 * @param label for the identifier.
 	 * @return The identifier.
 	 */
-	public Id id(String label) {
+	public Node<String,Void> id(String label) {
 		if (!labels.containsKey(label)) {
-			labels.put(label, new Id(label));
+			labels.put(label, Node.create(Node.Tag.ID, label, (Void)null));
 		}
 		return labels.get(label);
 	}
@@ -217,8 +209,8 @@ public class Language {
 	 * Create an identifier (a terminal or nonterminal variable).
 	 * @return The identifier
 	 */
-	public Id id() {
-		Id result = new Id();
+	public Node<String,Void> id() {
+		Node<String,Void> result = Node.create(Node.Tag.ID, (String)null, (Void)null);
 		ids.add(result);
 		return result;
 	}
@@ -226,7 +218,7 @@ public class Language {
 	/** The language definition. The root of all traversal. */
 	private Node<?,?> definition = reject;
 	/**
-	 * Define an identifier.
+	 * Create a rule (production).
 	 * 
 	 * <p>
 	 * <code>label -> rhs</code>
@@ -238,28 +230,28 @@ public class Language {
 	 * @param rhs the right hand side
 	 * @return The identifier, or reject (if the rhs rejects or <code>id -> id</code>).
 	 */
-	public Node<?,?> derives(String label, Node<?,?>... rhs) {
-		Node<?,?> result = derives(id(label), rhs);
+	public Node<?,?> rule(String label, Node<?,?>... rhs) {
+		Node<?,?> result = rule(id(label), rhs);
 		if (result == reject) {
 			labels.remove(label);
 		}
 		return result;
 	}
 	/**
-	 * Define an identifier.
+	 * Create a rule (production).
 	 * 
 	 * <p>
 	 * <code>id -> rhs</code>
 	 * <p>
-	 * Side effect: the first call to <code>derives</code> defines the starting identifier.
-	 * Subsequent calls to <code>derives</code> add rules for the identifier.
+	 * Side effect: the first call to <code>rule</code> defines the starting identifier.
+	 * Subsequent calls to <code>rule</code> add rules for the identifier.
 	 * 
 	 * @param id the identifier
 	 * @param rhs the right hand side
 	 * @return The identifier, or reject (if the rhs rejects or <code>id -> id</code>).
 	 */
-	public Node<?,?> derives(Id id, Node<?,?>... rhs) {
-		Id result = id;
+	public Node<?,?> rule(Node<String,Void> id, Node<?,?>... rhs) {
+		Node<?,?> result = id;
 		Node<?,?> right = list(rhs);
 		// If the right rejects, remove the identifier
 		if (right == reject) {
@@ -267,6 +259,7 @@ public class Language {
 			return reject;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
+		// FIXME
 		if (right.tag == Node.Tag.ID && result.right == reject) {
 			ids.remove(id);
 			return right;
@@ -280,8 +273,9 @@ public class Language {
 		if (definition == reject) {
 			definition = result;
 		}
-		result.right = or(result.right, right);
-		return result;
+		Node<?,?> rule = Node.create(Node.Tag.RULE, id, right);
+//		result.right = or(result.right, right);
+		return rule;
 	}
 	
 	/**
@@ -303,9 +297,11 @@ public class Language {
 	 * @param id
 	 * @return
 	 */
-	public <T> T acceptRule(Visitor<T> visitor, Id id) {
+	public <T> T acceptRule(Visitor<T> visitor, Node<String,Void> id) {
 		visitor.getWorkList().done(id);
-		return visitor.rule(id, id.right);
+		// FIXME: lookup rules
+//		return visitor.rule(id, id.right);
+		return null;
 	}
 	/**
 	 * Accept visitor into a language.
@@ -317,8 +313,8 @@ public class Language {
 	public <T> T accept(Visitor<T> visitor, Node<?,?> language) {
 		switch(language.tag) {
 		case ID:
-			visitor.getWorkList().todo((Id)language);
-			return visitor.id((Id)language);
+			visitor.getWorkList().todo((Node<String,Void>)language);
+			return visitor.id((Node<String,Void>)language);
 		case LIST:
 			return visitor.list((Node<Node<?,?>,Node<?,?>>)language);
 		case SET:
@@ -349,9 +345,9 @@ public class Language {
 		T accumulator;
 		// Visit a grammar
 		if (language.tag == Node.Tag.ID) {
-			visitor.getWorkList().todo((Id)language);
+			visitor.getWorkList().todo((Node<String,Void>)language);
 			accumulator = visitor.bottom();
-			for (Id identifier : visitor.getWorkList()) {
+			for (Node<String,Void> identifier : visitor.getWorkList()) {
 				accumulator = visitor.reduce(accumulator, acceptRule(visitor, identifier));
 				if (visitor.done(accumulator)) {
 					return visitor.end(accumulator);

@@ -7,7 +7,7 @@ package languageV2;
  */
 public class Node<L,R> {
 	public enum Tag {
-		SYMBOL,	LIST, SET, ID
+		SYMBOL,	LIST, SET, ID, RULE, ACTION
 	}
 	public final Tag tag;
 	public final L left;

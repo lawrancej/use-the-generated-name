@@ -8,7 +8,7 @@ import languageV2.Node;
 
 public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public Character c;
-	Map<Language.Id, Language.Id> ids = new HashMap<Language.Id, Language.Id>();
+	Map<Node<String,Void>, Node<String,Void>> ids = new HashMap<Node<String,Void>, Node<String,Void>>();
 	public Derivative(Language g) {
 		super(g);
 	}
@@ -36,9 +36,9 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		// Dc(a+b) = Dc(a) + Dc(b)
 		return g.or(g.accept(this, set.left), g.accept(this, set.right));
 	}
-	private Language.Id getReplacement(Language.Id id) {
+	private Node<String,Void> getReplacement(Node<String,Void> id) {
 		if (!ids.containsKey(id)) {
-			Language.Id replacement = g.id();
+			Node<String,Void> replacement = g.id();
 			ids.put(id, replacement);
 			return replacement;
 		}
@@ -46,7 +46,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 			return ids.get(id);
 		}
 	}
-	public Node<?,?> id(Language.Id id) {
+	public Node<?,?> id(Node<String,Void> id) {
 		// Handle left-recursion: return DcId if we're visiting Id -> Id
 		if (todo.visiting(id)) {
 			return getReplacement(id);
@@ -63,16 +63,16 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		// Otherwise, return the empty set
 		return bottom();
 	}
-	public Node<?,?> rule(Language.Id id, Node<?,?> rhs) {
+	public Node<?,?> rule(Node<Node<String,Void>, Node<?,?>> rule) {
 		// Visit the rhs
-		Node<?,?> derivation = g.accept(this,  rhs);
+		Node<?,?> derivation = g.accept(this,  rule.right);
 		
 		// Don't create a rule that rejects or is empty
 		if (derivation == Language.reject || derivation == Language.empty) {
 			return derivation;
 		}
 		// Create a new rule
-		return g.derives(getReplacement(id), derivation);
+		return g.rule(getReplacement(rule.left), derivation);
 	}
 	public Node<?,?> bottom() {
 		return Language.reject;

@@ -12,16 +12,16 @@ public class GrammarTest {
 	@Test
 	public void mathExpression() {
 		Language g = new Language() {{
-			Id expression = id("expression");
-			Id term = id("term");
-			Id factor = id("factor");
-			Id digit = id("digit");
-			Id digits = id("digits");
-			derives(expression, term, many(or(symbol('+'), symbol('-')), term));
-			derives(term, factor, many(or(symbol('*'), symbol('/')), factor));
-			derives(factor, or(digits, list(symbol('('), expression, symbol(')'))));
-			derives(digit, range('0', '9'));
-			derives(digits, digit, many(digit));
+			Node<String,Void> expression = id("expression");
+			Node<String,Void> term = id("term");
+			Node<String,Void> factor = id("factor");
+			Node<String,Void> digit = id("digit");
+			Node<String,Void> digits = id("digits");
+			rule(expression, term, many(or(symbol('+'), symbol('-')), term));
+			rule(term, factor, many(or(symbol('*'), symbol('/')), factor));
+			rule(factor, or(digits, list(symbol('('), expression, symbol(')'))));
+			rule(digit, range('0', '9'));
+			rule(digits, digit, many(digit));
 			//debug = true;
 		}};
 		//System.out.println(g.toString());
@@ -36,42 +36,42 @@ public class GrammarTest {
 	@Test
 	public void testGrammar() {
 		Language g = new Language() {{
-			derives("syntax", option(id("production"), id("syntax")));
-			derives("production", id("identifier"), symbol('='), id("expression"), symbol('.'));
-			derives("expression", option(id("expression"), symbol('|')), id("term"));
-			derives("term", option(id("term")), id("factor"));
-			derives("factor", or(id("identifier"), id("string")));
-			derives("identifier", id("letter"), many(id("letter"), id("digit")));
-			derives("string", symbol('"'), many(any), symbol('"'));
-			derives("digit", range('0', '9'));
-			derives("letter", or(range('A','Z'), range('a','z')));
+			rule("syntax", option(id("production"), id("syntax")));
+			rule("production", id("identifier"), symbol('='), id("expression"), symbol('.'));
+			rule("expression", option(id("expression"), symbol('|')), id("term"));
+			rule("term", option(id("term")), id("factor"));
+			rule("factor", or(id("identifier"), id("string")));
+			rule("identifier", id("letter"), many(id("letter"), id("digit")));
+			rule("string", symbol('"'), many(any), symbol('"'));
+			rule("digit", range('0', '9'));
+			rule("letter", or(range('A','Z'), range('a','z')));
 		}};
 	}
 	
 	@Test
 	public void testEBNF() {
 		Language g = new Language() {{
-			Id expression = id("expression");
-			derives("syntax", many(id("production")));
-			derives("production", id("identifier"), symbol('='), expression, symbol('.'));
-			derives("expression", id("term"), many(symbol('|'), id("term")));
-			derives("term", id("factor"), many(id("factor")));
-			derives("factor", or(id("identifier"),
+			Node<String,Void> expression = id("expression");
+			rule("syntax", many(id("production")));
+			rule("production", id("identifier"), symbol('='), expression, symbol('.'));
+			rule("expression", id("term"), many(symbol('|'), id("term")));
+			rule("term", id("factor"), many(id("factor")));
+			rule("factor", or(id("identifier"),
 					id("string"),
 					list(symbol('('), expression, symbol(')')),
 					list(symbol('['), expression, symbol(']')),
 					list(symbol('{'), expression, symbol('}'))));
-			derives("identifier", id("letter"), many(or(id("letter"), id("digit"))));
-			derives("string", symbol('"'), many(id("character")), symbol('"'));
-			derives("letter", or(range('A', 'Z'), range('a','z')));
-			derives("digit", range('0', '9'));
+			rule("identifier", id("letter"), many(or(id("letter"), id("digit"))));
+			rule("string", symbol('"'), many(id("character")), symbol('"'));
+			rule("letter", or(range('A', 'Z'), range('a','z')));
+			rule("digit", range('0', '9'));
 		}};
 	}
 	
 	@Test
 	public void testCox() {
 		Language g = new Language() {{
-			derives("S", or(list(id("S"), symbol('+'), id("S")), symbol('1')));
+			rule("S", or(list(id("S"), symbol('+'), id("S")), symbol('1')));
 
 			//debug = true;
 		}};
@@ -82,8 +82,8 @@ public class GrammarTest {
 	@Test
 	public void testCox2() {
 		Language g = new Language() {{
-			Language.Id s = id();
-			derives(s, or(list(s, symbol('+'), s), symbol('1')));
+			Node<String,Void> s = id();
+			rule(s, or(list(s, symbol('+'), s), symbol('1')));
 
 			//debug = true;
 		}};
@@ -113,12 +113,12 @@ public class GrammarTest {
 	public void testMany() {
 		Language g = new Language() {{
 			define(list(any, many(any)));
-			debug = true;
+			//debug = true;
 		}};
 		Assert.assertTrue(g.matches("abcdefg"));
 		Assert.assertFalse(g.matches(""));
 		Language f = new Language() {{
-			derives("hi",many(symbol('a')),many(symbol('b')));
+			rule("hi",many(symbol('a')),many(symbol('b')));
 			// debug = true;
 		}};
 		Assert.assertTrue(f.matches("ab"));
@@ -164,7 +164,7 @@ public class GrammarTest {
 	@Test
 	public void testParens() {
 		Language parens = new Language() {{
-			derives("S",option(id("S"),symbol('('),id("S"),symbol(')')));
+			rule("S",option(id("S"),symbol('('),id("S"),symbol(')')));
 		}};
 //		Assert.assertTrue(parens.isNonterminal("S"));
 		Assert.assertFalse(parens.matches("("));
@@ -196,7 +196,7 @@ public class GrammarTest {
 	@Test
 	public void testLeftRecursion() {
 		Language g = new Language() {{
-			derives("L",option(id("L"),symbol('x')));
+			rule("L",option(id("L"),symbol('x')));
 			// debug = true;
 		}};
 		Assert.assertTrue(g.matches("xxxx"));
@@ -211,11 +211,11 @@ public class GrammarTest {
 	@Test
 	public void testPage148() {
 		Language page148 = new Language() {{
-			derives("S",id("A"), id("C"));
-			derives("C",option(symbol('c')));
-			derives("A",or(list(symbol('a'), id("B"), id("C"), symbol('d')), list(id("B"), id("Q"))));
-			derives("B",option(symbol('b'), id("B")));
-			derives("Q",option(symbol('q')));
+			rule("S",id("A"), id("C"));
+			rule("C",option(symbol('c')));
+			rule("A",or(list(symbol('a'), id("B"), id("C"), symbol('d')), list(id("B"), id("Q"))));
+			rule("B",option(symbol('b'), id("B")));
+			rule("Q",option(symbol('q')));
 		}};
 //		System.out.println(page148.show(page148.first(page148.id("A"))));
 		Assert.assertTrue(page148.nullable());
@@ -225,13 +225,13 @@ public class GrammarTest {
 	public void testBrainfuck() {
 		Language g = new Language() {{
 			// Program -> Sequence
-			derives("Program",id("Sequence"));
+			rule("Program",id("Sequence"));
 			// Sequence -> ( Command | Loop ) *
-			derives("Sequence",many(or(id("Command"), id("Loop"))));
+			rule("Sequence",many(or(id("Command"), id("Loop"))));
 			// Command -> '+' | '-' | '<' | '>' | ',' | '.'
-			derives("Command",or(range('+','.'),symbol('<'), symbol('>')));
+			rule("Command",or(range('+','.'),symbol('<'), symbol('>')));
 			// Loop -> '[' Sequence ']'
-			derives("Loop",symbol('['), id("Sequence"), symbol(']'));
+			rule("Loop",symbol('['), id("Sequence"), symbol(']'));
 			// debug = true;
 		}};
 		Assert.assertTrue(g.matches("+"));
@@ -248,11 +248,11 @@ public class GrammarTest {
 	@Test
 	public void testRegexGrammar() {
 		Language regex = new Language() {{
-			derives("regex",id("term"),many(symbol('|'),id("regex")));
-			derives("term",many(id("factor")));
-			derives("factor",id("base"), option(symbol('*')));
-			derives("base",or(list(option(symbol('\\')), any), list(symbol('('), id("regex"), symbol(')'))));
-			debug = true;
+			rule("regex",id("term"),many(symbol('|'),id("regex")));
+			rule("term",many(id("factor")));
+			rule("factor",id("base"), option(symbol('*')));
+			rule("base",or(list(option(symbol('\\')), any), list(symbol('('), id("regex"), symbol(')'))));
+			//debug = true;
 		}};
 		Assert.assertTrue(regex.matches("a"));
 		Assert.assertTrue(regex.matches("a|b"));
@@ -260,7 +260,7 @@ public class GrammarTest {
 		Assert.assertTrue(regex.matches("(hello)|(world)"));
 	}
 	
-	@After
+//	@After
 	public void summary() {
 		// 2335 total
 		System.out.println(Node.allocations);

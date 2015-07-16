@@ -23,11 +23,11 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 		if (set == Language.reject) return bottom();
 		return g.or(g.accept(this, set.left), g.accept(this, set.right));
 	}
-	public Node<?,?> id(Language.Id id) {
+	public Node<?,?> id(Node<String,Void> id) {
 		return bottom();
 	}
-	public Node<?,?> rule(Language.Id id, Node<?,?> rhs) {
-		return g.accept(this, rhs);
+	public Node<?,?> rule(Node<Node<String,Void>,Node<?,?>> rule) {
+		return g.accept(this, rule.right);
 	}
 	public Node<?,?> bottom() {
 		return Language.reject;

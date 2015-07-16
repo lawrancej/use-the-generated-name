@@ -31,18 +31,18 @@ public interface Visitor<T> {
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
 	 */
-	WorkQueue<Language.Id> getWorkList();
+	WorkQueue<Node<String,Void>> getWorkList();
 	/**
 	 * Visit an identifier (on the right hand side).
 	 * @param id The identifier
 	 */
-	T id(Language.Id id);
+	T id(Node<String,Void> id);
 	/**
 	 * Visit a rule of the form `id -> rhs`
 	 * @param id The identifier
 	 * @param rhs The identifier's right hand side
 	 */
-	T rule(Language.Id id, Node<?,?> rhs);
+	T rule(Node<Node<String,Void>,Node<?,?>> rule);
 	/**
 	 * The default result.
 	 * 

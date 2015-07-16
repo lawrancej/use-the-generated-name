@@ -1,14 +1,15 @@
 package languageV2.traversal;
 
 import languageV2.Language;
+import languageV2.Node;
 
 public abstract class AbstractVisitor<T> implements Visitor<T> {
-	public final WorkQueue<Language.Id> todo = new WorkList<Language.Id>();
+	public final WorkQueue<Node<String,Void>> todo = new WorkList<Node<String,Void>>();
 	public final Language g;
 	public AbstractVisitor(Language g) {
 		this.g = g;
 	}
-	public WorkQueue<Language.Id> getWorkList() {
+	public WorkQueue<Node<String,Void>> getWorkList() {
 		return todo;
 	}
 	public void begin() {}

@@ -47,7 +47,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer id(Language.Id id) {
+	public StringBuffer id(Node<String,Void> id) {
 		buffer.append('<');
 		if (id.left == null) {
 			buffer.append(id.hashCode());
@@ -57,10 +57,10 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		buffer.append('>');
 		return buffer;
 	}
-	public StringBuffer rule(Language.Id id, Node<?,?> rhs) {
-		this.id(id);
+	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
+		this.id(rule.left);
 		buffer.append(" ::= ");
-		g.accept(this, rhs);
+		g.accept(this, rule.right);
 		buffer.append("\n");
 		return buffer;
 	}

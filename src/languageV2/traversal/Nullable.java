@@ -7,7 +7,7 @@ import languageV2.Language;
 import languageV2.Node;
 
 public class Nullable extends AbstractVisitor<Boolean> {
-	Set<Language.Id> nulls = new HashSet<Language.Id>();
+	Set<Node<String,Void>> nulls = new HashSet<Node<String,Void>>();
 	public Nullable(Language g) {
 		super(g);
 	}
@@ -23,7 +23,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		if (set == Language.reject) return false;
 		return g.accept(this, set.left) || g.accept(this, set.right);
 	}
-	public Boolean id(Language.Id id) {
+	public Boolean id(Node<String,Void> id) {
 		if (todo.visited(id)) {
 			return nulls.contains(id);
 		} else {
@@ -34,8 +34,8 @@ public class Nullable extends AbstractVisitor<Boolean> {
 			return result;
 		}
 	}
-	public Boolean rule(Language.Id id, Node<?,?> rhs) {
-		return g.accept(this, rhs);
+	public Boolean rule(Node<Node<String,Void>,Node<?,?>> rule) {
+		return g.accept(this, rule.right);
 	}
 	public Boolean bottom() {
 		return false;

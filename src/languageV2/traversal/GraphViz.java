@@ -5,7 +5,6 @@ import java.util.Set;
 
 import languageV2.Language;
 import languageV2.Node;
-import languageV2.Language.Id;
 
 /**
  * Debug grammar through GraphViz output and also query the size of the graph.
@@ -68,7 +67,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer id(Id id) {
+	public StringBuffer id(Node<String,Void> id) {
 		if (!nodes.contains(id)) {
 			nodes.add(id);
 			if (id.left == null) {
@@ -79,10 +78,10 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer rule(Id id, Node<?,?> rhs) {
-		this.id(id);
-		g.accept(this, rhs);
-		drawEdge(id.hashCode(), rhs.hashCode());
+	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
+		this.id(rule.left);
+		g.accept(this, rule.right);
+		drawEdge(rule.left.hashCode(), rule.right.hashCode());
 		return buffer;
 	}
 	public StringBuffer bottom() {
