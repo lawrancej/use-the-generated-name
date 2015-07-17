@@ -42,7 +42,7 @@ identifier.matches("4chan"); // false
 identifier.matches("2pac"); // false
 identifier.matches("x"); // true
 identifier.matches("xyzzy3"); // true
----
+----
 
 === Matching a context-free grammar
 
