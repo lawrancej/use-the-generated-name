@@ -18,6 +18,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		} else {
 			buffer.append('[');
 			buffer.append(language.left);
+			buffer.append('-');
 			buffer.append(language.right);
 			buffer.append(']');
 		}

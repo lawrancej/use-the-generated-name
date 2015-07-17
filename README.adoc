@@ -1,28 +1,85 @@
 = Dictorobitary
 
-Dictorobitary is a parsing library that:
+Dictorobitary is the language computer, a machine that translates any (context-free) language to our own (it's a parsing library).
 
+At the moment, it:
+
+* accepts all regular expressions
 * accepts all context-free grammars
 * operates at high speed
-* uses a EBNF specification both as a DSEL and as a string
 * sips memory
-* chooses the appropriate parsing algorithm based on the grammar
 * is non-blocking
 * is a library (drop in to your source folder)
-* all CFGs
-* allows regexes
-* cacheable partial parses
 * easy to embed and extend
-* restartable
-* thread safe
-* reconfigurable
-* context-sensitive allowed
-* compositionality
-* is unicode-capable (or not)
+* is restartable
+* is thread safe
+
+One day, it will:
+
+* construct parse forests
+* construct parse forests lazily
+* construct arbitrary trees through actions
+* use a ABNF or EBNF specification as a string
+* choose the fastest parsing algorithm based on the grammar structure
+* cache partial parses
+* be reconfigurable on the fly?
+* allow context-sensitivity
+* be unicode-capable (or not)
 * will not leak memory
-* is easy to embed in your code
-* is easy to extend in your code
 
-In short, Dictorobitary is the language computer: a machine that translates any language into our own.
+== Example usage
 
+=== Matching a regular expression
 
+To specify a regular language:
+
+----
+Language identifier = new Language() {{
+    // [A-Za-z][A-Za-z0-9]*
+    define(or(range('A','Z'), range('a','z')), many(or(range('A','Z'), range('a','z'), range('0', '9'))));
+}};
+identifier.matches("4chan"); // false
+identifier.matches("2pac"); // false
+identifier.matches("x"); // true
+identifier.matches("xyzzy3"); // true
+---
+
+=== Matching a context-free grammar
+
+To specify a context-free grammar:
+
+----
+Language arithmetic = new Language() {{
+    Node<String,Void> expression = id("expression");
+    Node<String,Void> term = id("term");
+    Node<String,Void> factor = id("factor");
+    Node<String,Void> digit = id("digit");
+    Node<String,Void> digits = id("digits");
+
+    rule(expression, term, many(or(symbol('+'), symbol('-')), term));
+    // term -> term {('+'|'-') term}
+    rule(term, factor, many(or(symbol('*'), symbol('/')), factor));
+    rule(factor, or(digits, list(symbol('('), expression, symbol(')'))));
+    rule(digit, range('0', '9'));
+    rule(digits, digit, many(digit));
+}};
+
+arithmetic.matches("(2+4)/3"); // true
+arithmetic.matches("(2+4)/3+"); // false
+----
+
+=== Matching a context-free grammar (TODO)
+
+Use a EBNF or ABNF string to define a language.
+
+----
+Language arithmetic = new Language(
+"expression = term , {('+'|'-') , term}."
+"term = factor , {('*'|'/'), factor}."
+"factor = digits | ('(', expression, ')')."
+"digit = '0' .. '9'."
+"digits = digit, {digit}.");
+
+arithmetic.matches("(2+4)/3"); // true
+arithmetic.matches("(2+4)/3+"); // false
+----
