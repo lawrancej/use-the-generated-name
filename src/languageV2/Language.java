@@ -192,6 +192,10 @@ public class Language {
 		}
 		return loop;
 	}
+	
+	public Node<?,?> many1(Node<?,?>... sequence) {
+		return list(list(sequence), many(sequence));
+	}
 	// Identifier lookup by name
 	private Map<String, Node<String,Void>> labels = new HashMap<String, Node<String,Void>>();
 	private Set<Node<String,Void>> ids = new HashSet<Node<String,Void>>();
@@ -220,6 +224,9 @@ public class Language {
 	
 	/** The language definition. The root of all traversal. */
 	private Node<?,?> definition = reject;
+	
+	/** Tokenization separator */
+	private Node<?,?> separator = empty;
 	/**
 	 * Create a rule (production).
 	 * 
@@ -286,6 +293,26 @@ public class Language {
 		}
 		return rules.get(key);
 	}
+	
+	/**
+	 * Surround a sequence
+	 * @param language
+	 * @return
+	 */
+	public Node<?,?> token(Node<?,?>... sequence) {
+		return list(list(separator, list(sequence)),separator);
+	}
+	
+	/**
+	 * Define the separator for tokenization.
+	 * 
+	 * @param separator for tokenization
+	 * @return the language
+	 */
+	public Node<?,?> separator(Node<?,?>... separator) {
+		return this.separator = list(separator);
+	}
+
 	
 	/**
 	 * Specify a language.
@@ -460,6 +487,10 @@ public class Language {
 		}
 		for (int i = 0; i < s.length(); i++) {
 			language = derivative(s.charAt(i), language);
+			if (language == reject) {
+				System.out.format("Syntax error at character '%c', index %d in string: %s\n", s.charAt(i), i, s);
+				break;
+			}
 			if (debug) {
 				System.out.println(beginTraversal(gv, language));
 				System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());

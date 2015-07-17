@@ -22,7 +22,6 @@ public class GrammarTest {
 			rule(factor, or(digits, list(symbol('('), expression, symbol(')'))));
 			rule(digit, range('0', '9'));
 			rule(digits, digit, many(digit));
-			//debug = true;
 		}};
 		//System.out.println(g.toString());
 		Assert.assertTrue(g.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
@@ -31,6 +30,56 @@ public class GrammarTest {
 		Assert.assertFalse(g.matches("27+"));
 		Assert.assertTrue(g.matches("27+34"));
 
+	}
+	
+	@Test
+	public void testRPN1() {
+		Language rpn = new Language() {{
+			separator(many(symbol(' ')));
+			Node<String,Void> expression = id("expression");
+			rule (expression, or(token(many1(range('0','9'))), list(token(expression), token(expression), or(symbol('+'),symbol('-'),symbol('/'),symbol('*')))));
+			//debug = true;
+		}};
+		Assert.assertTrue(rpn.matches("2"));
+		Assert.assertTrue(rpn.matches(" 2"));
+		Assert.assertTrue(rpn.matches(" 20"));
+		Assert.assertTrue(rpn.matches("2 "));
+		Assert.assertTrue(rpn.matches("2 2 +"));
+		Assert.assertTrue(rpn.matches("2 2 2 + -"));
+		Assert.assertTrue(rpn.matches("2 2 + 2 -"));
+		Assert.assertTrue(rpn.matches("2 3 -"));
+		Assert.assertTrue(rpn.matches("2 3 3 - -"));
+		Assert.assertTrue(rpn.matches("2 3 3 - 3 - *"));
+		Assert.assertTrue(rpn.matches("2 1 /"));
+		
+	}
+	
+	@Test
+	public void testRPN() {
+		Language rpn = new Language() {{
+			separator(many(symbol(' ')));
+			Node<String,Void> expression = id("expression");
+			Node<String,Void> plus = id("plus");
+			Node<String,Void> minus = id("minus");
+			Node<String,Void> div = id("div");
+			Node<String,Void> times = id("times");
+			Node<String, Void> number = id("number");
+			rule (expression, or(number, plus, minus, div, times));
+			rule (plus, expression, expression, token(symbol('+')));
+			rule (minus, expression, expression, token(symbol('-')));
+			rule (div, expression, expression, token(symbol('/')));
+			rule (times, expression, expression, token(symbol('*')));
+			rule (number, token(many1(range('0','9'))));
+			//debug = true;
+		}};
+		Assert.assertTrue(rpn.matches("2"));
+		Assert.assertTrue(rpn.matches(" 2"));
+		Assert.assertTrue(rpn.matches("2 "));
+		Assert.assertTrue(rpn.matches("2 2 +"));
+		Assert.assertTrue(rpn.matches("2 3 -"));
+		Assert.assertTrue(rpn.matches("2 3 3 - -"));
+		Assert.assertTrue(rpn.matches("2 3 3 - 3 - *"));
+		Assert.assertTrue(rpn.matches("2 1 /"));
 	}
 	
 	@Test
@@ -46,6 +95,18 @@ public class GrammarTest {
 			rule("digit", range('0', '9'));
 			rule("letter", or(range('A','Z'), range('a','z')));
 		}};
+	}
+	
+	@Test
+	public void testIdentifier() {
+		Language identifier = new Language() {{
+			// [A-Za-z][A-Za-z0-9]*
+			define(or(range('A','Z'), range('a','z')), many(or(range('A','Z'), range('a','z'), range('0', '9'))));
+		}};
+		Assert.assertFalse(identifier.matches("4chan"));
+		Assert.assertFalse(identifier.matches("2pac"));
+		Assert.assertTrue(identifier.matches("x"));
+		Assert.assertTrue(identifier.matches("xyzzy3"));
 	}
 	
 	@Test
