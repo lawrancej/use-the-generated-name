@@ -16,12 +16,12 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	}
 	public Boolean list(Node<Node<?,?>,Node<?,?>> list) {
 		if (list == Language.empty) return true;
-		boolean result = g.accept(this, list.left) && g.accept(this, list.right);
+		boolean result = Node.accept(this, list.left) && Node.accept(this, list.right);
 		return result;
 	}
 	public Boolean set(Node<Node<?,?>,Node<?,?>> set) {
 		if (set == Language.reject) return false;
-		return g.accept(this, set.left) || g.accept(this, set.right);
+		return Node.accept(this, set.left) || Node.accept(this, set.right);
 	}
 	public Boolean id(Node<String,Void> id) {
 		if (todo.visited(id)) {
@@ -35,7 +35,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		}
 	}
 	public Boolean rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		return g.accept(this, rule.right);
+		return Node.accept(this, rule.right);
 	}
 	public Boolean bottom() {
 		return false;

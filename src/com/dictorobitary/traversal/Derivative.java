@@ -24,9 +24,9 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		// Dc(e) = 0
 		if (list == Language.empty) return bottom();
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
-		Node<?,?> result = g.list(g.accept(this, list.left), list.right);
+		Node<?,?> result = g.list(Node.accept(this, list.left), list.right);
 		if (g.get.nullable.compute(list.left)) {
-			return g.or(result, g.accept(this, list.right));
+			return g.or(result, Node.accept(this, list.right));
 		}
 		return result;
 	}
@@ -34,7 +34,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		// Dc(0) = 0
 		if (set == Language.reject) return bottom();
 		// Dc(a+b) = Dc(a) + Dc(b)
-		return g.or(g.accept(this, set.left), g.accept(this, set.right));
+		return g.or(Node.accept(this, set.left), Node.accept(this, set.right));
 	}
 	private Node<String,Void> getReplacement(Node<String,Void> id) {
 		if (!ids.containsKey(id)) {
@@ -65,7 +65,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	}
 	public Node<?,?> rule(Node<Node<String,Void>, Node<?,?>> rule) {
 		// Visit the rhs
-		Node<?,?> derivation = g.accept(this,  rule.right);
+		Node<?,?> derivation = Node.accept(this,  rule.right);
 		
 		// Don't create a rule that rejects or is empty
 		if (derivation == Language.reject || derivation == Language.empty) {

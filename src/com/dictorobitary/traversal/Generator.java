@@ -33,17 +33,17 @@ public class Generator extends AbstractVisitor<StringBuffer> {
 
 	@Override
 	public StringBuffer list(Node<Node<?, ?>, Node<?, ?>> language) {
-		g.accept(this, language.left);
-		g.accept(this, language.right);
+		Node.accept(this, language.left);
+		Node.accept(this, language.right);
 		return buffer;
 	}
 
 	@Override
 	public StringBuffer set(Node<Node<?, ?>, Node<?, ?>> set) {
 		if (rand.nextInt(2) == 0) {
-			g.accept(this, set.left);
+			Node.accept(this, set.left);
 		} else {
-			g.accept(this, set.right);
+			Node.accept(this, set.right);
 		}
 		return buffer;
 	}
@@ -56,7 +56,7 @@ public class Generator extends AbstractVisitor<StringBuffer> {
 
 	@Override
 	public StringBuffer rule(Node<Node<String, Void>, Node<?, ?>> rule) {
-		g.accept(this, rule.right);
+		Node.accept(this, rule.right);
 		return buffer;
 	}
 

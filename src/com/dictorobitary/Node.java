@@ -1,9 +1,12 @@
 package com.dictorobitary;
 
 /**
- * A language is a set of strings (lists of symbols).
+ * A node in the data structure defining a language.
  * 
- * Recursion and repetition specify infinite languages.
+ * @author Joey Lawrance
+ *
+ * @param <L>
+ * @param <R>
  */
 final public class Node<L,R> {
 	public enum Tag {
@@ -22,5 +25,27 @@ final public class Node<L,R> {
 	// Handy shortcut for the constructor call
 	public static <Left,Right> Node<Left,Right> create(Tag type, Left left, Right right) {
 		return new Node<Left,Right>(type, left, right);
+	}
+	/**
+	 * Accept visitor into a language.
+	 * 
+	 * @param visitor
+	 * @param language
+	 * @return
+	 */
+	public static <T> T accept(Visitor<T> visitor, Node<?,?> language) {
+		switch(language.tag) {
+		case ID:
+			visitor.getWorkList().todo((Node<String,Void>)language);
+			return visitor.id((Node<String,Void>)language);
+		case LIST:
+			return visitor.list((Node<Node<?,?>,Node<?,?>>)language);
+		case SET:
+			return visitor.set((Node<Node<?,?>,Node<?,?>>)language);
+		case SYMBOL:
+			return visitor.symbol((Node<Character,Character>)language);
+		default:
+			return null;
+		}
 	}
 }

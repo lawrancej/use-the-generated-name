@@ -59,7 +59,7 @@ final public class Compute {
 		}
 		// Visit a regex
 		else {
-			accumulator = g.accept(visitor, language);
+			accumulator = Node.accept(visitor, language);
 		}
 		return visitor.end(accumulator);
 	}

@@ -29,9 +29,9 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 			buffer.append("\u03b5");
 		} else {
 			buffer.append('(');
-			g.accept(this, list.left);
+			Node.accept(this, list.left);
 			buffer.append(' ');
-			g.accept(this, list.right);
+			Node.accept(this, list.right);
 			buffer.append(')');
 		}
 		return buffer;
@@ -41,9 +41,9 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 			buffer.append("\u2205");
 		} else {
 			buffer.append('(');
-			g.accept(this, set.left);
+			Node.accept(this, set.left);
 			buffer.append('|');
-			g.accept(this, set.right);
+			Node.accept(this, set.right);
 			buffer.append(')');
 		}
 		return buffer;
@@ -61,7 +61,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
 		this.id(rule.left);
 		buffer.append(" ::= ");
-		g.accept(this, rule.right);
+		Node.accept(this, rule.right);
 		buffer.append("\n");
 		return buffer;
 	}
