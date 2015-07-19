@@ -2,6 +2,7 @@ package com.dictorobitary.traversal;
 
 import com.dictorobitary.Language;
 import com.dictorobitary.Node;
+import com.dictorobitary.Visitor;
 
 public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public final WorkQueue<Node<String,Void>> todo = new WorkList<Node<String,Void>>();
