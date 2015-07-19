@@ -1,10 +1,10 @@
-package com.dictorobitary.traversal;
+package com.dictorobitary;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-class WorkList<T> implements WorkQueue<T> {
+public class WorkList<T> implements WorkQueue<T> {
 	private Set<T> todo = new HashSet<T>();
 	private Set<T> done = new HashSet<T>();
 	private T current;

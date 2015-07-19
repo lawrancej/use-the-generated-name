@@ -1,6 +1,5 @@
 package com.dictorobitary;
 
-import com.dictorobitary.traversal.WorkQueue;
 
 /**
  * Traverse a language specification.
