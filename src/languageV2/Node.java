@@ -5,7 +5,7 @@ package languageV2;
  * 
  * Recursion and repetition specify infinite languages.
  */
-public class Node<L,R> {
+final public class Node<L,R> {
 	public enum Tag {
 		SYMBOL,	LIST, SET, ID, RULE, ACTION
 	}

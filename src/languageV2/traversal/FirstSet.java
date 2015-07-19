@@ -14,7 +14,7 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> pair) {
 		if (pair == Language.empty) return bottom();
 		Node<?,?> result = g.accept(this, pair.left);
-		if (g.nullable(pair.left)) {
+		if (g.get.nullable.compute(pair.left)) {
 			result = g.or(result, g.accept(this, pair.right));
 		}
 		return result;

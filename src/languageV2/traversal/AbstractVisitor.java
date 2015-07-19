@@ -16,4 +16,10 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public T end(T accumulator) {
 		return accumulator;
 	}
+	public T compute() {
+		return g.beginTraversal(this);
+	}
+	public T compute(Node<?,?> language) {
+		return g.beginTraversal(this, language);
+	}
 }

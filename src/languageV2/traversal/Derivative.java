@@ -8,7 +8,7 @@ import languageV2.Node;
 
 public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public Character c;
-	Map<Node<String,Void>, Node<String,Void>> ids = new HashMap<Node<String,Void>, Node<String,Void>>();
+	private Map<Node<String,Void>, Node<String,Void>> ids = new HashMap<Node<String,Void>, Node<String,Void>>();
 	public Derivative(Language g) {
 		super(g);
 	}
@@ -25,7 +25,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		if (list == Language.empty) return bottom();
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
 		Node<?,?> result = g.list(g.accept(this, list.left), list.right);
-		if (g.nullable(list.left)) {
+		if (g.get.nullable.compute(list.left)) {
 			return g.or(result, g.accept(this, list.right));
 		}
 		return result;

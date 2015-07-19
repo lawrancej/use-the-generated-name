@@ -26,7 +26,7 @@ public interface Visitor<T> {
 	/**
 	 * Visit a set of languages <code>a|b|c|...</code>
 	 */
-	T set(Node<Node<?,?>,Node<?,?>> set);
+	T set(Node<Node<?,?>,Node<?,?>> language);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
@@ -61,7 +61,7 @@ public interface Visitor<T> {
 	 * @param the current result
 	 * @return the result
 	 */
-	T reduce(T accumulator, T current);
+	public T reduce(T accumulator, T current);
 	/**
 	 * Pre-traversal method.
 	 */

@@ -9,7 +9,7 @@ import java.util.Set;
 import languageV2.traversal.*;
 
 /**
- * A language specification
+ * Specify a language, and accept visitors into the language specification.
  * 
  * @author Joseph Lawrance
  *
@@ -88,11 +88,12 @@ public class Language {
 		}
 		return listCache.get(key);
 	}
-	private Node<?,?> list(Node<?,?>[] nodes, int i) {
+	private Node<?,?> list(Node<?,?>[] nodes, int i, Node<?,?> separator) {
 		if (i >= nodes.length) {
 			return empty;
 		} else {
-			return listInstance(nodes[i], list(nodes, i+1));
+			// return listInstance(nodes[i], list(nodes, i+1));
+			return listInstance(separator, listInstance(nodes[i], list(nodes, i+1, separator)));
 		}
 	}
 	/**
@@ -102,7 +103,16 @@ public class Language {
 	 * @return A language matching the sequence in order: <code>abcd...</code>
 	 */
 	public Node<?,?> list(Node<?,?>... sequence) {
-		return list(sequence, 0);
+		return list(sequence, 0, empty);
+	}
+	
+	// Convert a string into an array of symbols
+	private Node<?,?>[] explode(String string) {
+		Node<?,?>[] array = new Node<?,?>[string.length()];
+		for (int i = 0; i < string.length(); i++) {
+			array[i] = symbol(string.charAt(i));
+		}
+		return array;
 	}
 	/**
 	 * Match a string literally.
@@ -111,11 +121,7 @@ public class Language {
 	 * @return A language matching the string: <code>hello<code>
 	 */
 	public Node<?,?> string(String string) {
-		Node<?,?>[] array = new Node<?,?>[string.length()];
-		for (int i = 0; i < string.length(); i++) {
-			array[i] = symbol(string.charAt(i));
-		}
-		return list(array, 0);
+		return list(explode(string), 0, empty);
 	}
 	private Map<Integer, Node<?,?>> setCache = new HashMap<Integer, Node<?,?>>();
 
@@ -162,6 +168,14 @@ public class Language {
 		return or(options, 0);
 	}
 	/**
+	 * Match one of the characters in a string.
+	 * @param string of characters
+	 * @return A language matching one of the characters in the string.
+	 */
+	public Node<?,?> oneOf(String string) {
+		return or(explode(string), 0);
+	}
+	/**
 	 * Match a sequence, optionally.
 	 * 
 	 * @param sequence to match optionally (a,b,c,...,z)
@@ -192,7 +206,28 @@ public class Language {
 		}
 		return loop;
 	}
-	
+	/**
+	 * Matches zero or more occurrences of language, separated by separator.
+	 * 
+	 * @param language to match
+	 * @param separator to use
+	 * @return
+	 */
+	public Node<?,?> sepBy(Node<?,?> language, Node<?,?> separator) {
+		return null;
+	}
+	/**
+	 * Matches one or more occurrences of language, separated by separator.
+	 * @return
+	 */
+	public Node<?,?> sepBy1(Node<?,?> language, Node<?,?> separator) {
+		return null;
+	}
+	/**
+	 * Match a sequence one or more times.
+	 * @param sequence to match repeatedly (e.g., <code>ab</code>)
+	 * @return A language matching the sequence one or more times: <code>(ab)+</code>
+	 */
 	public Node<?,?> many1(Node<?,?>... sequence) {
 		return list(list(sequence), many(sequence));
 	}
@@ -224,6 +259,14 @@ public class Language {
 	
 	/** The language definition. The root of all traversal. */
 	private Node<?,?> definition = reject;
+	
+	/**
+	 * Get the language definition
+	 * @return the root/start node in the language data structure.
+	 */
+	public Node<?,?> definition() {
+		return definition;
+	}
 	
 	/** Tokenization separator */
 	private Node<?,?> separator = empty;
@@ -299,8 +342,8 @@ public class Language {
 	 * @param language
 	 * @return
 	 */
-	public Node<?,?> token(Node<?,?>... sequence) {
-		return list(list(separator, list(sequence)),separator);
+	public Node<?,?> token(Node<String,Void> id, Node<?,?>... sequence) {
+		return rule(id, list(sequence));
 	}
 	
 	/**
@@ -313,7 +356,6 @@ public class Language {
 		return this.separator = list(separator);
 	}
 
-	
 	/**
 	 * Specify a language.
 	 * <p>
@@ -408,102 +450,8 @@ public class Language {
 	 * Debug output
 	 */
 	public boolean debug = false;
+	public final Compute get = new Compute(this);
 	public String toString() {
-		return beginTraversal(new Printer(this)).toString();
-	}
-	/**
-	 * Returns a string representation of this identifier.
-	 * @param id an identifier
-	 * @return a string representation of the identifier
-	 */
-	public String toString(String id) {
-		return beginTraversal(new Printer(this), id).toString();
-	}
-	public String toString(Node<?,?> language) {
-		return beginTraversal(new Printer(this), language).toString();
-	}
-	/**
-	 * Compute the first set for an identifier.
-	 * 
-	 * @param id the identifier
-	 * @return The first set for the identifier.
-	 */
-	public Node<?,?> first(Node<String,Void> id) {
-		return beginTraversal(new FirstSet(this), id);
-	}
-	/**
-	 * Compute the first set for the language specification.
-	 * 
-	 * @return The first set (the set of symbols appearing first in any derivation)
-	 */
-	public Node<?,?> first() {
-		return beginTraversal(new FirstSet(this));
-	}
-	
-	private Nullable nullable = new Nullable(this);
-	/**
-	 * Can this language derive the empty string?
-	 * 
-	 * @param language
-	 */
-	public boolean nullable(Node<?,?> language) {
-		return beginTraversal(nullable, language);
-	}
-	/**
-	 * Can this language specification derive the empty string?
-	 */
-	public boolean nullable() {
-		return beginTraversal(nullable);
-	}
-	
-	private Derivative derivative = new Derivative(this);
-	/**
-	 * Compute the derivative of a language with respect to a character.
-	 * 
-	 * @param c
-	 * @param language
-	 * @return
-	 */
-	public Node<?,?> derivative(char c, Node<?,?> language) {
-		derivative.c = c;
-		return beginTraversal(derivative, language);
-	}
-	/**
-	 * Compute the derivative of a language specification
-	 * 
-	 * @param c
-	 * @param language
-	 * @return
-	 */
-	public Node<?,?> derivative(char c) {
-		return derivative(c, definition);
-	}
-	public boolean matches(Node<?,?> language, String s) {
-		boolean result;
-		GraphViz gv = new GraphViz(this);
-		if (debug) {
-			System.out.println(beginTraversal(gv, language));
-			System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
-		}
-		for (int i = 0; i < s.length(); i++) {
-			language = derivative(s.charAt(i), language);
-			if (language == reject) {
-				System.out.format("Syntax error at character '%c', index %d in string: %s\n", s.charAt(i), i, s);
-				break;
-			}
-			if (debug) {
-				System.out.println(beginTraversal(gv, language));
-				System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
-			}
-		}
-		if (debug) {
-			System.out.println(beginTraversal(gv, language));
-			System.out.println(toString(language));
-		}
-		result = nullable(language);
-		return result;
-	}
-	public boolean matches(String s) {
-		return matches(definition, s);
+		return get.printer.compute().toString();
 	}
 }
