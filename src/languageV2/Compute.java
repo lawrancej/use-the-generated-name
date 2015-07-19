@@ -1,30 +1,77 @@
 package languageV2;
 
-import languageV2.traversal.Derivative;
-import languageV2.traversal.GraphViz;
-import languageV2.traversal.Nullable;
-import languageV2.traversal.Printer;
+import languageV2.traversal.*;
 
 /**
- * Compute with a language specification.
+ * Accept visitors into a language specification.
  * 
  * @author Joey Lawrance
  *
  */
 final public class Compute {
 	final private Language g;
-	final public Nullable nullable;
 	final public Derivative derivative;
+	final public FirstSet firstSet;
+	final public Generator generator;
 	final public GraphViz gv;
+	final public Nullable nullable;
 	final public Printer printer;
 	public Compute(Language language) {
 		g = language;
-		nullable = new Nullable(g);
 		derivative = new Derivative(g);
+		firstSet = new FirstSet(g);
+		generator = new Generator(g);
 		gv = new GraphViz(g);
+		nullable = new Nullable(g);
 		printer = new Printer(g);
 	}
 	public boolean debug = false;
+	/**
+	 * Begin traversal of the language specification, at specified identifier
+	 * @param visitor
+	 * @param id
+	 */
+	public <T> T beginTraversal(Visitor<T> visitor, String id) {
+		return beginTraversal(visitor, g.id(id));
+	}
+	/**
+	 * Begin traversal of a language
+	 * @param visitor
+	 * @param language
+	 * @return
+	 */
+	public <T> T beginTraversal(Visitor<T> visitor, Node<?,?> language) {
+		assert visitor != null;
+		assert language != null;
+		visitor.getWorkList().clear();
+		visitor.begin();
+		T accumulator;
+		// Visit a grammar
+		if (language.tag == Node.Tag.ID) {
+			visitor.getWorkList().todo((Node<String,Void>)language);
+			accumulator = visitor.bottom();
+			for (Node<String,Void> identifier : visitor.getWorkList()) {
+				accumulator = visitor.reduce(accumulator, g.acceptRule(visitor, identifier));
+				if (visitor.done(accumulator)) {
+					return visitor.end(accumulator);
+				}
+			}
+		}
+		// Visit a regex
+		else {
+			accumulator = g.accept(visitor, language);
+		}
+		return visitor.end(accumulator);
+	}
+	/**
+	 * Begin traversal of the language specification
+	 * @param visitor
+	 * @return
+	 */
+	public <T> T beginTraversal(Visitor<T> visitor) {
+		return beginTraversal(visitor, g.definition());
+	}
+	
 	public boolean matches(Node<?,?> language, CharSequence s) {
 		boolean result;
 		if (debug) {
@@ -53,5 +100,4 @@ final public class Compute {
 	public boolean matches(CharSequence s) {
 		return matches(g.definition(), s);
 	}
-
 }

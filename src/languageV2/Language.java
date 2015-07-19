@@ -9,7 +9,7 @@ import java.util.Set;
 import languageV2.traversal.*;
 
 /**
- * Specify a language, and accept visitors into the language specification.
+ * Specify a language.
  * 
  * @author Joseph Lawrance
  *
@@ -88,12 +88,12 @@ public class Language {
 		}
 		return listCache.get(key);
 	}
-	private Node<?,?> list(Node<?,?>[] nodes, int i, Node<?,?> separator) {
+	private Node<?,?> list(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
 			return empty;
 		} else {
-			// return listInstance(nodes[i], list(nodes, i+1));
-			return listInstance(separator, listInstance(nodes[i], list(nodes, i+1, separator)));
+			return listInstance(nodes[i], list(nodes, i+1));
+			// return listInstance(separator, listInstance(nodes[i], list(nodes, i+1, separator)));
 		}
 	}
 	/**
@@ -103,7 +103,7 @@ public class Language {
 	 * @return A language matching the sequence in order: <code>abcd...</code>
 	 */
 	public Node<?,?> list(Node<?,?>... sequence) {
-		return list(sequence, 0, empty);
+		return list(sequence, 0);
 	}
 	
 	// Convert a string into an array of symbols
@@ -121,7 +121,7 @@ public class Language {
 	 * @return A language matching the string: <code>hello<code>
 	 */
 	public Node<?,?> string(String string) {
-		return list(explode(string), 0, empty);
+		return list(explode(string), 0);
 	}
 	private Map<Integer, Node<?,?>> setCache = new HashMap<Integer, Node<?,?>>();
 
@@ -400,51 +400,6 @@ public class Language {
 		default:
 			return null;
 		}
-	}
-	/**
-	 * Begin traversal of the language specification, at specified identifier
-	 * @param visitor
-	 * @param id
-	 */
-	public <T> T beginTraversal(Visitor<T> visitor, String id) {
-		return beginTraversal(visitor, id(id));
-	}
-	/**
-	 * Begin traversal of a language
-	 * @param visitor
-	 * @param language
-	 * @return
-	 */
-	public <T> T beginTraversal(Visitor<T> visitor, Node<?,?> language) {
-		assert visitor != null;
-		assert language != null;
-		visitor.getWorkList().clear();
-		visitor.begin();
-		T accumulator;
-		// Visit a grammar
-		if (language.tag == Node.Tag.ID) {
-			visitor.getWorkList().todo((Node<String,Void>)language);
-			accumulator = visitor.bottom();
-			for (Node<String,Void> identifier : visitor.getWorkList()) {
-				accumulator = visitor.reduce(accumulator, acceptRule(visitor, identifier));
-				if (visitor.done(accumulator)) {
-					return visitor.end(accumulator);
-				}
-			}
-		}
-		// Visit a regex
-		else {
-			accumulator = accept(visitor, language);
-		}
-		return visitor.end(accumulator);
-	}
-	/**
-	 * Begin traversal of the language specification
-	 * @param visitor
-	 * @return
-	 */
-	public <T> T beginTraversal(Visitor<T> visitor) {
-		return beginTraversal(visitor, definition);
 	}
 	/**
 	 * Debug output
