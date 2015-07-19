@@ -1,12 +1,12 @@
 package test;
 
-import languageV2.Language;
-import languageV2.Node;
-import languageV2.traversal.FirstSet;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
+import com.dictorobitary.traversal.FirstSet;
 
 public class GrammarTest {
 	

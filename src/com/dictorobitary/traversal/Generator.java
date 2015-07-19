@@ -1,9 +1,9 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
 import java.util.Random;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 
 /**

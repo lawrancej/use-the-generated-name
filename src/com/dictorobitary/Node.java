@@ -1,4 +1,4 @@
-package languageV2;
+package com.dictorobitary;
 
 /**
  * A language is a set of strings (lists of symbols).

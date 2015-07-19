@@ -1,7 +1,7 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public final WorkQueue<Node<String,Void>> todo = new WorkList<Node<String,Void>>();

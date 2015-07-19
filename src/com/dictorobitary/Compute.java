@@ -1,6 +1,6 @@
-package languageV2;
+package com.dictorobitary;
 
-import languageV2.traversal.*;
+import com.dictorobitary.traversal.*;
 
 /**
  * Accept visitors into a language specification.

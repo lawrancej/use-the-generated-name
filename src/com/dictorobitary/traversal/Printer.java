@@ -1,7 +1,7 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Language g) {

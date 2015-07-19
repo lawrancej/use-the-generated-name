@@ -1,10 +1,10 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public Character c;

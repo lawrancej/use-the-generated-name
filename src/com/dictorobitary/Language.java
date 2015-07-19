@@ -1,4 +1,4 @@
-package languageV2;
+package com.dictorobitary;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import languageV2.traversal.*;
+import com.dictorobitary.traversal.*;
 
 /**
  * Specify a language.

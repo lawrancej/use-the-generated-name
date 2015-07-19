@@ -1,10 +1,10 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 /**
  * Debug grammar through GraphViz output and also query the size of the graph.

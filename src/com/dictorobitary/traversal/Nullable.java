@@ -1,10 +1,10 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 public class Nullable extends AbstractVisitor<Boolean> {
 	Set<Node<String,Void>> nulls = new HashSet<Node<String,Void>>();
