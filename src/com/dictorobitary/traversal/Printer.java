@@ -1,5 +1,6 @@
 package com.dictorobitary.traversal;
 
+import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
 import com.dictorobitary.Node;
 

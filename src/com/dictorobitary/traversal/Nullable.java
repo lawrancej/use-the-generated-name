@@ -3,6 +3,7 @@ package com.dictorobitary.traversal;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
 import com.dictorobitary.Node;
 

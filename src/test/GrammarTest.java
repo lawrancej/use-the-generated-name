@@ -6,10 +6,8 @@ import org.junit.Test;
 
 import com.dictorobitary.Language;
 import com.dictorobitary.Node;
-import com.dictorobitary.traversal.FirstSet;
 
 public class GrammarTest {
-	
 	@Test
 	public void mathExpression() {
 		Language g = new Language() {{
@@ -25,6 +23,7 @@ public class GrammarTest {
 			rule(digits, digit, many(digit));
 		}};
 
+		System.out.println(g.get.generator.compute());
 		//System.out.println(g.toString());
 		Assert.assertTrue(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertTrue(g.get.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
@@ -232,13 +231,12 @@ public class GrammarTest {
 		Language parens = new Language() {{
 			rule("S",option(id("S"),symbol('('),id("S"),symbol(')')));
 		}};
-		FirstSet first = new FirstSet(parens);
 //		Assert.assertTrue(parens.isNonterminal("S"));
 		Assert.assertFalse(parens.get.matches("("));
 		Assert.assertTrue(parens.get.matches("()"));
 		Assert.assertFalse(parens.get.matches(")"));
-		Assert.assertTrue(parens.get.matches(first.compute(), "("));
-		Assert.assertFalse(parens.get.matches(first.compute(), ")"));
+		Assert.assertTrue(parens.get.matches(parens.get.firstSet.compute(), "("));
+		Assert.assertFalse(parens.get.matches(parens.get.firstSet.compute(), ")"));
 	}
 	
 	@Test

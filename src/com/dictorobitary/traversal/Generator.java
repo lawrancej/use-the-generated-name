@@ -2,6 +2,7 @@ package com.dictorobitary.traversal;
 
 import java.util.Random;
 
+import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
 import com.dictorobitary.Node;
 
