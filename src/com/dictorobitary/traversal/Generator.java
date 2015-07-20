@@ -51,7 +51,10 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 	}
 	public StringBuilder id(Node<String, Void> id) {
 		if (g.get.nullable.compute(id)) {
-			if (rand.nextInt(10) <= 3) {
+			if (todo.visited(id)) {
+				return buffer;
+			}
+			if (rand.nextInt(2) == 0) {
 				g.acceptRule(this, id);				
 			}
 		} else {

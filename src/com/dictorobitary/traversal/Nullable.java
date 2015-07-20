@@ -32,6 +32,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		return Node.accept(this, set.left) || Node.accept(this, set.right);
 	}
 	public Boolean id(Node<String,Void> id) {
+		if (nulls.contains(id)) return true;
 		if (todo.visited(id)) {
 			return nulls.contains(id);
 		} else {
@@ -43,6 +44,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		}
 	}
 	public Boolean rule(Node<Node<String,Void>,Node<?,?>> rule) {
+		if (nulls.contains(rule.left)) return true;
 		return Node.accept(this, rule.right);
 	}
 	public Boolean bottom() {
