@@ -1,7 +1,7 @@
 package com.dictorobitary;
 
 /**
- * A node in the data structure defining a language.
+ * A node in grammar graph data structure.
  * 
  * @author Joey Lawrance
  *

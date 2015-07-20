@@ -1,6 +1,5 @@
 package com.dictorobitary;
 
-
 /**
  * Traverse a language specification.
  * 
