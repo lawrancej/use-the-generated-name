@@ -13,13 +13,25 @@ package com.dictorobitary;
  */
 public interface Visitor<T> {
 	/**
-	 * Visit symbol: <code>c</code>
+	 * Visit any symbol: <code>.</code>
+	 */
+	T any(Node<?,?> language);
+	/**
+	 * Visit symbol range: <code>[from-to]</code>
 	 */
 	T symbol(Node<Character,Character> language);
+	/**
+	 * Visit empty list: <code>&epsilon;</code>
+	 */
+	T empty(Node<?,?> language);
 	/**
 	 * Visit a list of languages: <code>abc...</code>
 	 */
 	T list(Node<Node<?,?>,Node<?,?>> language);
+	/**
+	 * Visit empty set: <code>&#8709;</code>
+	 */
+	T reject(Node<?,?> language);
 	/**
 	 * Visit a set of languages <code>a|b|c|...</code>
 	 */

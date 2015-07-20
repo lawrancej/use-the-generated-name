@@ -13,34 +13,35 @@ import com.dictorobitary.Node;
  * @author Joey Lawrance
  *
  */
-public class Generator extends AbstractVisitor<StringBuffer> {
+public class Generator extends AbstractVisitor<StringBuilder> {
 
 	Random rand = new Random();
-	StringBuffer buffer;
+	StringBuilder buffer;
 	public Generator(Language g) {
 		super(g);
 	}
-
-	@Override
-	public StringBuffer symbol(Node<Character, Character> language) {
-		if (language == Language.any) {
-			return buffer.append((char)(rand.nextInt(127)+1));
-		} else if (language.left == language.right) {
+	public StringBuilder any(Node<?, ?> language) {
+		return buffer.append((char)(rand.nextInt(127)+1));
+	}
+	public StringBuilder symbol(Node<Character, Character> language) {
+		if (language.left == language.right) {
 			return buffer.append(language.left);
 		} else {
 			return buffer.append((char)(rand.nextInt(language.right - language.left) + language.left));
 		}
 	}
-
-	@Override
-	public StringBuffer list(Node<Node<?, ?>, Node<?, ?>> language) {
+	public StringBuilder empty(Node<?, ?> language) {
+		return buffer;
+	}
+	public StringBuilder list(Node<Node<?, ?>, Node<?, ?>> language) {
 		Node.accept(this, language.left);
 		Node.accept(this, language.right);
 		return buffer;
 	}
-
-	@Override
-	public StringBuffer set(Node<Node<?, ?>, Node<?, ?>> set) {
+	public StringBuilder reject(Node<?, ?> langauge) {
+		return null;
+	}
+	public StringBuilder set(Node<Node<?, ?>, Node<?, ?>> set) {
 		if (rand.nextInt(2) == 0) {
 			Node.accept(this, set.left);
 		} else {
@@ -48,37 +49,30 @@ public class Generator extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-
-	@Override
-	public StringBuffer id(Node<String, Void> id) {
-		g.acceptRule(this, id);
+	public StringBuilder id(Node<String, Void> id) {
+		if (g.get.nullable.compute(id)) {
+			if (rand.nextInt(10) <= 3) {
+				g.acceptRule(this, id);				
+			}
+		} else {
+			g.acceptRule(this, id);
+		}
 		return buffer;
 	}
-
-	@Override
-	public StringBuffer rule(Node<Node<String, Void>, Node<?, ?>> rule) {
+	public StringBuilder rule(Node<Node<String, Void>, Node<?, ?>> rule) {
 		Node.accept(this, rule.right);
 		return buffer;
 	}
-
-	@Override
-	public StringBuffer bottom() {
+	public StringBuilder bottom() {
 		return buffer;
 	}
-
-	@Override
-	public boolean done(StringBuffer accumulator) {
+	public boolean done(StringBuilder accumulator) {
 		return false;
 	}
-
-	@Override
-	public StringBuffer reduce(StringBuffer accumulator, StringBuffer current) {
+	public StringBuilder reduce(StringBuilder accumulator, StringBuilder current) {
 		return buffer;
 	}
-	
-	@Override
 	public void begin() {
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 	}
-
 }

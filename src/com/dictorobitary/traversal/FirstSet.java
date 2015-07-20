@@ -9,19 +9,26 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 	public FirstSet(Language g) {
 		super(g);
 	}
-	public Node<?,?> symbol(Node<Character,Character> c) {
-		return c;
+	public Node<?, ?> any(Node<?, ?> language) {
+		return language;
+	}
+	public Node<?,?> symbol(Node<Character,Character> language) {
+		return language;
+	}
+	public Node<?, ?> empty(Node<?, ?> language) {
+		return bottom();
 	}
 	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> pair) {
-		if (pair == Language.empty) return bottom();
 		Node<?,?> result = Node.accept(this, pair.left);
 		if (g.get.nullable.compute(pair.left)) {
 			result = g.or(result, Node.accept(this, pair.right));
 		}
 		return result;
 	}
+	public Node<?, ?> reject(Node<?, ?> langauge) {
+		return bottom();
+	}
 	public Node<?,?> set(Node<Node<?,?>,Node<?,?>> set) {
-		if (set == Language.reject) return bottom();
 		return g.or(Node.accept(this, set.left), Node.accept(this, set.right));
 	}
 	public Node<?,?> id(Node<String,Void> id) {

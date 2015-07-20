@@ -39,10 +39,19 @@ final public class Node<L,R> {
 			visitor.getWorkList().todo((Node<String,Void>)language);
 			return visitor.id((Node<String,Void>)language);
 		case LIST:
+			if (language == Language.empty) {
+				return visitor.empty(language);
+			}
 			return visitor.list((Node<Node<?,?>,Node<?,?>>)language);
 		case SET:
+			if (language == Language.reject) {
+				return visitor.reject(language);
+			}
 			return visitor.set((Node<Node<?,?>,Node<?,?>>)language);
 		case SYMBOL:
+			if (language == Language.any) {
+				return visitor.any(language);
+			}
 			return visitor.symbol((Node<Character,Character>)language);
 		default:
 			return null;

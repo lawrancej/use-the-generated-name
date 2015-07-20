@@ -25,12 +25,17 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 			buffer.append(arrow);
 		}
 	}
+	public StringBuffer any(Node<?, ?> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"Any\"];\n", language.hashCode()));
+		}
+		return buffer;
+	}
 	public StringBuffer symbol(Node<Character,Character> language) {
 		if (!nodes.contains(language)) {
 			nodes.add(language);
-			if (language == Language.any) {
-				buffer.append(String.format("%s [label=\"Any\"];\n", language.hashCode()));
-			} else if (language.left == language.right) {
+			if (language.left == language.right) {
 				buffer.append(String.format("%s [label=\"'%c'\"];\n", language.hashCode(), language.left));
 			} else {
 				buffer.append(String.format("%s [label=\"'%c'..'%c'\"];\n", language.hashCode(), language.left, language.right));
@@ -38,18 +43,30 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
+	@Override
+	public StringBuffer empty(Node<?, ?> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"&epsilon;\"];\n", language.hashCode()));
+		}
+		return buffer;
+	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
 		if (!nodes.contains(list)) {
 			nodes.add(list);
-			if (list == Language.empty) {
-				buffer.append(String.format("%s [label=\"&epsilon;\"];\n", list.hashCode()));
-				return buffer;
-			}
 			buffer.append(String.format("%s [label=\"{List|{<left> L|<right> R}}\"];\n", list.hashCode()));
 			Node.accept(this, list.left);
 			drawEdge(list.hashCode() + ":left", list.left.hashCode());
 			Node.accept(this, list.right);
 			drawEdge(list.hashCode() + ":right", list.right.hashCode());
+		}
+		return buffer;
+	}
+	@Override
+	public StringBuffer reject(Node<?, ?> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"&#8709;\"];\n", language.hashCode()));
 		}
 		return buffer;
 	}

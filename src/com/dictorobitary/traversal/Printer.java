@@ -9,10 +9,12 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		super(g);
 	}
 	private StringBuffer buffer = new StringBuffer();
+	public StringBuffer any(Node<?, ?> language) {
+		buffer.append("<any character>");
+		return buffer;
+	}
 	public StringBuffer symbol(Node<Character,Character> language) {
-		if (language == Language.any) {
-			buffer.append("<any character>");
-		} else if (language.left == language.right) {
+		if (language.left == language.right) {
 			buffer.append('\'');
 			buffer.append(language.left);
 			buffer.append('\'');
@@ -25,28 +27,28 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
+	public StringBuffer empty(Node<?, ?> language) {
+		buffer.append("\u03b5");
+		return buffer;
+	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
-		if (list == Language.empty) {
-			buffer.append("\u03b5");
-		} else {
-			buffer.append('(');
-			Node.accept(this, list.left);
-			buffer.append(' ');
-			Node.accept(this, list.right);
-			buffer.append(')');
-		}
+		buffer.append('(');
+		Node.accept(this, list.left);
+		buffer.append(' ');
+		Node.accept(this, list.right);
+		buffer.append(')');
+		return buffer;
+	}
+	public StringBuffer reject(Node<?, ?> language) {
+		buffer.append("\u2205");
 		return buffer;
 	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
-		if (set == Language.reject) {
-			buffer.append("\u2205");
-		} else {
-			buffer.append('(');
-			Node.accept(this, set.left);
-			buffer.append('|');
-			Node.accept(this, set.right);
-			buffer.append(')');
-		}
+		buffer.append('(');
+		Node.accept(this, set.left);
+		buffer.append('|');
+		Node.accept(this, set.right);
+		buffer.append(')');
 		return buffer;
 	}
 	public StringBuffer id(Node<String,Void> id) {

@@ -13,17 +13,23 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public Derivative(Language g) {
 		super(g);
 	}
+	public Node<?, ?> any(Node<?, ?> language) {
+		// D(.) = e
+		return Language.empty;
+	}
 	public Node<?,?> symbol(Node<Character,Character> language) {
-		// Dc(c|.) = e
-		if (language == Language.any || this.c == language.left || (this.c > language.left && this.c <= language.right)) {
+		// Dc(c) = e
+		if (this.c == language.left || (this.c > language.left && this.c <= language.right)) {
 			return Language.empty;
 		}
 		// Dc(c') = 0
 		return bottom();
 	}
-	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> list) {
+	public Node<?, ?> empty(Node<?, ?> language) {
 		// Dc(e) = 0
-		if (list == Language.empty) return bottom();
+		return bottom();
+	}
+	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> list) {
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
 		Node<?,?> result = g.list(Node.accept(this, list.left), list.right);
 		if (g.get.nullable.compute(list.left)) {
@@ -31,9 +37,11 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		}
 		return result;
 	}
-	public Node<?,?> set(Node<Node<?,?>,Node<?,?>> set) {
+	public Node<?, ?> reject(Node<?, ?> langauge) {
 		// Dc(0) = 0
-		if (set == Language.reject) return bottom();
+		return bottom();
+	}
+	public Node<?,?> set(Node<Node<?,?>,Node<?,?>> set) {
 		// Dc(a+b) = Dc(a) + Dc(b)
 		return g.or(Node.accept(this, set.left), Node.accept(this, set.right));
 	}

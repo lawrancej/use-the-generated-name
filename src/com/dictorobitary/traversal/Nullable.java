@@ -12,16 +12,23 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Nullable(Language g) {
 		super(g);
 	}
+	public Boolean any(Node<?, ?> language) {
+		return false;
+	}
 	public Boolean symbol(Node<Character,Character> c) {
 		return false;
 	}
+	public Boolean empty(Node<?, ?> language) {
+		return true;
+	}
 	public Boolean list(Node<Node<?,?>,Node<?,?>> list) {
-		if (list == Language.empty) return true;
 		boolean result = Node.accept(this, list.left) && Node.accept(this, list.right);
 		return result;
 	}
+	public Boolean reject(Node<?, ?> language) {
+		return false;
+	}
 	public Boolean set(Node<Node<?,?>,Node<?,?>> set) {
-		if (set == Language.reject) return false;
 		return Node.accept(this, set.left) || Node.accept(this, set.right);
 	}
 	public Boolean id(Node<String,Void> id) {
