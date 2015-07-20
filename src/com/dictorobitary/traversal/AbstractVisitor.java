@@ -19,10 +19,32 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public T end(T accumulator) {
 		return accumulator;
 	}
+	public T compute(String id) {
+		return compute(g.id(id));
+	}
 	public T compute() {
-		return g.get.beginTraversal(this);
+		return compute(g.definition());
 	}
 	public T compute(Node<?,?> language) {
-		return g.get.beginTraversal(this, language);
+		assert language != null;
+		getWorkList().clear();
+		begin();
+		T accumulator;
+		// Visit a grammar
+		if (language.tag == Node.Tag.ID) {
+			getWorkList().todo((Node<String,Void>)language);
+			accumulator = bottom();
+			for (Node<String,Void> identifier : getWorkList()) {
+				accumulator = reduce(accumulator, g.acceptRule(this, identifier));
+				if (done(accumulator)) {
+					return end(accumulator);
+				}
+			}
+		}
+		// Visit a regex
+		else {
+			accumulator = Node.accept(this, language);
+		}
+		return end(accumulator);
 	}
 }

@@ -26,52 +26,6 @@ final public class Compute {
 		printer = new Printer(g);
 	}
 	public boolean debug = false;
-	/**
-	 * Begin traversal of the language specification, at specified identifier
-	 * @param visitor
-	 * @param id
-	 */
-	public <T> T beginTraversal(Visitor<T> visitor, String id) {
-		return beginTraversal(visitor, g.id(id));
-	}
-	/**
-	 * Begin traversal of a language
-	 * @param visitor
-	 * @param language
-	 * @return
-	 */
-	public <T> T beginTraversal(Visitor<T> visitor, Node<?,?> language) {
-		assert visitor != null;
-		assert language != null;
-		visitor.getWorkList().clear();
-		visitor.begin();
-		T accumulator;
-		// Visit a grammar
-		if (language.tag == Node.Tag.ID) {
-			visitor.getWorkList().todo((Node<String,Void>)language);
-			accumulator = visitor.bottom();
-			for (Node<String,Void> identifier : visitor.getWorkList()) {
-				accumulator = visitor.reduce(accumulator, g.acceptRule(visitor, identifier));
-				if (visitor.done(accumulator)) {
-					return visitor.end(accumulator);
-				}
-			}
-		}
-		// Visit a regex
-		else {
-			accumulator = Node.accept(visitor, language);
-		}
-		return visitor.end(accumulator);
-	}
-	/**
-	 * Begin traversal of the language specification
-	 * @param visitor
-	 * @return
-	 */
-	public <T> T beginTraversal(Visitor<T> visitor) {
-		return beginTraversal(visitor, g.definition());
-	}
-	
 	public boolean matches(Node<?,?> language, CharSequence s) {
 		boolean result;
 		if (debug) {
