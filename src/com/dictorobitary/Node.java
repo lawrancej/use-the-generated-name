@@ -8,6 +8,7 @@ package com.dictorobitary;
  * @param <L>
  * @param <R>
  */
+@SuppressWarnings("unchecked")
 final public class Node<L,R> {
 	public enum Tag {
 		SYMBOL,	LIST, SET, ID, RULE, ACTION

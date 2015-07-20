@@ -20,6 +20,7 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public T compute() {
 		return compute(g.definition());
 	}
+	@SuppressWarnings("unchecked")
 	public T compute(Node<?,?> language) {
 		assert language != null;
 		getWorkList().clear();

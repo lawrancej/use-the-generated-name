@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.dictorobitary.traversal.*;
-
 /**
  * Specify a language.
  * 
