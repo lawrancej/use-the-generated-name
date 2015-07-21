@@ -19,11 +19,11 @@ public class Language {
 	/** Match any character, equivalent to regular expression dot. */
 	public static final Node<Character,Character> any = Node.create(Node.Tag.SYMBOL, null, null);
 	/** Match the empty list (empty sequence). */
-	public static final Node<Node<?,?>,Node<?,?>> empty = Node.create(Node.Tag.LIST, null,null);
+	public static final Node<Node<?,?>,Node<?,?>> empty = Node.create(Node.Tag.LIST, null, null);
 	/** Reject everything (the empty set). */
-	public static final Node<Node<?,?>,Node<?,?>> reject = Node.create(Node.Tag.SET,null,null);
+	public static final Node<Node<?,?>,Node<?,?>> reject = Node.create(Node.Tag.SET, null, null);
 
-	private Map<Integer, Node<Character,Character>> alphabet = new HashMap<Integer, Node<Character,Character>>();
+	private Map<Integer, Node<Character,Character>> rangeCache = new HashMap<Integer, Node<Character,Character>>();
 	/**
 	 * Match a character.
 	 * 
@@ -46,12 +46,7 @@ public class Language {
 			to = tmp;
 		}
 		int key = (from << 16) | to;
-		if (!alphabet.containsKey(key)) {
-			Node<Character,Character> result = Node.create(Node.Tag.SYMBOL, from,to);
-			alphabet.put(key, result);
-			return result;
-		}
-		return alphabet.get(key);
+		return Node.createCached(rangeCache, key, Node.Tag.SYMBOL, from,to);
 	}
 	
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
@@ -79,12 +74,7 @@ public class Language {
 		if (right == empty) { return left; }
 		// FIXME: this is fast, but a bit dodgy
 		int key = left.hashCode() ^ right.hashCode();
-		if (!listCache.containsKey(key)) {
-			Node<?,?> result = Node.create(Node.Tag.LIST, left, right);
-			listCache.put(key, (Node<Node<?, ?>, Node<?, ?>>) result);
-			return result;
-		}
-		return listCache.get(key);
+		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
 	}
 	private Node<?,?> list(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -121,7 +111,7 @@ public class Language {
 	public Node<?,?> string(String string) {
 		return list(explode(string), 0);
 	}
-	private Map<Integer, Node<?,?>> setCache = new HashMap<Integer, Node<?,?>>();
+	private Map<Integer, Node<Node<?,?>,Node<?,?>>> setCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
 		// Skip through defined identifiers
@@ -142,12 +132,7 @@ public class Language {
 			if (r.left == left || r.right == left) return r;
 		}
 		int key = left.hashCode() ^ right.hashCode();
-		if (!setCache.containsKey(key)) {
-			Node<?,?> result = Node.create(Node.Tag.SET, left, right);
-			setCache.put(key, result);
-			return result;
-		}
-		return setCache.get(key);
+		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 	}
 	private Node<?,?> or(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -191,9 +176,6 @@ public class Language {
 	 */
 	public Node<?,?> many(Node<?,?>... sequence) {
 		Node<?,?> language = list(sequence);
-		// Skip through defined identifiers
-		language = skipDefinedIdentifier(language);
-		// Avoid creating a new loop, if possible
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
 		Node<String,Void> loop = id();
@@ -230,7 +212,7 @@ public class Language {
 		return list(list(sequence), many(sequence));
 	}
 	// Identifier lookup by name
-	private Map<String, Node<String,Void>> labels = new HashMap<String, Node<String,Void>>();
+	private Map<Integer, Node<String,Void>> labels = new HashMap<Integer, Node<String,Void>>();
 	private Set<Node<String,Void>> ids = new HashSet<Node<String,Void>>();
 	/**
 	 * Create or use an identifier (a terminal or nonterminal variable).
@@ -240,10 +222,7 @@ public class Language {
 	 */
 	public Node<String,Void> id(String label) {
 		assert label != null;
-		if (!labels.containsKey(label)) {
-			labels.put(label, Node.create(Node.Tag.ID, label, (Void)null));
-		}
-		return labels.get(label);
+		return Node.createCached(labels, label.hashCode(), Node.Tag.ID, label, (Void)null);
 	}
 	/**
 	 * Create an identifier (a terminal or nonterminal variable).
@@ -268,6 +247,10 @@ public class Language {
 	
 	/** Tokenization separator */
 	private Node<?,?> separator = empty;
+	
+//	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
+	Map<Integer, Node<Node<String,Void>, ?>> rules = new HashMap<Integer, Node<Node<String,Void>, ?>>();
+
 	/**
 	 * Create a rule (production).
 	 * 
@@ -286,7 +269,7 @@ public class Language {
 		assert rhs != null;
 		Node<?,?> result = rule(id(label), rhs);
 		if (result == reject) {
-			labels.remove(label);
+			labels.remove(label.hashCode());
 		}
 		return result;
 	}
@@ -323,10 +306,13 @@ public class Language {
 			ids.remove(id);
 			return reject;
 		}
+//		Node<?,?> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
+//			definition = node;
 			definition = id;
 		}
+//		return node;
 		if (!rules.containsKey(key)) {
 			Node<Node<String, Void>, ?> rule = Node.create(Node.Tag.RULE, id, right);
 			rules.put(key, rule);
@@ -365,7 +351,6 @@ public class Language {
 	public void define(Node<?,?>... language) {
 		definition = list(language);
 	}
-	Map<Integer, Node<Node<String,Void>, ?>> rules = new HashMap<Integer, Node<Node<String,Void>, ?>>();
 	/**
 	 * Accept visitor into a rule of the form: <code>id -> right</code>
 	 * 

@@ -22,8 +22,13 @@ public class GrammarTest {
 			rule(digit, range('0', '9'));
 			rule(digits, digit, many(digit));
 		}};
+//		for (int i = 0; i < 10; i++) {
+//		String s = g.get.generator.compute().toString();
+//			Assert.assertTrue(g.get.matches(s));
+//			System.out.println(s);
+//		}
 
-		System.out.println(g.get.generator.compute());
+		Assert.assertFalse(g.get.matches("((2)*77*40)3"));
 		//System.out.println(g.toString());
 		Assert.assertTrue(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertTrue(g.get.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
@@ -325,7 +330,7 @@ public class GrammarTest {
 		Assert.assertTrue(regex.get.matches("(hello)|(world)"));
 	}
 	
-//	@After
+	@After
 	public void summary() {
 		// 3528 total
 		System.out.println(Node.allocations);
