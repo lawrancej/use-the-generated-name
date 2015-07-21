@@ -35,7 +35,6 @@ public class GrammarTest {
 		Assert.assertFalse(g.get.matches("1+"));
 		Assert.assertFalse(g.get.matches("27+"));
 		Assert.assertTrue(g.get.matches("27+34"));
-
 	}
 	
 //	@Test
@@ -46,7 +45,6 @@ public class GrammarTest {
 			Node<String,Void> number = id("number");
 			rule (expression, or(number, list(expression, expression, oneOf("+-/*"))));
 			token (number, many1(range('0','9')));
-			//debug = true;
 		}};
 
 		Assert.assertTrue(rpn.get.matches("2"));
@@ -60,7 +58,6 @@ public class GrammarTest {
 		Assert.assertTrue(rpn.get.matches("2 3 3 - -"));
 		Assert.assertTrue(rpn.get.matches("2 3 3 - 3 - *"));
 		Assert.assertTrue(rpn.get.matches("2 1 /"));
-		
 	}
 	
 //	@Test
@@ -79,7 +76,6 @@ public class GrammarTest {
 			rule (div, expression, expression, symbol('/'));
 			rule (times, expression, expression, symbol('*'));
 			token (number, many1(range('0','9')));
-			//debug = true;
 		}};
 		Assert.assertTrue(rpn.get.matches("2"));
 		Assert.assertTrue(rpn.get.matches(" 2"));
@@ -142,8 +138,6 @@ public class GrammarTest {
 	public void testCox() {
 		Language g = new Language() {{
 			rule("S", or(list(id("S"), symbol('+'), id("S")), symbol('1')));
-
-			//debug = true;
 		}};
 		Assert.assertTrue(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertFalse(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
@@ -154,8 +148,6 @@ public class GrammarTest {
 		Language g = new Language() {{
 			Node<String,Void> s = id();
 			rule(s, or(list(s, symbol('+'), s), symbol('1')));
-
-			//debug = true;
 		}};
 		long before, after;
 		before = System.nanoTime();
@@ -183,13 +175,11 @@ public class GrammarTest {
 	public void testMany() {
 		Language g = new Language() {{
 			define(list(any, many(any)));
-			//debug = true;
 		}};
 		Assert.assertTrue(g.get.matches("abcdefg"));
 		Assert.assertFalse(g.get.matches(""));
 		Language f = new Language() {{
 			rule("hi",many(symbol('a')),many(symbol('b')));
-			// debug = true;
 		}};
 		Assert.assertTrue(f.get.matches("ab"));
 		Assert.assertTrue(f.get.matches(""));
@@ -302,7 +292,6 @@ public class GrammarTest {
 			rule("Command",oneOf("+-<>,."));
 			// Loop -> '[' Sequence ']'
 			rule("Loop",symbol('['), id("Sequence"), symbol(']'));
-			// debug = true;
 		}};
 		Assert.assertTrue(g.get.matches("+"));
 		Assert.assertTrue(g.get.matches("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
@@ -322,7 +311,7 @@ public class GrammarTest {
 			rule("term",many(id("factor")));
 			rule("factor",id("base"), option(symbol('*')));
 			rule("base",or(list(option(symbol('\\')), any), list(symbol('('), id("regex"), symbol(')'))));
-			//debug = true;
+			get.debug = true;
 		}};
 		Assert.assertTrue(regex.get.matches("a"));
 		Assert.assertTrue(regex.get.matches("a|b"));

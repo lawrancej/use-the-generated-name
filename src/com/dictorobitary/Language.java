@@ -1,6 +1,5 @@
 package com.dictorobitary;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,10 +8,12 @@ import java.util.Set;
 /**
  * Specify a language.
  * 
+ * For the OO purists, this is a Node factory.
+ * This Node factory performs compaction by construction.
+ * 
  * @author Joseph Lawrance
  *
  */
-@SuppressWarnings("unchecked")
 public class Language {
 	/** Construct a language specification */
 	public Language() {}
@@ -247,8 +248,7 @@ public class Language {
 	/** Tokenization separator */
 	private Node<?,?> separator = empty;
 	
-//	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
-	Map<Integer, Node<Node<String,Void>, ?>> rules = new HashMap<Integer, Node<Node<String,Void>, ?>>();
+	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
 	
 	private Node<?,?> undefine(Node<String,Void> id) {
 		ids.remove(id);
@@ -295,8 +295,8 @@ public class Language {
 		assert id != null;
 		assert rhs != null;
 		Node<?,?> right = list(rhs);
-		// If the right rejects, remove the identifier
-		if (right == reject) {
+		// If the right rejects, or Id -> Id literally, remove the identifier and reject
+		if (right == reject || id == right) {
 			return undefine(id);
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
@@ -305,23 +305,12 @@ public class Language {
 			undefine(id);
 			return right;
 		}
-		// If Id -> Id literally, reject
-		if (id == right) {
-			return undefine(id);
-		}
-//		Node<?,?> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
+		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
-//			definition = node;
-			definition = id;
+			definition = node.left;
 		}
-//		return node;
-		if (!rules.containsKey(key)) {
-			Node<Node<String, Void>, ?> rule = Node.create(Node.Tag.RULE, id, right);
-			rules.put(key, rule);
-			return id;
-		}
-		return rules.get(key);
+		return node.left;
 	}
 	
 	/**
