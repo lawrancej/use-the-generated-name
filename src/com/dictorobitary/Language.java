@@ -50,10 +50,10 @@ public class Language {
 	}
 	
 	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
-	private Node<?,?> skipDefinedIdentifier(Node<?,?> language) {
+	// Skip through defined identifiers
+	private Node<?,?> getRHS(Node<?,?> language) {
 		int key = language.hashCode();
 		if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
-			ids.remove(language);
 			language = (Node<?, ?>) rules.get(key).right;
 		}
 		return language;
@@ -62,9 +62,8 @@ public class Language {
 	private Node<?,?> listInstance(Node<?,?> left, Node<?,?> right) {
 		assert left != null;
 		assert right != null;
-		// Skip through defined identifiers
-		left = skipDefinedIdentifier(left);
-		right = skipDefinedIdentifier(right);
+		left = getRHS(left);
+		right = getRHS(right);
 		// r0 = 0r = 0
 		if (left == reject || right == reject) {
 			return reject;
@@ -115,8 +114,8 @@ public class Language {
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
 		// Skip through defined identifiers
-		left = skipDefinedIdentifier(left);
-		right = skipDefinedIdentifier(right);
+		left = getRHS(left);
+		right = getRHS(right);
 		// r+0 = 0+r = r
 		if (left == reject) { return right; }
 		if (right == reject) { return left; }
@@ -250,6 +249,12 @@ public class Language {
 	
 //	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
 	Map<Integer, Node<Node<String,Void>, ?>> rules = new HashMap<Integer, Node<Node<String,Void>, ?>>();
+	
+	private Node<?,?> undefine(Node<String,Void> id) {
+		ids.remove(id);
+		rules.remove(id.hashCode());
+		return reject;
+	}
 
 	/**
 	 * Create a rule (production).
@@ -292,19 +297,17 @@ public class Language {
 		Node<?,?> right = list(rhs);
 		// If the right rejects, remove the identifier
 		if (right == reject) {
-			ids.remove(id);
-			return reject;
+			return undefine(id);
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
 		int key = id.hashCode();
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-			ids.remove(id);
+			undefine(id);
 			return right;
 		}
 		// If Id -> Id literally, reject
 		if (id == right) {
-			ids.remove(id);
-			return reject;
+			return undefine(id);
 		}
 //		Node<?,?> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
 		// If the language is undefined, make this the starting identifier
@@ -362,10 +365,6 @@ public class Language {
 		visitor.getWorkList().done(id);
 		return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.hashCode()));
 	}
-	/**
-	 * Debug output
-	 */
-	public boolean debug = false;
 	public final Compute get = new Compute(this);
 	public String toString() {
 		return get.printer.compute().toString();
