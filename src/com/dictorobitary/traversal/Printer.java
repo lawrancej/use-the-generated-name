@@ -39,6 +39,17 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		buffer.append(')');
 		return buffer;
 	}
+	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> loop) {
+		buffer.append('(');
+		Node.accept(this,loop.left);
+		if (loop.right == Language.any) {
+			buffer.append(")*");
+		} else {
+			// FIXME
+			buffer.append("){FIXME}");
+		}
+		return buffer;
+	}
 	public StringBuffer reject(Node<?, ?> language) {
 		buffer.append("\u2205");
 		return buffer;

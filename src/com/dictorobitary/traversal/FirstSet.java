@@ -25,6 +25,9 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 		}
 		return result;
 	}
+	public Node<?,?> loop(Node<Node<?,?>,Node<?,?>> loop) {
+		return Node.accept(this, loop.left);
+	}
 	public Node<?, ?> reject(Node<?, ?> langauge) {
 		return bottom();
 	}

@@ -25,6 +25,9 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		boolean result = Node.accept(this, list.left) && Node.accept(this, list.right);
 		return result;
 	}
+	public Boolean loop(Node<Node<?,?>,Node<?,?>> language) {
+		return language.right == Language.any;
+	}
 	public Boolean reject(Node<?, ?> language) {
 		return false;
 	}

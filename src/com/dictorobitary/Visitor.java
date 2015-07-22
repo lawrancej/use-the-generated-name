@@ -29,6 +29,11 @@ public interface Visitor<T> {
 	 */
 	T list(Node<Node<?,?>,Node<?,?>> language);
 	/**
+	 * Visit a loop: <code>a*</code>
+	 * @param language
+	 */
+	T loop(Node<Node<?, ?>, Node<?, ?>> language);
+	/**
 	 * Visit empty set: <code>&#8709;</code>
 	 */
 	T reject(Node<?,?> language);

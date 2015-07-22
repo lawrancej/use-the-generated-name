@@ -1,6 +1,8 @@
 package com.dictorobitary.traversal;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
@@ -38,7 +40,13 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		Node.accept(this, language.right);
 		return buffer;
 	}
-	public StringBuilder reject(Node<?, ?> langauge) {
+	public StringBuilder loop(Node<Node<?, ?>, Node<?, ?>> language) {
+		for (int iterations = rand.nextInt(20); iterations > 0; iterations--) {
+			Node.accept(this, language.left);
+		}
+		return buffer;
+	}
+	public StringBuilder reject(Node<?, ?> language) {
 		return null;
 	}
 	public StringBuilder set(Node<Node<?, ?>, Node<?, ?>> set) {
@@ -50,20 +58,18 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		return buffer;
 	}
 	public StringBuilder id(Node<String, Void> id) {
-		if (g.get.nullable.compute(id)) {
-			if (todo.visited(id)) {
-				return buffer;
-			}
-			if (rand.nextInt(2) == 0) {
-				g.acceptRule(this, id);				
-			}
-		} else {
-			g.acceptRule(this, id);
-		}
+		g.acceptRule(this, id);
 		return buffer;
 	}
 	public StringBuilder rule(Node<Node<String, Void>, Node<?, ?>> rule) {
-		Node.accept(this, rule.right);
+		System.out.println(rule.left.left);
+		if (g.get.nullable.compute(rule.left)) {
+			if (rand.nextInt(2) == 0) {
+				Node.accept(this, rule.right);
+			}
+		} else {
+			Node.accept(this, rule.right);
+		}
 		return buffer;
 	}
 	public StringBuilder bottom() {

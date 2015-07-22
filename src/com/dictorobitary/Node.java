@@ -13,7 +13,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 final public class Node<L,R> {
 	public enum Tag {
-		SYMBOL,	LIST, SET, ID, RULE, ACTION
+		SYMBOL,	LIST, SET, ID, RULE, ACTION, LOOP
 	}
 	public final Tag tag;
 	public final L left;
@@ -65,8 +65,8 @@ final public class Node<L,R> {
 				return visitor.any(language);
 			}
 			return visitor.symbol((Node<Character,Character>)language);
-		case RULE:
-			return visitor.rule((Node<Node<String, Void>, Node<?, ?>>) language);
+		case LOOP:
+			return visitor.loop((Node<Node<?,?>,Node<?,?>>)language);
 		default:
 			return null;
 		}

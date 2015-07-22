@@ -37,6 +37,9 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		}
 		return result;
 	}
+	public Node<?, ?> loop(Node<Node<?, ?>, Node<?, ?>> language) {
+		return g.list(Node.accept(this, language.left), language);
+	}
 	public Node<?, ?> reject(Node<?, ?> langauge) {
 		// Dc(0) = 0
 		return bottom();

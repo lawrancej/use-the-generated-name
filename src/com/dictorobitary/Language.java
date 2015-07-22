@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * Specify a language.
  * 
- * For the OO purists, this is a Node factory.
+ * In OO terms, this is a Node factory.
  * This Node factory performs compaction by construction.
  * 
  * @author Joseph Lawrance
@@ -168,6 +168,7 @@ public class Language {
 		return or(empty, list(sequence));
 	}
 	
+	private Map<Integer, Node<Node<?,?>,Node<?,?>>> loopCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 	/**
 	 * Match a sequence zero or more times.
 	 * 
@@ -178,13 +179,8 @@ public class Language {
 		Node<?,?> language = list(sequence);
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
-		Node<String,Void> loop = id();
-		boolean flag = (definition == reject);
-		rule(loop, option(language, loop));
-		if (flag) {
-			definition = reject;
-		}
-		return loop;
+		if (language.tag == Node.Tag.LOOP) return language;
+		return Node.createCached(loopCache, language.hashCode(), Node.Tag.LOOP, language, any);
 	}
 	/**
 	 * Matches zero or more occurrences of language, separated by separator.
