@@ -127,7 +127,7 @@ public class GrammarTest {
 		}
 */
 		System.out.println("Generator:");
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 00; i++) {
 			String s = mathExpression.get.generator.compute(2,3).toString();
 			boolean result = mathExpression.get.matches(s);
 			if (!result) {
@@ -137,11 +137,18 @@ public class GrammarTest {
 			Assert.assertTrue(result);
 		}
 //		System.out.println(mathExpression.get.generator.compute().toString());
+		for (int i = 0; i < 49; i++) {
+		Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
 		Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
 		Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
 		Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
 		Assert.assertTrue(mathExpression.get.matches("(48)-5*6"));
 		Assert.assertTrue(mathExpression.get.matches("(14-4)*2-4/7"));
+		}
+		Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
+		Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
+		Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
+		Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
 		Assert.assertFalse(mathExpression.get.matches("((2)*77*40)3"));
 		//System.out.println(g.toString());
 		Assert.assertTrue(mathExpression.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
