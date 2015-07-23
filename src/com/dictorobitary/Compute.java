@@ -16,6 +16,7 @@ final public class Compute {
 	final public GraphViz gv;
 	final public Nullable nullable;
 	final public Printer printer;
+	final public Token token;
 	public Compute(Language language) {
 		g = language;
 		derivative = new Derivative(g);
@@ -24,6 +25,7 @@ final public class Compute {
 		gv = new GraphViz(g);
 		nullable = new Nullable(g);
 		printer = new Printer(g);
+		token = new Token(g);
 	}
 	public boolean debug = false;
 	public boolean matches(Node<?,?> language, CharSequence s) {

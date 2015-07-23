@@ -1,13 +1,10 @@
 package com.dictorobitary.traversal;
 
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
 import com.dictorobitary.Node;
-
 
 /**
  * Randomly generate strings in a language.
@@ -17,6 +14,8 @@ import com.dictorobitary.Node;
  */
 public class Generator extends AbstractVisitor<StringBuilder> {
 
+	public int depthLimit = 10;
+	public int loopLimit = 5;
 	Random rand = new Random();
 	StringBuilder buffer;
 	public Generator(Language g) {
@@ -41,15 +40,15 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		return buffer;
 	}
 	public StringBuilder loop(Node<Node<?, ?>, Node<?, ?>> language) {
-		for (int iterations = rand.nextInt(20); iterations > 0; iterations--) {
+		for (int iterations = rand.nextInt(loopLimit); iterations > 0; iterations--) {
 			Node.accept(this, language.left);
 		}
 		return buffer;
 	}
 	public StringBuilder reject(Node<?, ?> language) {
-		return null;
+		return buffer;
 	}
-	public StringBuilder set(Node<Node<?, ?>, Node<?, ?>> set) {
+	private StringBuilder flip(Node<Node<?,?>, Node<?,?>> set) {
 		if (rand.nextInt(2) == 0) {
 			Node.accept(this, set.left);
 		} else {
@@ -57,19 +56,43 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		}
 		return buffer;
 	}
+	public StringBuilder set(Node<Node<?, ?>, Node<?, ?>> set) {
+		boolean leftIsToken = g.get.token.compute(set.left);
+		boolean rightIsToken = g.get.token.compute(set.right);
+		// If neither (or both) sides are terminals, just pick a random side
+		if (leftIsToken == rightIsToken) { return flip(set); }
+		// Randomly pick the nonterminal side a limited number of times.
+		int number = rand.nextInt(3) + 1;
+		if (number <= 2) {
+			depthLimit -= number;
+		}
+		if (!leftIsToken) {
+			if (number <= 2 && depthLimit >= 0) {
+				Node.accept(this, set.left);
+			}
+			else {
+				Node.accept(this, set.right);
+			}
+		}
+		else if (!rightIsToken) {
+			if (number <= 2 && depthLimit >= 0) {
+				Node.accept(this, set.right);
+			}
+			else {
+				Node.accept(this, set.left);
+			}
+		}
+//		System.out.format("left %s : token? %b\n", g.get.printer.compute(set.left), leftIsToken);
+//		System.out.format("right %s : token? %b\n", g.get.printer.compute(set.right), rightIsToken);
+		return buffer;
+	}
 	public StringBuilder id(Node<String, Void> id) {
+		if (g.get.nullable.compute(id)) return buffer;
 		g.acceptRule(this, id);
 		return buffer;
 	}
 	public StringBuilder rule(Node<Node<String, Void>, Node<?, ?>> rule) {
-		System.out.println(rule.left.left);
-		if (g.get.nullable.compute(rule.left)) {
-			if (rand.nextInt(2) == 0) {
-				Node.accept(this, rule.right);
-			}
-		} else {
-			Node.accept(this, rule.right);
-		}
+		Node.accept(this, rule.right);
 		return buffer;
 	}
 	public StringBuilder bottom() {
@@ -83,5 +106,10 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 	}
 	public void begin() {
 		buffer = new StringBuilder();
+	}
+	public StringBuilder compute(int loopLimit, int recursionLimit) {
+		this.depthLimit = recursionLimit;
+		this.loopLimit = loopLimit;
+		return super.compute();
 	}
 }

@@ -2,15 +2,28 @@ package test;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dictorobitary.Language;
 import com.dictorobitary.Node;
 
 public class GrammarTest {
-	@Test
-	public void mathExpression() {
-		Language g = new Language() {{
+	static Language mathExpression;
+	static Language grammar;
+	static Language identifier;
+	static Language ebnf;
+	static Language cox;
+	static Language cox2;
+	static Language symbol;
+	static Language rpn;
+	static Language rpn2;
+	static Language regex;
+	@BeforeClass
+	public static void setup() {
+		long before, after;
+		before = System.nanoTime();
+		mathExpression = new Language() {{
 			Node<String,Void> expression = id("expression");
 			Node<String,Void> term = id("term");
 			Node<String,Void> factor = id("factor");
@@ -22,74 +35,7 @@ public class GrammarTest {
 			rule(digit, range('0', '9'));
 			rule(digits, digit, many(digit));
 		}};
-//		for (int i = 0; i < 10; i++) {
-//		String s = g.get.generator.compute().toString();
-//			Assert.assertTrue(g.get.matches(s));
-//			System.out.println(s);
-//		}
-
-		Assert.assertFalse(g.get.matches("((2)*77*40)3"));
-		//System.out.println(g.toString());
-		Assert.assertTrue(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
-		Assert.assertTrue(g.get.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
-		Assert.assertFalse(g.get.matches("1+"));
-		Assert.assertFalse(g.get.matches("27+"));
-		Assert.assertTrue(g.get.matches("27+34"));
-	}
-	
-//	@Test
-	public void testRPN1() {
-		Language rpn = new Language() {{
-			separator(many(symbol(' ')));
-			Node<String,Void> expression = id("expression");
-			Node<String,Void> number = id("number");
-			rule (expression, or(number, list(expression, expression, oneOf("+-/*"))));
-			token (number, many1(range('0','9')));
-		}};
-
-		Assert.assertTrue(rpn.get.matches("2"));
-		Assert.assertTrue(rpn.get.matches(" 2"));
-		Assert.assertTrue(rpn.get.matches(" 20"));
-		Assert.assertTrue(rpn.get.matches("2 "));
-		Assert.assertTrue(rpn.get.matches("2 2 +"));
-		Assert.assertTrue(rpn.get.matches("2 2 2 + -"));
-		Assert.assertTrue(rpn.get.matches("2 2 + 2 -"));
-		Assert.assertTrue(rpn.get.matches("2 3 -"));
-		Assert.assertTrue(rpn.get.matches("2 3 3 - -"));
-		Assert.assertTrue(rpn.get.matches("2 3 3 - 3 - *"));
-		Assert.assertTrue(rpn.get.matches("2 1 /"));
-	}
-	
-//	@Test
-	public void testRPN() {
-		Language rpn = new Language() {{
-			separator(many(symbol(' ')));
-			Node<String,Void> expression = id("expression");
-			Node<String,Void> plus = id("plus");
-			Node<String,Void> minus = id("minus");
-			Node<String,Void> div = id("div");
-			Node<String,Void> times = id("times");
-			Node<String, Void> number = id("number");
-			rule (expression, or(number, plus, minus, div, times));
-			rule (plus, expression, expression, symbol('+'));
-			rule (minus, expression, expression, symbol('-'));
-			rule (div, expression, expression, symbol('/'));
-			rule (times, expression, expression, symbol('*'));
-			token (number, many1(range('0','9')));
-		}};
-		Assert.assertTrue(rpn.get.matches("2"));
-		Assert.assertTrue(rpn.get.matches(" 2"));
-		Assert.assertTrue(rpn.get.matches("2 "));
-		Assert.assertTrue(rpn.get.matches("2 2 +"));
-		Assert.assertTrue(rpn.get.matches("2 3 -"));
-		Assert.assertTrue(rpn.get.matches("2 3 3 - -"));
-		Assert.assertTrue(rpn.get.matches("2 3 3 - 3 - *"));
-		Assert.assertTrue(rpn.get.matches("2 1 /"));
-	}
-	
-	@Test
-	public void testGrammar() {
-		Language g = new Language() {{
+		grammar = new Language() {{
 			rule("syntax", option(id("production"), id("syntax")));
 			rule("production", id("identifier"), symbol('='), id("expression"), symbol('.'));
 			rule("expression", option(id("expression"), symbol('|')), id("term"));
@@ -100,23 +46,11 @@ public class GrammarTest {
 			rule("digit", range('0', '9'));
 			rule("letter", or(range('A','Z'), range('a','z')));
 		}};
-	}
-	
-	@Test
-	public void testIdentifier() {
-		Language identifier = new Language() {{
+		identifier = new Language() {{
 			// [A-Za-z][A-Za-z0-9]*
 			define(or(range('A','Z'), range('a','z')), many(or(range('A','Z'), range('a','z'), range('0', '9'))));
 		}};
-		Assert.assertFalse(identifier.get.matches("4chan"));
-		Assert.assertFalse(identifier.get.matches("2pac"));
-		Assert.assertTrue(identifier.get.matches("x"));
-		Assert.assertTrue(identifier.get.matches("xyzzy3"));
-	}
-	
-	@Test
-	public void testEBNF() {
-		Language g = new Language() {{
+		ebnf = new Language() {{
 			Node<String,Void> expression = id("expression");
 			rule("syntax", many(id("production")));
 			rule("production", id("identifier"), symbol('='), expression, symbol('.'));
@@ -132,43 +66,160 @@ public class GrammarTest {
 			rule("letter", or(range('A', 'Z'), range('a','z')));
 			rule("digit", range('0', '9'));
 		}};
+		cox = new Language() {{
+			rule("S", or(list(id("S"), symbol('+'), id("S")), symbol('1')));
+		}};
+		cox2 = new Language() {{
+			Node<String,Void> s = id();
+			rule(s, or(list(s, symbol('+'), s), symbol('1')));
+		}};
+		symbol = new Language() {{
+			define(symbol('s'));
+		}};
+		rpn = new Language() {{
+			separator(many(symbol(' ')));
+			Node<String,Void> expression = id("expression");
+			Node<String,Void> number = id("number");
+			rule (expression, or(number, list(expression, expression, oneOf("+-/*"))));
+			token (number, many1(range('0','9')));
+		}};
+		rpn2 = new Language() {{
+			separator(many(symbol(' ')));
+			Node<String,Void> expression = id("expression");
+			Node<String,Void> plus = id("plus");
+			Node<String,Void> minus = id("minus");
+			Node<String,Void> div = id("div");
+			Node<String,Void> times = id("times");
+			Node<String, Void> number = id("number");
+			rule (expression, or(number, plus, minus, div, times));
+			rule (plus, expression, expression, symbol('+'));
+			rule (minus, expression, expression, symbol('-'));
+			rule (div, expression, expression, symbol('/'));
+			rule (times, expression, expression, symbol('*'));
+			token (number, many1(range('0','9')));
+		}};
+		regex = new Language() {{
+			rule("regex",id("term"),many(symbol('|'),id("regex")));
+			rule("term",many(id("factor")));
+			rule("factor",id("base"), option(symbol('*')));
+			rule("base",or(list(option(symbol('\\')), any), list(symbol('('), id("regex"), symbol(')'))));
+			//get.debug = true;
+		}};
+		after = System.nanoTime();
+		System.out.format("Setup time: %.2f milliseconds\n", (after - before)/1000000.0);
+	}
+	
+	@Test
+	public void testToken() {
+		Assert.assertFalse(mathExpression.get.token.compute());
+		Assert.assertTrue(mathExpression.get.token.compute(mathExpression.id("digit")));
+		Assert.assertTrue(mathExpression.get.token.compute(mathExpression.id("digits")));
+		Assert.assertFalse(mathExpression.get.token.compute(mathExpression.id("term")));
+		Assert.assertFalse(mathExpression.get.token.compute(mathExpression.id("factor")));
+	}
+	
+	@Test
+	public void testMathExpression() {
+/*		for (int i = 0; i < 10; i++) {
+			String s = mathExpression.get.generator.compute().toString();
+			Assert.assertTrue(mathExpression.get.matches(s));
+			System.out.println(s);
+		}
+*/
+		System.out.println("Generator:");
+		for (int i = 0; i < 1000; i++) {
+			String s = mathExpression.get.generator.compute(2,3).toString();
+			boolean result = mathExpression.get.matches(s);
+			if (!result) {
+				// WTF?
+				System.out.println(s);
+			}
+			Assert.assertTrue(result);
+		}
+//		System.out.println(mathExpression.get.generator.compute().toString());
+		Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
+		Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
+		Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
+		Assert.assertTrue(mathExpression.get.matches("(48)-5*6"));
+		Assert.assertTrue(mathExpression.get.matches("(14-4)*2-4/7"));
+		Assert.assertFalse(mathExpression.get.matches("((2)*77*40)3"));
+		//System.out.println(g.toString());
+		Assert.assertTrue(mathExpression.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertTrue(mathExpression.get.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertFalse(mathExpression.get.matches("1+"));
+		Assert.assertFalse(mathExpression.get.matches("27+"));
+		Assert.assertTrue(mathExpression.get.matches("27+34"));
+	}
+	
+//	@Test
+	public void testRPN2() {
+
+		Assert.assertTrue(rpn2.get.matches("2"));
+		Assert.assertTrue(rpn2.get.matches(" 2"));
+		Assert.assertTrue(rpn2.get.matches(" 20"));
+		Assert.assertTrue(rpn2.get.matches("2 "));
+		Assert.assertTrue(rpn2.get.matches("2 2 +"));
+		Assert.assertTrue(rpn2.get.matches("2 2 2 + -"));
+		Assert.assertTrue(rpn2.get.matches("2 2 + 2 -"));
+		Assert.assertTrue(rpn2.get.matches("2 3 -"));
+		Assert.assertTrue(rpn2.get.matches("2 3 3 - -"));
+		Assert.assertTrue(rpn2.get.matches("2 3 3 - 3 - *"));
+		Assert.assertTrue(rpn2.get.matches("2 1 /"));
+	}
+	
+//	@Test
+	public void testRPN() {
+		Assert.assertTrue(rpn.get.matches("2"));
+		Assert.assertTrue(rpn.get.matches(" 2"));
+		Assert.assertTrue(rpn.get.matches("2 "));
+		Assert.assertTrue(rpn.get.matches("2 2 +"));
+		Assert.assertTrue(rpn.get.matches("2 3 -"));
+		Assert.assertTrue(rpn.get.matches("2 3 3 - -"));
+		Assert.assertTrue(rpn.get.matches("2 3 3 - 3 - *"));
+		Assert.assertTrue(rpn.get.matches("2 1 /"));
+	}
+	
+	@Test
+	public void testGrammar() {
+	}
+	
+	@Test
+	public void testIdentifier() {
+		Assert.assertFalse(identifier.get.matches("4chan"));
+		Assert.assertFalse(identifier.get.matches("2pac"));
+		Assert.assertTrue(identifier.get.matches("x"));
+		Assert.assertTrue(identifier.get.matches("xyzzy3"));
+	}
+	
+	@Test
+	public void testEBNF() {
 	}
 	
 	@Test
 	public void testCox() {
-		Language g = new Language() {{
-			rule("S", or(list(id("S"), symbol('+'), id("S")), symbol('1')));
-		}};
-		Assert.assertTrue(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
-		Assert.assertFalse(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
+		Assert.assertTrue(cox.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertFalse(cox.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
 	}
 
 	@Test
 	public void testCox2() {
-		Language g = new Language() {{
-			Node<String,Void> s = id();
-			rule(s, or(list(s, symbol('+'), s), symbol('1')));
-		}};
 		long before, after;
 		before = System.nanoTime();
-		Assert.assertTrue(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+		Assert.assertTrue(cox2.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		after = System.nanoTime();
 		System.out.println(after - before);
 		before = System.nanoTime();
-		Assert.assertFalse(g.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
+		Assert.assertFalse(cox2.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
 		after = System.nanoTime();
 		System.out.println(after - before);
 	}
 
 	@Test
 	public void testSymbol() {
-		Language g = new Language() {{
-			define(symbol('s'));
-		}};
-		Assert.assertFalse(g.get.nullable.compute());
-		Assert.assertFalse(g.get.matches("e"));
-		Assert.assertTrue(g.get.matches("s"));
-		Assert.assertTrue(g.get.matches("s"));
+		Assert.assertFalse(symbol.get.nullable.compute());
+		Assert.assertFalse(symbol.get.matches("e"));
+		Assert.assertTrue(symbol.get.matches("s"));
+		Assert.assertTrue(symbol.get.matches("s"));
 	}
 
 	@Test
@@ -306,20 +357,13 @@ public class GrammarTest {
 
 	@Test
 	public void testRegexGrammar() {
-		Language regex = new Language() {{
-			rule("regex",id("term"),many(symbol('|'),id("regex")));
-			rule("term",many(id("factor")));
-			rule("factor",id("base"), option(symbol('*')));
-			rule("base",or(list(option(symbol('\\')), any), list(symbol('('), id("regex"), symbol(')'))));
-			get.debug = true;
-		}};
 		Assert.assertTrue(regex.get.matches("a"));
 		Assert.assertTrue(regex.get.matches("a|b"));
 		Assert.assertTrue(regex.get.matches("a|b**"));
 		Assert.assertTrue(regex.get.matches("(hello)|(world)"));
 	}
 	
-	@After
+//	@After
 	public void summary() {
 		// 3528 total
 		System.out.println(Node.allocations);
