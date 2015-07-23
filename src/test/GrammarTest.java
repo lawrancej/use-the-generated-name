@@ -126,7 +126,6 @@ public class GrammarTest {
 			System.out.println(s);
 		}
 */
-		System.out.println("Generator:");
 		for (int i = 0; i < 00; i++) {
 			String s = mathExpression.get.generator.compute(2,3).toString();
 			boolean result = mathExpression.get.matches(s);
@@ -148,6 +147,8 @@ public class GrammarTest {
 		Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
 		Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
 		Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
+		System.out.println("It's about to break");
+		System.out.println(mathExpression.get.gv.compute());
 		Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
 		Assert.assertFalse(mathExpression.get.matches("((2)*77*40)3"));
 		//System.out.println(g.toString());
