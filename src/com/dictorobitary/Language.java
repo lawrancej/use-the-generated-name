@@ -1,7 +1,7 @@
 package com.dictorobitary;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +24,7 @@ public class Language {
 	/** Reject everything (the empty set). */
 	public static final Node<Node<?,?>,Node<?,?>> reject = Node.create(Node.Tag.SET, null, null);
 
-	private Map<Integer, Node<Character,Character>> rangeCache = new HashMap<Integer, Node<Character,Character>>();
+	private Map<Integer, Node<Character,Character>> rangeCache = new LinkedHashMap<Integer, Node<Character,Character>>();
 	/**
 	 * Match a character.
 	 * 
@@ -50,7 +50,7 @@ public class Language {
 		return Node.createCached(rangeCache, key, Node.Tag.SYMBOL, from,to);
 	}
 	
-	private Map<Integer, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
+	private Map<Long, Node<Node<?,?>,Node<?,?>>> listCache = new LinkedHashMap<Long, Node<Node<?,?>,Node<?,?>>>();
 	// Skip through defined identifiers
 	private Node<?,?> getRHS(Node<?,?> language) {
 		int key = language.hashCode();
@@ -73,8 +73,9 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// FIXME: this is fast, but a bit dodgy
-		int key = left.hashCode() ^ right.hashCode();
+		long key = left.hashCode() << 32 ^ right.hashCode();
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
+//		return Node.create(Node.Tag.LIST, left, right);
 	}
 	private Node<?,?> list(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -111,7 +112,7 @@ public class Language {
 	public Node<?,?> string(String string) {
 		return list(explode(string), 0);
 	}
-	private Map<Integer, Node<Node<?,?>,Node<?,?>>> setCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
+	private Map<Integer, Node<Node<?,?>,Node<?,?>>> setCache = new LinkedHashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
 		// Skip through defined identifiers
@@ -133,6 +134,7 @@ public class Language {
 		}
 		int key = left.hashCode() ^ right.hashCode();
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
+//		return Node.create(Node.Tag.SET, left, right);
 	}
 	private Node<?,?> or(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -168,7 +170,7 @@ public class Language {
 		return or(empty, list(sequence));
 	}
 	
-	private Map<Integer, Node<Node<?,?>,Node<?,?>>> loopCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
+	private Map<Integer, Node<Node<?,?>,Node<?,?>>> loopCache = new LinkedHashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 	/**
 	 * Match a sequence zero or more times.
 	 * 
@@ -181,6 +183,7 @@ public class Language {
 		if (language == empty || language == reject) { return empty; }
 		if (language.tag == Node.Tag.LOOP) return language;
 		return Node.createCached(loopCache, language.hashCode(), Node.Tag.LOOP, language, any);
+//		return Node.create(Node.Tag.LOOP, language, any);
 	}
 	/**
 	 * Matches zero or more occurrences of language, separated by separator.
@@ -208,8 +211,8 @@ public class Language {
 		return list(list(sequence), many(sequence));
 	}
 	// Identifier lookup by name
-	private Map<Integer, Node<String,Void>> labels = new HashMap<Integer, Node<String,Void>>();
-	private Set<Node<String,Void>> ids = new HashSet<Node<String,Void>>();
+	private Map<String, Node<String,Void>> labels = new LinkedHashMap<String, Node<String,Void>>();
+	private Set<Node<String,Void>> ids = new LinkedHashSet<Node<String,Void>>();
 	/**
 	 * Create or use an identifier (a terminal or nonterminal variable).
 	 * 
@@ -218,7 +221,7 @@ public class Language {
 	 */
 	public Node<String,Void> id(String label) {
 		assert label != null;
-		return Node.createCached(labels, label.hashCode(), Node.Tag.ID, label, (Void)null);
+		return Node.createCached(labels, label, Node.Tag.ID, label, (Void)null);
 	}
 	/**
 	 * Create an identifier (a terminal or nonterminal variable).
@@ -244,8 +247,9 @@ public class Language {
 	/** Tokenization separator */
 	private Node<?,?> separator = empty;
 	
-	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
+	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new LinkedHashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
 	
+	Map<Node<?,?>, Node<String,Void>> reverse = new LinkedHashMap<Node<?,?>, Node<String,Void>>();
 	private Node<?,?> undefine(Node<String,Void> id) {
 		ids.remove(id);
 		rules.remove(id.hashCode());
@@ -270,7 +274,7 @@ public class Language {
 		assert rhs != null;
 		Node<?,?> result = rule(id(label), rhs);
 		if (result == reject) {
-			labels.remove(label.hashCode());
+//			labels.remove(label);
 		}
 		return result;
 	}
@@ -293,15 +297,22 @@ public class Language {
 		Node<?,?> right = list(rhs);
 		// If the right rejects, or Id -> Id literally, remove the identifier and reject
 		if (right == reject || id == right) {
-			return undefine(id);
+//			return undefine(id);
+			return reject;
 		}
-		// If we defined this language already with a different identifier, return the existing identifier
+		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
 		int key = id.hashCode();
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-			undefine(id);
+//			undefine(id);
 			return right;
 		}
+		// If we defined this language already with a different identifier, return the existing identifier
+		if (reverse.containsKey(right)) {
+			return reverse.get(right);
+		}
+
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
+		reverse.put(right, id);
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
 			definition = node.left;

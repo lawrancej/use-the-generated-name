@@ -1,6 +1,6 @@
 package com.dictorobitary.traversal;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.dictorobitary.AbstractVisitor;
@@ -9,7 +9,7 @@ import com.dictorobitary.Node;
 
 public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public Character c;
-	private Map<Node<String,Void>, Node<String,Void>> ids = new HashMap<Node<String,Void>, Node<String,Void>>();
+	private Map<Node<String,Void>, Node<String,Void>> ids = new LinkedHashMap<Node<String,Void>, Node<String,Void>>();
 	public Derivative(Language g) {
 		super(g);
 	}
@@ -38,6 +38,8 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		return result;
 	}
 	public Node<?, ?> loop(Node<Node<?, ?>, Node<?, ?>> language) {
+		// Dc(a*) = Dc(a)a* = Dc(aa*)
+//		return Node.accept(this, g.list(language.left, language));
 		return g.list(Node.accept(this, language.left), language);
 	}
 	public Node<?, ?> reject(Node<?, ?> langauge) {
@@ -59,6 +61,11 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		}
 	}
 	public Node<?,?> id(Node<String,Void> id) {
+		// By this point, we've seen the identifier on the rhs before.
+		// If the identifier derives a non-empty set, return the identifier
+		if (ids.containsKey(id)) {
+			return ids.get(id);
+		}
 		// Handle left-recursion: return DcId if we're visiting Id -> Id
 		if (todo.visiting(id)) {
 			return getReplacement(id);
@@ -67,15 +74,15 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		if (!todo.visited(id)) {
 			return g.acceptRule(this, id);
 		}
-		// By this point, we've seen the identifier on the rhs before.
-		// If the identifier derives a non-empty set, return the identifier
-		if (ids.containsKey(id)) {
-			return ids.get(id);
-		}
 		// Otherwise, return the empty set
 		return bottom();
 	}
 	public Node<?,?> rule(Node<Node<String,Void>, Node<?,?>> rule) {
+		// By this point, we've seen the identifier on the rhs before.
+		// If the identifier derives a non-empty set, return the identifier
+		if (ids.containsKey(rule.left)) {
+			return ids.get(rule.left);
+		}
 		// Visit the rhs
 		Node<?,?> derivation = Node.accept(this,  rule.right);
 		

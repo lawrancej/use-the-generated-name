@@ -25,7 +25,7 @@ final public class Node<L,R> {
 		this.right = right;
 		allocations++;
 	}
-	public static <Left, Right> Node<Left,Right> createCached(Map<Integer, Node<Left,Right>> cache, int key, Tag type, Left left, Right right) {
+	public static <Left, Right,Key> Node<Left,Right> createCached(Map<Key, Node<Left,Right>> cache, Key key, Tag type, Left left, Right right) {
 		if (!cache.containsKey(key)) {
 			Node<Left,Right> result = Node.create(type, left, right);
 			cache.put(key, result);

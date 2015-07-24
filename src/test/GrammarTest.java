@@ -19,6 +19,12 @@ public class GrammarTest {
 	static Language rpn;
 	static Language rpn2;
 	static Language regex;
+	static Language brainfuck;
+	static Language page148;
+	static Language leftRecursion;
+	static Language fooBarFrak;
+	static Language helloWorld;
+	static Language[] languages;
 	@BeforeClass
 	public static void setup() {
 		long before, after;
@@ -105,6 +111,33 @@ public class GrammarTest {
 			rule("base",or(list(option(symbol('\\')), any), list(symbol('('), id("regex"), symbol(')'))));
 			//get.debug = true;
 		}};
+		brainfuck = new Language() {{
+			// Program -> Sequence
+			rule("Program",id("Sequence"));
+			// Sequence -> ( Command | Loop ) *
+			rule("Sequence",many(or(id("Command"), id("Loop"))));
+			// Command -> '+' | '-' | '<' | '>' | ',' | '.'
+			rule("Command",oneOf("+-<>,."));
+			// Loop -> '[' Sequence ']'
+			rule("Loop",symbol('['), id("Sequence"), symbol(']'));
+		}};
+		page148 = new Language() {{
+			rule("S",id("A"), id("C"));
+			rule("C",option(symbol('c')));
+			rule("A",or(list(symbol('a'), id("B"), id("C"), symbol('d')), list(id("B"), id("Q"))));
+			rule("B",option(symbol('b'), id("B")));
+			rule("Q",option(symbol('q')));
+		}};
+		leftRecursion = new Language() {{
+			rule("L",option(id("L"),symbol('x')));
+		}};
+		fooBarFrak = new Language() {{
+			define(many(or(string("foo"),string("bar"),string("frak"))));
+		}};
+		helloWorld = new Language() {{
+			define(string("hello world"));
+		}};
+		languages = new Language[] { mathExpression, grammar, identifier, regex, symbol, ebnf, cox, cox2, symbol, rpn, rpn2, brainfuck, page148, leftRecursion, fooBarFrak, helloWorld };
 		after = System.nanoTime();
 		System.out.format("Setup time: %.2f milliseconds\n", (after - before)/1000000.0);
 	}
@@ -120,37 +153,80 @@ public class GrammarTest {
 	
 	@Test
 	public void testMathExpression() {
-/*		for (int i = 0; i < 10; i++) {
-			String s = mathExpression.get.generator.compute().toString();
-			Assert.assertTrue(mathExpression.get.matches(s));
-			System.out.println(s);
+		for (int i = 0; i < 1000; i++) {
+			Assert.assertTrue(mathExpression.get.matches("(8/72)/(43*6+0/8)"));
+			Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
+			Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
+			Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
+			Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
+			Assert.assertTrue(mathExpression.get.matches("(48)-5*6"));
+			Assert.assertTrue(mathExpression.get.matches("68-50/87"));
+			Assert.assertTrue(mathExpression.get.matches("(14-4)*2-4/7"));
+			Assert.assertTrue(mathExpression.get.matches("1+((5/78+7))"));
+			Assert.assertTrue(mathExpression.get.matches("05/(38/15)-2*11"));
+			Assert.assertTrue(mathExpression.get.matches("(0/0-81)*63-5"));
+			Assert.assertTrue(mathExpression.get.matches("01/(((68-12*18))*37)"));
+			Assert.assertTrue(mathExpression.get.matches("48*((3+43*2)/80)"));
 		}
-*/
-		for (int i = 0; i < 00; i++) {
+	}
+	
+	@Test
+	public void fuzzGrammars() {
+		boolean result;
+		for (int i = 0; i < 10000; i++) {
+//			result = mathExpression.get.matches("(6+04*4)");
+			result = mathExpression.get.matches("2+2");
+			if (!result) {
+				// WTF?
+				System.out.format("WTF on iteration %d on string 2+2\n", i);
+			}
+			Assert.assertTrue(result);
+		}
+//		System.out.println("wtf");
+//		System.out.println(mathExpression.get.gv.compute());
+//		result = mathExpression.get.matches("2+2");
+		/*
+		for (Language language : languages) {
+			for (int i = 0; i < 1000; i++) {
+				String s = language.get.generator.compute(2,3).toString();
+				boolean result = language.get.matches(s);
+				if (!result) {
+					// WTF?
+					System.out.format("WTF on iteration %d on string %s\n", i, s);
+				}
+				Assert.assertTrue(result);
+			}
+		}
+		*/
+	}
+
+	
+	//@Test
+	public void testMathExpressionAgain() {
+		for (int i = 0; i < 1000; i++) {
 			String s = mathExpression.get.generator.compute(2,3).toString();
 			boolean result = mathExpression.get.matches(s);
 			if (!result) {
 				// WTF?
-				System.out.println(s);
+				System.out.format("WTF on iteration %d on string %s\n", i, s);
 			}
 			Assert.assertTrue(result);
 		}
-//		System.out.println(mathExpression.get.generator.compute().toString());
 		for (int i = 0; i < 49; i++) {
-		Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
-		Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
-		Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
-		Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
-		Assert.assertTrue(mathExpression.get.matches("(48)-5*6"));
-		Assert.assertTrue(mathExpression.get.matches("(14-4)*2-4/7"));
+			System.out.print('.');
+			Assert.assertTrue(mathExpression.get.matches("(8/72)/(43*6+0/8)"));
+			Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
+			Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
+			Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
+			Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
+			Assert.assertTrue(mathExpression.get.matches("(48)-5*6"));
+			Assert.assertTrue(mathExpression.get.matches("68-50/87"));
+			Assert.assertTrue(mathExpression.get.matches("(14-4)*2-4/7"));
+			Assert.assertTrue(mathExpression.get.matches("1+((5/78+7))"));
+			Assert.assertTrue(mathExpression.get.matches("05/(38/15)-2*11"));
+			Assert.assertTrue(mathExpression.get.matches("(0/0-81)*63-5"));
+			Assert.assertTrue(mathExpression.get.matches("01/(((68-12*18))*37)"));
 		}
-		Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
-		Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
-		Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
-		System.out.println("It's about to break");
-		System.out.println(mathExpression.get.gv.compute());
-		Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
-		Assert.assertFalse(mathExpression.get.matches("((2)*77*40)3"));
 		//System.out.println(g.toString());
 		Assert.assertTrue(mathExpression.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
 		Assert.assertTrue(mathExpression.get.matches("(1+1+1+1+1+1+1+1+1)/(1+1+1+1+1+1+1+1+1+1+1+1)*1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
@@ -295,72 +371,45 @@ public class GrammarTest {
 	
 	@Test
 	public void testHelloWorld() {
-		Language g = new Language() {{
-			define(string("hello world"));
-		}};
-		Assert.assertTrue(g.get.matches("hello world"));
-		Assert.assertFalse(g.get.matches("hello"));
+		Assert.assertTrue(helloWorld.get.matches("hello world"));
+		Assert.assertFalse(helloWorld.get.matches("hello"));
 	}
 	
 	@Test
 	public void testFooBarFrak() {
-		Language g = new Language() {{
-			define(many(or(string("foo"),string("bar"),string("frak"))));
-		}};
-		Assert.assertTrue(g.get.matches("foo"));
-		Assert.assertTrue(g.get.matches("foofoobar"));
-		Assert.assertFalse(g.get.matches("foobaz"));
+		Assert.assertTrue(fooBarFrak.get.matches("foo"));
+		Assert.assertTrue(fooBarFrak.get.matches("foofoobar"));
+		Assert.assertFalse(fooBarFrak.get.matches("foobaz"));
 	}
 	
 	@Test
 	public void testLeftRecursion() {
-		Language g = new Language() {{
-			rule("L",option(id("L"),symbol('x')));
-			// debug = true;
-		}};
-		Assert.assertTrue(g.get.matches("xxxx"));
-		Assert.assertTrue(g.get.matches("xx"));
-		Assert.assertTrue(g.get.matches(""));
-		Assert.assertTrue(g.get.matches("x"));
-		Assert.assertTrue(g.get.matches("xxx"));
-		Assert.assertTrue(g.get.matches("xxxxxxxxxxxxxxxxxxxxxxx"));
-		Assert.assertFalse(g.get.matches("L"));
+		Assert.assertTrue(leftRecursion.get.matches("xxxx"));
+		Assert.assertTrue(leftRecursion.get.matches("xx"));
+		Assert.assertTrue(leftRecursion.get.matches(""));
+		Assert.assertTrue(leftRecursion.get.matches("x"));
+		Assert.assertTrue(leftRecursion.get.matches("xxx"));
+		Assert.assertTrue(leftRecursion.get.matches("xxxxxxxxxxxxxxxxxxxxxxx"));
+		Assert.assertFalse(leftRecursion.get.matches("L"));
 	}
 	
 	@Test
 	public void testPage148() {
-		Language page148 = new Language() {{
-			rule("S",id("A"), id("C"));
-			rule("C",option(symbol('c')));
-			rule("A",or(list(symbol('a'), id("B"), id("C"), symbol('d')), list(id("B"), id("Q"))));
-			rule("B",option(symbol('b'), id("B")));
-			rule("Q",option(symbol('q')));
-		}};
 //		System.out.println(page148.show(page148.first(page148.id("A"))));
 		Assert.assertTrue(page148.get.nullable.compute());
 	}
 
 	@Test
 	public void testBrainfuck() {
-		Language g = new Language() {{
-			// Program -> Sequence
-			rule("Program",id("Sequence"));
-			// Sequence -> ( Command | Loop ) *
-			rule("Sequence",many(or(id("Command"), id("Loop"))));
-			// Command -> '+' | '-' | '<' | '>' | ',' | '.'
-			rule("Command",oneOf("+-<>,."));
-			// Loop -> '[' Sequence ']'
-			rule("Loop",symbol('['), id("Sequence"), symbol(']'));
-		}};
-		Assert.assertTrue(g.get.matches("+"));
-		Assert.assertTrue(g.get.matches("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
-		Assert.assertFalse(g.get.matches("+["));
-		Assert.assertFalse(g.get.matches("+[."));
-		Assert.assertFalse(g.get.matches("+[.+"));
-		Assert.assertFalse(g.get.matches("hi"));
-		Assert.assertTrue(g.get.matches("+[.+]"));
-		Assert.assertTrue(g.get.matches("+[.+]+"));
-		Assert.assertFalse(g.get.matches("boo"));
+		Assert.assertTrue(brainfuck.get.matches("+"));
+		Assert.assertTrue(brainfuck.get.matches("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
+		Assert.assertFalse(brainfuck.get.matches("+["));
+		Assert.assertFalse(brainfuck.get.matches("+[."));
+		Assert.assertFalse(brainfuck.get.matches("+[.+"));
+		Assert.assertFalse(brainfuck.get.matches("hi"));
+		Assert.assertTrue(brainfuck.get.matches("+[.+]"));
+		Assert.assertTrue(brainfuck.get.matches("+[.+]+"));
+		Assert.assertFalse(brainfuck.get.matches("boo"));
 	}
 
 	@Test
@@ -371,7 +420,7 @@ public class GrammarTest {
 		Assert.assertTrue(regex.get.matches("(hello)|(world)"));
 	}
 	
-//	@After
+	@After
 	public void summary() {
 		// 3528 total
 		System.out.println(Node.allocations);
