@@ -35,15 +35,18 @@ final public class Compute {
 			System.out.println(gv.compute());
 			System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
 		}
-		for (int i = 0; i < s.length(); i++) {
+		int i;
+		for (i = 0; i < s.length(); i++) {
 			derivative.c = s.charAt(i);
 			before = language;
 			language = derivative.compute(language);
 			if (language == Language.reject) {
 				System.out.format("Syntax error at character '%c', index %d in string: %s\n", s.charAt(i), i, s);
-				System.out.println(gv.compute(before));
-				System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
-				break;
+				if (debug) {
+					System.out.println(gv.compute(before));
+					System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
+				}
+				return false;
 			}
 			if (debug) {
 				System.out.println(gv.compute(language));
@@ -56,9 +59,11 @@ final public class Compute {
 		}
 		result = nullable.compute(language);
 		if (!result) {
-		System.out.format("Syntax error at eof\n");
-		System.out.println(gv.compute(language));
-		System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
+			System.out.format("Syntax error at eof, index %d in string: %s\n", i, s);
+			if (debug) {
+				System.out.println(gv.compute(language));
+				System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
+			}
 		}
 		return result;
 	}

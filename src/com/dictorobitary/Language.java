@@ -15,8 +15,9 @@ import java.util.Set;
  *
  */
 public class Language {
+	public final String name;
 	/** Construct a language specification */
-	public Language() {}
+	public Language(String name) { this.name = name; }
 	/** Match any character, equivalent to regular expression dot. */
 	public static final Node<Character,Character> any = Node.create(Node.Tag.SYMBOL, null, null);
 	/** Match the empty list (empty sequence). */

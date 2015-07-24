@@ -9,27 +9,23 @@ import com.dictorobitary.Language;
 import com.dictorobitary.Node;
 
 public class GrammarTest {
-	static Language mathExpression;
-	static Language grammar;
-	static Language identifier;
-	static Language ebnf;
-	static Language cox;
-	static Language cox2;
-	static Language symbol;
-	static Language rpn;
-	static Language rpn2;
-	static Language regex;
-	static Language brainfuck;
-	static Language page148;
-	static Language leftRecursion;
-	static Language fooBarFrak;
-	static Language helloWorld;
+	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs,
+	parens, endsWithB, identifier, mathExpression, grammar, ebnf, cox,
+	cox2, symbol, rpn, rpn2, regex, brainfuck, page148, leftRecursion;
+
 	static Language[] languages;
 	@BeforeClass
 	public static void setup() {
 		long before, after;
 		before = System.nanoTime();
-		mathExpression = new Language() {{
+		// Grammars
+		asbs = new Language("a*b*") {{
+			rule("hi",many(symbol('a')),many(symbol('b')));
+		}};
+		parens = new Language("parens") {{
+			rule("S",option(id("S"),symbol('('),id("S"),symbol(')')));
+		}};
+		mathExpression = new Language("math") {{
 			Node<String,Void> expression = id("expression");
 			Node<String,Void> term = id("term");
 			Node<String,Void> factor = id("factor");
@@ -41,7 +37,7 @@ public class GrammarTest {
 			rule(digit, range('0', '9'));
 			rule(digits, digit, many(digit));
 		}};
-		grammar = new Language() {{
+		grammar = new Language("grammar") {{
 			rule("syntax", option(id("production"), id("syntax")));
 			rule("production", id("identifier"), symbol('='), id("expression"), symbol('.'));
 			rule("expression", option(id("expression"), symbol('|')), id("term"));
@@ -52,11 +48,7 @@ public class GrammarTest {
 			rule("digit", range('0', '9'));
 			rule("letter", or(range('A','Z'), range('a','z')));
 		}};
-		identifier = new Language() {{
-			// [A-Za-z][A-Za-z0-9]*
-			define(or(range('A','Z'), range('a','z')), many(or(range('A','Z'), range('a','z'), range('0', '9'))));
-		}};
-		ebnf = new Language() {{
+		ebnf = new Language("ebnf") {{
 			Node<String,Void> expression = id("expression");
 			rule("syntax", many(id("production")));
 			rule("production", id("identifier"), symbol('='), expression, symbol('.'));
@@ -72,24 +64,21 @@ public class GrammarTest {
 			rule("letter", or(range('A', 'Z'), range('a','z')));
 			rule("digit", range('0', '9'));
 		}};
-		cox = new Language() {{
+		cox = new Language("cox") {{
 			rule("S", or(list(id("S"), symbol('+'), id("S")), symbol('1')));
 		}};
-		cox2 = new Language() {{
+		cox2 = new Language("cox, again") {{
 			Node<String,Void> s = id();
 			rule(s, or(list(s, symbol('+'), s), symbol('1')));
 		}};
-		symbol = new Language() {{
-			define(symbol('s'));
-		}};
-		rpn = new Language() {{
+		rpn = new Language("rpn") {{
 			separator(many(symbol(' ')));
 			Node<String,Void> expression = id("expression");
 			Node<String,Void> number = id("number");
 			rule (expression, or(number, list(expression, expression, oneOf("+-/*"))));
 			token (number, many1(range('0','9')));
 		}};
-		rpn2 = new Language() {{
+		rpn2 = new Language("rpn, again") {{
 			separator(many(symbol(' ')));
 			Node<String,Void> expression = id("expression");
 			Node<String,Void> plus = id("plus");
@@ -104,14 +93,14 @@ public class GrammarTest {
 			rule (times, expression, expression, symbol('*'));
 			token (number, many1(range('0','9')));
 		}};
-		regex = new Language() {{
+		regex = new Language("regex") {{
 			rule("regex",id("term"),many(symbol('|'),id("regex")));
 			rule("term",many(id("factor")));
 			rule("factor",id("base"), option(symbol('*')));
 			rule("base",or(list(option(symbol('\\')), any), list(symbol('('), id("regex"), symbol(')'))));
 			//get.debug = true;
 		}};
-		brainfuck = new Language() {{
+		brainfuck = new Language("brainfuck") {{
 			// Program -> Sequence
 			rule("Program",id("Sequence"));
 			// Sequence -> ( Command | Loop ) *
@@ -121,27 +110,54 @@ public class GrammarTest {
 			// Loop -> '[' Sequence ']'
 			rule("Loop",symbol('['), id("Sequence"), symbol(']'));
 		}};
-		page148 = new Language() {{
+		page148 = new Language("page 148") {{
 			rule("S",id("A"), id("C"));
 			rule("C",option(symbol('c')));
 			rule("A",or(list(symbol('a'), id("B"), id("C"), symbol('d')), list(id("B"), id("Q"))));
 			rule("B",option(symbol('b'), id("B")));
 			rule("Q",option(symbol('q')));
 		}};
-		leftRecursion = new Language() {{
+		leftRecursion = new Language("left recursion") {{
 			rule("L",option(id("L"),symbol('x')));
 		}};
-		fooBarFrak = new Language() {{
-			define(many(or(string("foo"),string("bar"),string("frak"))));
+		
+		// Regular expressions
+		symbol = new Language("symbol") {{
+			define(symbol('s'));
 		}};
-		helloWorld = new Language() {{
+		ab = new Language("ab") {{
+			define(list(symbol('a'), symbol('b')));
+		}};
+		helloWorld = new Language("hello world") {{
 			define(string("hello world"));
 		}};
-		languages = new Language[] { mathExpression, grammar, identifier, regex, symbol, ebnf, cox, cox2, symbol, rpn, rpn2, brainfuck, page148, leftRecursion, fooBarFrak, helloWorld };
+		many1any = new Language("(.)+") {{
+			define(list(any, many(any)));
+		}};
+		aaaa = new Language("(a|b)*") {{
+			define(many(or(symbol('a'), symbol('b'))));
+		}};
+		endsWithB = new Language("(.+)b") {{
+			define(list(any, many(any), symbol('b')));
+		}};
+		fooBarFrak = new Language("foo bar frak") {{
+			define(many(or(string("foo"),string("bar"),string("frak"))));
+		}};
+		identifier = new Language("identifier") {{
+			// [A-Za-z][A-Za-z0-9]*
+			define(or(range('A','Z'), range('a','z')), many(or(range('A','Z'), range('a','z'), range('0', '9'))));
+		}};
+
+
+		languages = new Language[] { 
+				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak,
+				identifier, asbs, parens, mathExpression, grammar, ebnf, cox,
+				cox2, regex, brainfuck, page148, leftRecursion, rpn, rpn2
+		};
 		after = System.nanoTime();
 		System.out.format("Setup time: %.2f milliseconds\n", (after - before)/1000000.0);
 	}
-	
+
 	@Test
 	public void testToken() {
 		Assert.assertFalse(mathExpression.get.token.compute());
@@ -150,7 +166,7 @@ public class GrammarTest {
 		Assert.assertFalse(mathExpression.get.token.compute(mathExpression.id("term")));
 		Assert.assertFalse(mathExpression.get.token.compute(mathExpression.id("factor")));
 	}
-	
+
 	@Test
 	public void testMathExpression() {
 		for (int i = 0; i < 1000; i++) {
@@ -171,10 +187,38 @@ public class GrammarTest {
 	}
 	
 	@Test
-	public void fuzzGrammars() {
+	public void testRegexMatching() {
+		Assert.assertFalse(symbol.get.nullable.compute());
+		Assert.assertFalse(symbol.get.matches("e"));
+		Assert.assertTrue(symbol.get.matches("s"));
+		Assert.assertTrue(symbol.get.matches("s"));
+		Assert.assertFalse(identifier.get.matches("4chan"));
+		Assert.assertFalse(identifier.get.matches("2pac"));
+		Assert.assertTrue(identifier.get.matches("x"));
+		Assert.assertTrue(identifier.get.matches("xyzzy3"));
+		Assert.assertTrue(many1any.get.matches("abcdefg"));
+		Assert.assertFalse(many1any.get.matches(""));
+		Assert.assertFalse(aaaa.get.matches("abcdefg"));
+		Assert.assertTrue(aaaa.get.matches("aaaa"));
+		Assert.assertTrue(aaaa.get.matches(""));
+		Assert.assertTrue(aaaa.get.matches("aabbabab"));
+		Assert.assertTrue(ab.get.matches("ab"));
+		Assert.assertFalse(ab.get.matches("aaaa"));
+		Assert.assertFalse(ab.get.matches(""));
+		Assert.assertFalse(ab.get.matches("aabbabab"));
+		Assert.assertTrue(endsWithB.get.matches("jebb"));
+		Assert.assertFalse(endsWithB.get.matches("jabba"));
+		Assert.assertTrue(helloWorld.get.matches("hello world"));
+		Assert.assertFalse(helloWorld.get.matches("hello"));
+		Assert.assertTrue(fooBarFrak.get.matches("foo"));
+		Assert.assertTrue(fooBarFrak.get.matches("foofoobar"));
+		Assert.assertFalse(fooBarFrak.get.matches("foobaz"));
+	}
+
+	@Test
+	public void twoPlusTwo() {
 		boolean result;
 		for (int i = 0; i < 10000; i++) {
-//			result = mathExpression.get.matches("(6+04*4)");
 			result = mathExpression.get.matches("2+2");
 			if (!result) {
 				// WTF?
@@ -182,10 +226,10 @@ public class GrammarTest {
 			}
 			Assert.assertTrue(result);
 		}
-//		System.out.println("wtf");
-//		System.out.println(mathExpression.get.gv.compute());
-//		result = mathExpression.get.matches("2+2");
-		/*
+	}
+
+	@Test
+	public void fuzzGrammars() {
 		for (Language language : languages) {
 			for (int i = 0; i < 1000; i++) {
 				String s = language.get.generator.compute(2,3).toString();
@@ -193,14 +237,14 @@ public class GrammarTest {
 				if (!result) {
 					// WTF?
 					System.out.format("WTF on iteration %d on string %s\n", i, s);
+					System.out.println(language.get.gv.compute());
 				}
 				Assert.assertTrue(result);
 			}
 		}
-		*/
 	}
 
-	
+
 	//@Test
 	public void testMathExpressionAgain() {
 		for (int i = 0; i < 1000; i++) {
@@ -234,8 +278,8 @@ public class GrammarTest {
 		Assert.assertFalse(mathExpression.get.matches("27+"));
 		Assert.assertTrue(mathExpression.get.matches("27+34"));
 	}
-	
-//	@Test
+
+	//	@Test
 	public void testRPN2() {
 
 		Assert.assertTrue(rpn2.get.matches("2"));
@@ -250,8 +294,8 @@ public class GrammarTest {
 		Assert.assertTrue(rpn2.get.matches("2 3 3 - 3 - *"));
 		Assert.assertTrue(rpn2.get.matches("2 1 /"));
 	}
-	
-//	@Test
+
+	//	@Test
 	public void testRPN() {
 		Assert.assertTrue(rpn.get.matches("2"));
 		Assert.assertTrue(rpn.get.matches(" 2"));
@@ -262,23 +306,7 @@ public class GrammarTest {
 		Assert.assertTrue(rpn.get.matches("2 3 3 - 3 - *"));
 		Assert.assertTrue(rpn.get.matches("2 1 /"));
 	}
-	
-	@Test
-	public void testGrammar() {
-	}
-	
-	@Test
-	public void testIdentifier() {
-		Assert.assertFalse(identifier.get.matches("4chan"));
-		Assert.assertFalse(identifier.get.matches("2pac"));
-		Assert.assertTrue(identifier.get.matches("x"));
-		Assert.assertTrue(identifier.get.matches("xyzzy3"));
-	}
-	
-	@Test
-	public void testEBNF() {
-	}
-	
+
 	@Test
 	public void testCox() {
 		Assert.assertTrue(cox.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
@@ -299,89 +327,25 @@ public class GrammarTest {
 	}
 
 	@Test
-	public void testSymbol() {
-		Assert.assertFalse(symbol.get.nullable.compute());
-		Assert.assertFalse(symbol.get.matches("e"));
-		Assert.assertTrue(symbol.get.matches("s"));
-		Assert.assertTrue(symbol.get.matches("s"));
-	}
-
-	@Test
 	public void testMany() {
-		Language g = new Language() {{
-			define(list(any, many(any)));
-		}};
-		Assert.assertTrue(g.get.matches("abcdefg"));
-		Assert.assertFalse(g.get.matches(""));
-		Language f = new Language() {{
-			rule("hi",many(symbol('a')),many(symbol('b')));
-		}};
-		Assert.assertTrue(f.get.matches("ab"));
-		Assert.assertTrue(f.get.matches(""));
-		Assert.assertTrue(f.get.matches("b"));
-		Assert.assertFalse(f.get.matches("c"));
-		Assert.assertTrue(f.get.matches("aaaaaabbbb"));
-		Assert.assertTrue(f.get.matches("aaaaaaaaaaaaaaaaa"));
-		Assert.assertFalse(f.get.matches("aaaaaaaaabaaaaaaaa"));
+		Assert.assertTrue(asbs.get.matches("ab"));
+		Assert.assertTrue(asbs.get.matches(""));
+		Assert.assertTrue(asbs.get.matches("b"));
+		Assert.assertFalse(asbs.get.matches("c"));
+		Assert.assertTrue(asbs.get.matches("aaaaaabbbb"));
+		Assert.assertTrue(asbs.get.matches("aaaaaaaaaaaaaaaaa"));
+		Assert.assertFalse(asbs.get.matches("aaaaaaaaabaaaaaaaa"));
 	}
 
-	@Test
-	public void testOr() {
-		Language aaaa = new Language() {{
-			define(many(or(symbol('a'), symbol('b'))));
-		}};
-		Assert.assertFalse(aaaa.get.matches("abcdefg"));
-		Assert.assertTrue(aaaa.get.matches("aaaa"));
-		Assert.assertTrue(aaaa.get.matches(""));
-		Assert.assertTrue(aaaa.get.matches("aabbabab"));
-	}
-
-	@Test
-	public void testList() {
-		Language g = new Language() {{
-			define(list(symbol('a'), symbol('b')));
-		}};
-		Assert.assertTrue(g.get.matches("ab"));
-		Assert.assertFalse(g.get.matches("aaaa"));
-		Assert.assertFalse(g.get.matches(""));
-		Assert.assertFalse(g.get.matches("aabbabab"));
-	}
-	
-	@Test
-	public void testAny() {
-		Language g = new Language() {{
-			define(list(any, many(any), symbol('b')));
-		}};
-		Assert.assertTrue(g.get.matches("jebb"));
-		Assert.assertFalse(g.get.matches("jabba"));
-	}
-	
 	@Test
 	public void testParens() {
-		Language parens = new Language() {{
-			rule("S",option(id("S"),symbol('('),id("S"),symbol(')')));
-		}};
-//		Assert.assertTrue(parens.isNonterminal("S"));
 		Assert.assertFalse(parens.get.matches("("));
 		Assert.assertTrue(parens.get.matches("()"));
 		Assert.assertFalse(parens.get.matches(")"));
 		Assert.assertTrue(parens.get.matches(parens.get.firstSet.compute(), "("));
 		Assert.assertFalse(parens.get.matches(parens.get.firstSet.compute(), ")"));
 	}
-	
-	@Test
-	public void testHelloWorld() {
-		Assert.assertTrue(helloWorld.get.matches("hello world"));
-		Assert.assertFalse(helloWorld.get.matches("hello"));
-	}
-	
-	@Test
-	public void testFooBarFrak() {
-		Assert.assertTrue(fooBarFrak.get.matches("foo"));
-		Assert.assertTrue(fooBarFrak.get.matches("foofoobar"));
-		Assert.assertFalse(fooBarFrak.get.matches("foobaz"));
-	}
-	
+
 	@Test
 	public void testLeftRecursion() {
 		Assert.assertTrue(leftRecursion.get.matches("xxxx"));
@@ -392,10 +356,10 @@ public class GrammarTest {
 		Assert.assertTrue(leftRecursion.get.matches("xxxxxxxxxxxxxxxxxxxxxxx"));
 		Assert.assertFalse(leftRecursion.get.matches("L"));
 	}
-	
+
 	@Test
 	public void testPage148() {
-//		System.out.println(page148.show(page148.first(page148.id("A"))));
+		//		System.out.println(page148.show(page148.first(page148.id("A"))));
 		Assert.assertTrue(page148.get.nullable.compute());
 	}
 
@@ -415,13 +379,11 @@ public class GrammarTest {
 	@Test
 	public void testRegexGrammar() {
 		Assert.assertTrue(regex.get.matches("a"));
-		System.out.println(regex.get.gv.compute());
 		Assert.assertTrue(regex.get.matches("a|b"));
-		System.out.println(regex.get.gv.compute());
 		Assert.assertTrue(regex.get.matches("a|b**"));
-//		Assert.assertTrue(regex.get.matches("(hello)|(world)"));
+		Assert.assertTrue(regex.get.matches("(hello)|(world)"));
 	}
-	
+
 	@After
 	public void summary() {
 		// 3528 total
