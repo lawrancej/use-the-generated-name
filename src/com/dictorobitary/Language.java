@@ -274,7 +274,7 @@ public class Language {
 		assert rhs != null;
 		Node<?,?> result = rule(id(label), rhs);
 		if (result == reject) {
-//			labels.remove(label);
+			labels.remove(label);
 		}
 		return result;
 	}
@@ -295,15 +295,16 @@ public class Language {
 		assert id != null;
 		assert rhs != null;
 		Node<?,?> right = list(rhs);
+		right = getRHS(right);
 		// If the right rejects, or Id -> Id literally, remove the identifier and reject
 		if (right == reject || id == right) {
-//			return undefine(id);
-			return reject;
+			return undefine(id);
+//			return reject;
 		}
 		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
 		int key = id.hashCode();
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-//			undefine(id);
+			undefine(id);
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
@@ -359,7 +360,10 @@ public class Language {
 	 */
 	public <T> T acceptRule(Visitor<T> visitor, Node<String,Void> id) {
 		visitor.getWorkList().done(id);
-		return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.hashCode()));
+		if (rules.containsKey(id.hashCode())) {
+			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.hashCode()));
+		}
+		return visitor.reject(reject);
 	}
 	public final Compute get = new Compute(this);
 	public String toString() {
