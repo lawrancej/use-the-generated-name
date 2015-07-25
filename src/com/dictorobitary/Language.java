@@ -275,7 +275,7 @@ public class Language {
 		assert rhs != null;
 		Node<?,?> result = rule(id(label), rhs);
 		if (result == reject) {
-			labels.remove(label);
+//			labels.remove(label);
 		}
 		return result;
 	}
@@ -299,22 +299,23 @@ public class Language {
 		right = getRHS(right);
 		// If the right rejects, or Id -> Id literally, remove the identifier and reject
 		if (right == reject || id == right) {
-			return undefine(id);
-//			return reject;
+//			return undefine(id);
+			return reject;
 		}
 		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
 		int key = id.hashCode();
-		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-			undefine(id);
-			return right;
-		}
+//		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
+//			undefine(id);
+//			return right;
+//		}
 		// If we defined this language already with a different identifier, return the existing identifier
-		if (reverse.containsKey(right)) {
+/*		if (reverse.containsKey(right)) {
 			return reverse.get(right);
 		}
-
+*/
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
-		reverse.put(right, id);
+/*		reverse.put(right, id);
+		*/
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
 			definition = node.left;
@@ -361,10 +362,10 @@ public class Language {
 	 */
 	public <T> T acceptRule(Visitor<T> visitor, Node<String,Void> id) {
 		visitor.getWorkList().done(id);
-		if (rules.containsKey(id.hashCode())) {
+//		if (rules.containsKey(id.hashCode())) {
 			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.hashCode()));
-		}
-		return visitor.reject(reject);
+//		}
+//		return visitor.reject(reject);
 	}
 	public final Compute get = new Compute(this);
 	public String toString() {

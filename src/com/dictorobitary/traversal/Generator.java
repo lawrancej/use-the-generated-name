@@ -99,7 +99,7 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		return buffer;
 	}
 	public boolean done(StringBuilder accumulator) {
-		return false;
+		return true;
 	}
 	public StringBuilder reduce(StringBuilder accumulator, StringBuilder current) {
 		return buffer;

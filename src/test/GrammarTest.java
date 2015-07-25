@@ -10,9 +10,10 @@ import com.dictorobitary.Node;
 
 public class GrammarTest {
 	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs,
-	parens, endsWithB, identifier, mathExpression, grammar, ebnf, cox,
-	cox2, symbol, rpn, rpn2, regex, brainfuck, page148, leftRecursion;
+	parens, endsWithB, identifier, page148, mathExpression, grammar, ebnf, cox,
+	cox2, symbol, rpn, rpn2, regex, brainfuck, leftRecursion;
 
+	static Language[] regularLanguages;
 	static Language[] languages;
 	@BeforeClass
 	public static void setup() {
@@ -111,10 +112,15 @@ public class GrammarTest {
 			rule("Loop",symbol('['), id("Sequence"), symbol(']'));
 		}};
 		page148 = new Language("page 148") {{
+			// S -> A C
 			rule("S",id("A"), id("C"));
+			// C -> c | epsilon
 			rule("C",option(symbol('c')));
+			// A -> a B C d | B Q
 			rule("A",or(list(symbol('a'), id("B"), id("C"), symbol('d')), list(id("B"), id("Q"))));
+			// B -> b B | epsilon
 			rule("B",option(symbol('b'), id("B")));
+			// Q -> q | epsilon
 			rule("Q",option(symbol('q')));
 		}};
 		leftRecursion = new Language("left recursion") {{
@@ -148,11 +154,13 @@ public class GrammarTest {
 			define(or(range('A','Z'), range('a','z')), many(or(range('A','Z'), range('a','z'), range('0', '9'))));
 		}};
 
-
 		languages = new Language[] { 
+				asbs, parens, page148, cox,
+				cox2, brainfuck, leftRecursion, mathExpression, /*grammar,*/ ebnf,  regex,  rpn, rpn2
+		};
+		regularLanguages = new Language[] {
 				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak,
-				identifier, asbs, parens, mathExpression, grammar, ebnf, cox,
-				cox2, regex, brainfuck, page148, leftRecursion, rpn, rpn2
+				identifier
 		};
 		after = System.nanoTime();
 		System.out.format("Setup time: %.2f milliseconds\n", (after - before)/1000000.0);
@@ -217,12 +225,44 @@ public class GrammarTest {
 
 	@Test
 	public void twoPlusTwo() {
-		boolean result;
-		for (int i = 0; i < 10000; i++) {
-			result = mathExpression.get.matches("2+2");
+		repeat(mathExpression, "2+2", 10000);
+	}
+	
+	@Test
+	public void repeatCox() {
+		repeat(cox, "1+1+1", 10000);
+	}
+	
+	@Test
+	public void repeatStuff() {
+		repeat(aaaa, "abba", 100000);
+	}
+	@Test
+	public void repeatStuffAgain() {
+		// Rules and identifiers are broken. Regexen are not
+		repeat(asbs, "aaabbb", 100000);
+	}
+
+	public void fuzz(Language language, int times) {
+		for (int i = 0; i < times; i++) {
+			String s = language.get.generator.compute().toString();
+			boolean result = language.get.matches(s);
 			if (!result) {
 				// WTF?
-				System.out.format("WTF on iteration %d on string 2+2\n", i);
+				System.out.format("WTF for grammar '%s' on iteration %d on string %s\n", language.name, i, s);
+				System.out.println(language.get.gv.compute());
+			}
+			Assert.assertTrue(result);
+		}
+	}
+
+	public void repeat(Language language, String s, int times) {
+		for (int i = 0; i < times; i++) {
+			boolean result = language.get.matches(s);
+			if (!result) {
+				// WTF?
+				System.out.format("WTF for grammar '%s' on iteration %d on string %s\n", language.name, i, s);
+				System.out.println(language.get.gv.compute());
 			}
 			Assert.assertTrue(result);
 		}
@@ -231,17 +271,20 @@ public class GrammarTest {
 	@Test
 	public void fuzzGrammars() {
 		for (Language language : languages) {
-			for (int i = 0; i < 1000; i++) {
-				String s = language.get.generator.compute(2,3).toString();
-				boolean result = language.get.matches(s);
-				if (!result) {
-					// WTF?
-					System.out.format("WTF on iteration %d on string %s\n", i, s);
-					System.out.println(language.get.gv.compute());
-				}
-				Assert.assertTrue(result);
-			}
+			fuzz(language, 1000);
 		}
+	}
+	
+	@Test
+	public void fuzzRegexes() {
+		for (Language language : regularLanguages) {
+			fuzz(language, 10000);
+		}
+	}
+	
+	@Test
+	public void fuzzPage148() {
+		fuzz(page148, 100000);
 	}
 
 
@@ -361,6 +404,13 @@ public class GrammarTest {
 	public void testPage148() {
 		//		System.out.println(page148.show(page148.first(page148.id("A"))));
 		Assert.assertTrue(page148.get.nullable.compute());
+		Assert.assertTrue(page148.get.matches("abd"));
+		Assert.assertFalse(page148.get.matches("qcb"));
+		Assert.assertFalse(page148.get.matches("adb"));
+		Assert.assertFalse(page148.get.matches("acdc"));
+		Assert.assertFalse(page148.get.matches("acdb"));
+		Assert.assertFalse(page148.get.matches("adcb"));
+		Assert.assertFalse(page148.get.matches("qb"));
 	}
 
 	@Test

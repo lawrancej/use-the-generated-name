@@ -101,7 +101,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		else return accumulator;
 	}
 	public boolean done(Node<?,?> accumulator) {
-		return false;
+		return true;
 	}
 	public void begin() {
 		ids.clear();
