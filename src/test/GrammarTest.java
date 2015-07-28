@@ -9,7 +9,7 @@ import com.dictorobitary.Language;
 import com.dictorobitary.Node;
 
 public class GrammarTest {
-	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs,
+	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs, asbs2,
 	parens, endsWithB, identifier, page148, mathExpression, grammar, ebnf, cox,
 	cox2, symbol, rpn, rpn2, regex, brainfuck, leftRecursion;
 
@@ -128,6 +128,10 @@ public class GrammarTest {
 		}};
 		
 		// Regular expressions
+		asbs2 = new Language("a*b*") {{
+			define(many(symbol('a')),many(symbol('b')));
+		}};
+
 		symbol = new Language("symbol") {{
 			define(symbol('s'));
 		}};
@@ -159,7 +163,7 @@ public class GrammarTest {
 				cox2, brainfuck, leftRecursion, mathExpression, /*grammar,*/ ebnf,  regex,  rpn, rpn2
 		};
 		regularLanguages = new Language[] {
-				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak,
+				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak, asbs2,
 				identifier
 		};
 		after = System.nanoTime();
@@ -240,6 +244,7 @@ public class GrammarTest {
 	@Test
 	public void repeatStuffAgain() {
 		// Rules and identifiers are broken. Regexen are not
+		repeat(asbs2, "aaabbb", 100000);
 		repeat(asbs, "aaabbb", 100000);
 	}
 
@@ -407,7 +412,7 @@ public class GrammarTest {
 		Assert.assertTrue(page148.get.matches("abd"));
 		Assert.assertFalse(page148.get.matches("qcb"));
 		Assert.assertFalse(page148.get.matches("adb"));
-		Assert.assertFalse(page148.get.matches("acdc"));
+		Assert.assertTrue(page148.get.matches("acdc"));
 		Assert.assertFalse(page148.get.matches("acdb"));
 		Assert.assertFalse(page148.get.matches("adcb"));
 		Assert.assertFalse(page148.get.matches("qb"));

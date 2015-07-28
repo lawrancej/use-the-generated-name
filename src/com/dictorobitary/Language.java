@@ -54,10 +54,10 @@ public class Language {
 	private Map<Long, Node<Node<?,?>,Node<?,?>>> listCache = new LinkedHashMap<Long, Node<Node<?,?>,Node<?,?>>>();
 	// Skip through defined identifiers
 	private Node<?,?> getRHS(Node<?,?> language) {
-		int key = language.hashCode();
-		if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
-			language = (Node<?, ?>) rules.get(key).right;
-		}
+//		int key = language.hashCode();
+//		if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
+//			language = (Node<?, ?>) rules.get(key).right;
+//		}
 		return language;
 	}
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
@@ -300,7 +300,7 @@ public class Language {
 		// If the right rejects, or Id -> Id literally, remove the identifier and reject
 		if (right == reject || id == right) {
 //			return undefine(id);
-			return reject;
+//			return reject;
 		}
 		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
 		int key = id.hashCode();
@@ -318,9 +318,9 @@ public class Language {
 		*/
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
-			definition = node.left;
+			definition = id;
 		}
-		return node.left;
+		return id;
 	}
 	
 	/**
