@@ -47,7 +47,7 @@ public class Language {
 			from = to;
 			to = tmp;
 		}
-		int key = (from << 16) | to;
+		int key = (from << 16) ^ to;
 		return Node.createCached(rangeCache, key, Node.Tag.SYMBOL, from,to);
 	}
 	
@@ -74,7 +74,7 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// FIXME: this is fast, but a bit dodgy
-		long key = left.hashCode() << 32 ^ right.hashCode();
+		long key = (left.hashCode() << 32) ^ right.hashCode();
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
 //		return Node.create(Node.Tag.LIST, left, right);
 	}
@@ -113,7 +113,7 @@ public class Language {
 	public Node<?,?> string(String string) {
 		return list(explode(string), 0);
 	}
-	private Map<Integer, Node<Node<?,?>,Node<?,?>>> setCache = new LinkedHashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
+	private Map<Long, Node<Node<?,?>,Node<?,?>>> setCache = new LinkedHashMap<Long, Node<Node<?,?>,Node<?,?>>>();
 
 	private Node<?,?> orInstance(Node<?,?> left, Node<?,?> right) {
 		// Skip through defined identifiers
@@ -133,7 +133,7 @@ public class Language {
 			Node<?,?> r = (Node<?,?>) right;
 			if (r.left == left || r.right == left) return r;
 		}
-		int key = left.hashCode() ^ right.hashCode();
+		long key = (left.hashCode() << 32) ^ right.hashCode();
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 //		return Node.create(Node.Tag.SET, left, right);
 	}
@@ -299,23 +299,41 @@ public class Language {
 		right = getRHS(right);
 		// If the right rejects, or Id -> Id literally, remove the identifier and reject
 		if (right == reject || id == right) {
-//			return undefine(id);
+			return undefine(id);
 //			return reject;
 		}
 		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
 		int key = id.hashCode();
-//		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-//			undefine(id);
-//			return right;
-//		}
-		// If we defined this language already with a different identifier, return the existing identifier
-/*		if (reverse.containsKey(right)) {
-			return reverse.get(right);
+		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
+			undefine(id);
+			return right;
 		}
-*/
+		// If we defined this language already with a different identifier, return the existing identifier
+//		if (reverse.containsKey(right)) {
+//			return reverse.get(right);
+//		}
+
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
-/*		reverse.put(right, id);
-		*/
+		if (node.left != id) {
+			System.out.println("WTF: cached id isn't the identifier");
+			System.out.println(get.printer.compute(node.left));
+			System.out.println(get.printer.compute(id));
+			System.out.println(node.left.hashCode());
+			System.out.println(id.hashCode());
+			System.out.println(node.left.equals(id));
+//			System.out.println(node.left)
+//			System.exit(0);
+		}
+		if (node.right != right) {
+			System.out.println("WTF: right hand side isn't the right hand side");
+			System.out.println(get.printer.compute(node.left));
+			System.out.println(get.printer.compute(id));
+			System.out.println(get.printer.compute(node.right));
+			System.out.println(get.printer.compute(right));
+//			System.exit(0);
+		}
+//		reverse.put(right, id);
+//		*/
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
 			definition = id;

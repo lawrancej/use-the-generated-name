@@ -1,6 +1,7 @@
 package com.dictorobitary;
 
 import java.util.Map;
+import java.util.Random;
 
 /**
  * A node in grammar graph data structure.
@@ -12,18 +13,24 @@ import java.util.Map;
  */
 @SuppressWarnings("unchecked")
 final public class Node<L,R> {
+	private static final Random rand = new Random();
 	public enum Tag {
 		SYMBOL,	LIST, SET, ID, RULE, ACTION, LOOP
 	}
+	private final long id;
 	public final Tag tag;
 	public final L left;
 	public final R right;
-	public static int allocations = 0;
+	public static long allocations = 0;
 	private Node(Tag type, L left, R right) {
+		this.id = rand.nextLong();
 		this.tag = type;
 		this.left = left;
 		this.right = right;
 		allocations++;
+	}
+	public static <Left, Right, Key> Node<Left,Right> getCached(Map<Key, Node<Left,Right>> cache, Key key) {
+		return cache.get(key);
 	}
 	public static <Left, Right,Key> Node<Left,Right> createCached(Map<Key, Node<Left,Right>> cache, Key key, Tag type, Left left, Right right) {
 		if (!cache.containsKey(key)) {
@@ -32,6 +39,12 @@ final public class Node<L,R> {
 			return result;
 		}
 		return cache.get(key);
+	}
+//	public boolean equals(Object other) {
+//		return this.hashCode() == other.hashCode();
+//	}
+	public int hashCode() {
+		return (int)id;
 	}
 
 	// Handy shortcut for the constructor call
