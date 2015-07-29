@@ -40,13 +40,12 @@ final public class Node<L,R> {
 		}
 		return cache.get(key);
 	}
-//	public boolean equals(Object other) {
-//		return this.hashCode() == other.hashCode();
-//	}
-//	public int hashCode() {
-//		return (int)id;
-//	}
-
+	public boolean equals(Object other) {
+		return this.hashCode() == other.hashCode();
+	}
+	public int hashCode() {
+		return (int)id;
+	}
 	// Handy shortcut for the constructor call
 	public static <Left,Right> Node<Left,Right> create(Tag type, Left left, Right right) {
 		return new Node<Left,Right>(type, left, right);

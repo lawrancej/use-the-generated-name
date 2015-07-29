@@ -53,7 +53,7 @@ public class GrammarTest {
 			Node<String,Void> expression = id("expression");
 			rule("syntax", many(id("production")));
 			rule("production", id("identifier"), symbol('='), expression, symbol('.'));
-			rule("expression", id("term"), many(symbol('|'), id("term")));
+			rule(expression, id("term"), many(symbol('|'), id("term")));
 			rule("term", id("factor"), many(id("factor")));
 			rule("factor", or(id("identifier"),
 					id("string"),
@@ -160,7 +160,7 @@ public class GrammarTest {
 
 		languages = new Language[] { 
 				asbs, parens, page148, cox,
-				cox2, brainfuck, leftRecursion, mathExpression, /*grammar,*/ ebnf,  regex,  rpn, rpn2
+				cox2, brainfuck, leftRecursion, mathExpression, regex, /*grammar,*/ ebnf, rpn, rpn2,
 		};
 		regularLanguages = new Language[] {
 				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak, asbs2,
@@ -249,12 +249,13 @@ public class GrammarTest {
 	}
 
 	public void fuzz(Language language, int times) {
+		System.out.format("Fuzzing grammar '%s'\n", language.name);
 		for (int i = 0; i < times; i++) {
 			String s = language.get.generator.compute().toString();
 			boolean result = language.get.matches(s);
 			if (!result) {
 				// WTF?
-				System.out.format("WTF for grammar '%s' on iteration %d on string %s\n", language.name, i, s);
+				System.out.format("WTF on iteration %d on string %s\n", i, s);
 				System.out.println(language.get.gv.compute());
 			}
 			Assert.assertTrue(result);
