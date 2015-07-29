@@ -42,6 +42,7 @@ public class Language {
 	 * @return A language matching <code>[from-to]</code>
 	 */
 	public Node<Character,Character> range(char from, char to) {
+		// Swap order if from is greater than to
 		char tmp = from;
 		if (from > to) {
 			from = to;
