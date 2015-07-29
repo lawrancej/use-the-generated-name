@@ -17,7 +17,7 @@ final public class Node<L,R> {
 	public enum Tag {
 		SYMBOL,	LIST, SET, ID, RULE, ACTION, LOOP
 	}
-	private final long id;
+	public final long id;
 	public final Tag tag;
 	public final L left;
 	public final R right;
@@ -43,9 +43,9 @@ final public class Node<L,R> {
 //	public boolean equals(Object other) {
 //		return this.hashCode() == other.hashCode();
 //	}
-	public int hashCode() {
-		return (int)id;
-	}
+//	public int hashCode() {
+//		return (int)id;
+//	}
 
 	// Handy shortcut for the constructor call
 	public static <Left,Right> Node<Left,Right> create(Tag type, Left left, Right right) {

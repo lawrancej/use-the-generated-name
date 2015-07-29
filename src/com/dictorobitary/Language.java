@@ -75,7 +75,7 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// FIXME: this is fast, but a bit dodgy
-		long key = (left.hashCode() << 32) ^ right.hashCode();
+		long key = left.id ^ right.id;
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
 //		return Node.create(Node.Tag.LIST, left, right);
 	}
@@ -134,7 +134,7 @@ public class Language {
 			Node<?,?> r = (Node<?,?>) right;
 			if (r.left == left || r.right == left) return r;
 		}
-		long key = (left.hashCode() << 32) ^ right.hashCode();
+		long key = left.id ^ right.id;
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 //		return Node.create(Node.Tag.SET, left, right);
 	}
@@ -172,7 +172,7 @@ public class Language {
 		return or(empty, list(sequence));
 	}
 	
-	private Map<Integer, Node<Node<?,?>,Node<?,?>>> loopCache = new LinkedHashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
+	private Map<Long, Node<Node<?,?>,Node<?,?>>> loopCache = new LinkedHashMap<Long, Node<Node<?,?>,Node<?,?>>>();
 	/**
 	 * Match a sequence zero or more times.
 	 * 
@@ -184,7 +184,7 @@ public class Language {
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
 		if (language.tag == Node.Tag.LOOP) return language;
-		return Node.createCached(loopCache, language.hashCode(), Node.Tag.LOOP, language, any);
+		return Node.createCached(loopCache, language.id, Node.Tag.LOOP, language, any);
 //		return Node.create(Node.Tag.LOOP, language, any);
 	}
 	/**
@@ -249,7 +249,7 @@ public class Language {
 	/** Tokenization separator */
 	private Node<?,?> separator = empty;
 	
-	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new LinkedHashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
+	Map<Long, Node<Node<String,Void>, Node<?,?>>> rules = new LinkedHashMap<Long, Node<Node<String,Void>, Node<?,?>>>();
 	
 	Map<Node<?,?>, Node<String,Void>> reverse = new LinkedHashMap<Node<?,?>, Node<String,Void>>();
 	private Node<?,?> undefine(Node<String,Void> id) {
@@ -304,7 +304,7 @@ public class Language {
 //			return reject;
 		}
 		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
-		int key = id.hashCode();
+		long key = id.id;
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
 			undefine(id);
 			return right;
@@ -382,7 +382,7 @@ public class Language {
 	public <T> T acceptRule(Visitor<T> visitor, Node<String,Void> id) {
 		visitor.getWorkList().done(id);
 //		if (rules.containsKey(id.hashCode())) {
-			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.hashCode()));
+			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.id));
 //		}
 //		return visitor.reject(reject);
 	}
