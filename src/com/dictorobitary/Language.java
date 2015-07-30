@@ -251,7 +251,7 @@ public class Language {
 	
 	Map<Long, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Long, Node<Node<String,Void>, Node<?,?>>>();
 	
-	Map<Node<?,?>, Node<String,Void>> reverse = new HashMap<Node<?,?>, Node<String,Void>>();
+	Map<Long, Node<String,Void>> reverse = new HashMap<Long, Node<String,Void>>();
 	private Node<?,?> undefine(Node<String,Void> id) {
 		ids.remove(id);
 		rules.remove(id.id);
@@ -310,31 +310,17 @@ public class Language {
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
-//		if (reverse.containsKey(right)) {
-//			return reverse.get(right);
-//		}
-
+/*		if (reverse.containsKey(right.id)) {
+			Node<String,Void> storedId = reverse.get(right.id);
+			if (rules.containsKey(id.id)) {
+				return id;
+			} else {
+				return storedId;
+			}
+		}
+*/
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
-		if (node.left != id) {
-			System.out.println("WTF: cached id isn't the identifier");
-			System.out.println(get.printer.compute(node.left));
-			System.out.println(get.printer.compute(id));
-			System.out.println(node.left.id);
-			System.out.println(id.id);
-			System.out.println(node.left.equals(id));
-//			System.out.println(node.left)
-//			System.exit(0);
-		}
-		if (node.right != right) {
-			System.out.println("WTF: right hand side isn't the right hand side");
-			System.out.println(get.printer.compute(node.left));
-			System.out.println(get.printer.compute(id));
-			System.out.println(get.printer.compute(node.right));
-			System.out.println(get.printer.compute(right));
-//			System.exit(0);
-		}
-//		reverse.put(right, id);
-//		*/
+//		reverse.put(right.id, id);
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
 			definition = id;
