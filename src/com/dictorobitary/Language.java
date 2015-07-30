@@ -55,9 +55,9 @@ public class Language {
 	private Map<Long, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Long, Node<Node<?,?>,Node<?,?>>>();
 	// Skip through defined identifiers
 	private Node<?,?> getRHS(Node<?,?> language) {
-//		int key = language.id;
+//		long key = language.id;
 //		if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
-//			language = (Node<?, ?>) rules.get(key).right;
+//			return rules.get(key).right;
 //		}
 		return language;
 	}
