@@ -161,7 +161,7 @@ public class GrammarTest {
 
 		languages = new Language[] { 
 				asbs, parens, page148, cox,
-				cox2, brainfuck, leftRecursion, mathExpression, regex, /*grammar,*/ ebnf, // rpn, rpn2,
+				cox2, brainfuck, leftRecursion, mathExpression, regex, ebnf, // rpn, rpn2, grammar,
 		};
 		regularLanguages = new Language[] {
 				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak, asbs2,
@@ -182,7 +182,7 @@ public class GrammarTest {
 
 	@Test
 	public void testMathExpression() {
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
 			characters += 23;
 			Assert.assertTrue(mathExpression.get.matches("01/(((68-12*18))*37)"));
@@ -244,23 +244,23 @@ public class GrammarTest {
 
 	@Test
 	public void twoPlusTwo() {
-		repeat(mathExpression, "2+2", 100000);
+		repeat(mathExpression, "2+2", 10000);
 	}
 	
 	@Test
 	public void repeatCox() {
-		repeat(cox, "1+1+1", 100000);
+		repeat(cox, "1+1+1", 10000);
 	}
 	
 	@Test
 	public void repeatStuff() {
-		repeat(aaaa, "abba", 100000);
+		repeat(aaaa, "abba", 10000);
 	}
 	@Test
 	public void repeatStuffAgain() {
 		// Rules and identifiers are broken. Regexen are not
-		repeat(asbs2, "aaabbb", 100000);
-		repeat(asbs, "aaabbb", 100000);
+		repeat(asbs2, "aaabbb", 10000);
+		repeat(asbs, "aaabbb", 10000);
 	}
 
 	public void fuzz(Language language, int times) {
@@ -294,7 +294,7 @@ public class GrammarTest {
 	@Test
 	public void fuzzGrammars() {
 		for (Language language : languages) {
-			fuzz(language, 1000);
+			fuzz(language, 100);
 		}
 	}
 	
