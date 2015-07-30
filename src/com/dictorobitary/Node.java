@@ -79,9 +79,6 @@ final public class Node<L,R> {
 			return visitor.symbol((Node<Character,Character>)language);
 		case LOOP:
 			return visitor.loop((Node<Node<?,?>,Node<?,?>>)language);
-		case RULE:
-			visitor.getWorkList().done((Node<String,Void>)language);
-			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)language);
 		default:
 			return null;
 		}
