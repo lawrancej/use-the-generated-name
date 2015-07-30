@@ -1,17 +1,20 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.AbstractVisitor;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Language g) {
 		super(g);
 	}
 	private StringBuffer buffer = new StringBuffer();
+	public StringBuffer any(Node<?, ?> language) {
+		buffer.append("<any character>");
+		return buffer;
+	}
 	public StringBuffer symbol(Node<Character,Character> language) {
-		if (language == Language.any) {
-			buffer.append("<any character>");
-		} else if (language.left == language.right) {
+		if (language.left == language.right) {
 			buffer.append('\'');
 			buffer.append(language.left);
 			buffer.append('\'');
@@ -24,28 +27,39 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
+	public StringBuffer empty(Node<?, ?> language) {
+		buffer.append("\u03b5");
+		return buffer;
+	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
-		if (list == Language.empty) {
-			buffer.append("\u03b5");
+		buffer.append('(');
+		Node.accept(this, list.left);
+		buffer.append(' ');
+		Node.accept(this, list.right);
+		buffer.append(')');
+		return buffer;
+	}
+	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> loop) {
+		buffer.append('(');
+		Node.accept(this,loop.left);
+		if (loop.right == Language.any) {
+			buffer.append(")*");
 		} else {
-			buffer.append('(');
-			g.accept(this, list.left);
-			buffer.append(' ');
-			g.accept(this, list.right);
-			buffer.append(')');
+			// FIXME
+			buffer.append("){FIXME}");
 		}
 		return buffer;
 	}
+	public StringBuffer reject(Node<?, ?> language) {
+		buffer.append("\u2205");
+		return buffer;
+	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
-		if (set == Language.reject) {
-			buffer.append("\u2205");
-		} else {
-			buffer.append('(');
-			g.accept(this, set.left);
-			buffer.append('|');
-			g.accept(this, set.right);
-			buffer.append(')');
-		}
+		buffer.append('(');
+		Node.accept(this, set.left);
+		buffer.append('|');
+		Node.accept(this, set.right);
+		buffer.append(')');
 		return buffer;
 	}
 	public StringBuffer id(Node<String,Void> id) {
@@ -61,7 +75,7 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
 		this.id(rule.left);
 		buffer.append(" ::= ");
-		g.accept(this, rule.right);
+		Node.accept(this, rule.right);
 		buffer.append("\n");
 		return buffer;
 	}
@@ -73,5 +87,8 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	}
 	public boolean done(StringBuffer accumulator) {
 		return false;
+	}
+	public void begin() {
+		buffer = new StringBuffer();
 	}
 }

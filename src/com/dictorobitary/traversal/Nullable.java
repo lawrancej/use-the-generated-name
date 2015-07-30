@@ -1,29 +1,47 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.AbstractVisitor;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
+/**
+ * Determine if a language can derive the empty string
+ * 
+ * @author Joseph Lawrance
+ *
+ */
 public class Nullable extends AbstractVisitor<Boolean> {
 	Set<Node<String,Void>> nulls = new HashSet<Node<String,Void>>();
 	public Nullable(Language g) {
 		super(g);
 	}
+	public Boolean any(Node<?, ?> language) {
+		return false;
+	}
 	public Boolean symbol(Node<Character,Character> c) {
 		return false;
 	}
+	public Boolean empty(Node<?, ?> language) {
+		return true;
+	}
 	public Boolean list(Node<Node<?,?>,Node<?,?>> list) {
-		if (list == Language.empty) return true;
-		boolean result = g.accept(this, list.left) && g.accept(this, list.right);
+		boolean result = Node.accept(this, list.left) && Node.accept(this, list.right);
 		return result;
 	}
+	public Boolean loop(Node<Node<?,?>,Node<?,?>> language) {
+		return language.right == Language.any;
+	}
+	public Boolean reject(Node<?, ?> language) {
+		return false;
+	}
 	public Boolean set(Node<Node<?,?>,Node<?,?>> set) {
-		if (set == Language.reject) return false;
-		return g.accept(this, set.left) || g.accept(this, set.right);
+		return Node.accept(this, set.left) || Node.accept(this, set.right);
 	}
 	public Boolean id(Node<String,Void> id) {
+		if (nulls.contains(id)) return true;
 		if (todo.visited(id)) {
 			return nulls.contains(id);
 		} else {
@@ -35,13 +53,17 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		}
 	}
 	public Boolean rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		return g.accept(this, rule.right);
+		if (nulls.contains(rule.left)) return true;
+		return Node.accept(this, rule.right);
 	}
 	public Boolean bottom() {
 		return false;
 	}
 	public Boolean reduce(Boolean accumulator, Boolean current) {
 		return current;
+	}
+	public void begin() {
+		nulls.clear();
 	}
 	// Return only the first result.
 	public boolean done(Boolean accumulator) {

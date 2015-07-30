@@ -1,10 +1,11 @@
-package languageV2.traversal;
+package com.dictorobitary.traversal;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import languageV2.Language;
-import languageV2.Node;
+import com.dictorobitary.AbstractVisitor;
+import com.dictorobitary.Language;
+import com.dictorobitary.Node;
 
 /**
  * Debug grammar through GraphViz output and also query the size of the graph.
@@ -24,12 +25,17 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 			buffer.append(arrow);
 		}
 	}
+	public StringBuffer any(Node<?, ?> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"Any\"];\n", language.hashCode()));
+		}
+		return buffer;
+	}
 	public StringBuffer symbol(Node<Character,Character> language) {
 		if (!nodes.contains(language)) {
 			nodes.add(language);
-			if (language == Language.any) {
-				buffer.append(String.format("%s [label=\"Any\"];\n", language.hashCode()));
-			} else if (language.left == language.right) {
+			if (language.left == language.right) {
 				buffer.append(String.format("%s [label=\"'%c'\"];\n", language.hashCode(), language.left));
 			} else {
 				buffer.append(String.format("%s [label=\"'%c'..'%c'\"];\n", language.hashCode(), language.left, language.right));
@@ -37,18 +43,38 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
+	@Override
+	public StringBuffer empty(Node<?, ?> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"&epsilon;\"];\n", language.hashCode()));
+		}
+		return buffer;
+	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
 		if (!nodes.contains(list)) {
 			nodes.add(list);
-			if (list == Language.empty) {
-				buffer.append(String.format("%s [label=\"&epsilon;\"];\n", list.hashCode()));
-				return buffer;
-			}
 			buffer.append(String.format("%s [label=\"{List|{<left> L|<right> R}}\"];\n", list.hashCode()));
-			g.accept(this, list.left);
+			Node.accept(this, list.left);
 			drawEdge(list.hashCode() + ":left", list.left.hashCode());
-			g.accept(this, list.right);
+			Node.accept(this, list.right);
 			drawEdge(list.hashCode() + ":right", list.right.hashCode());
+		}
+		return buffer;
+	}
+	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"Loop\"];\n", language.hashCode()));
+			Node.accept(this, language.left);
+			drawEdge(language.hashCode(), language.left.hashCode());
+		}
+		return buffer;
+	}
+	public StringBuffer reject(Node<?, ?> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"&#8709;\"];\n", language.hashCode()));
 		}
 		return buffer;
 	}
@@ -60,9 +86,9 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 				return buffer;
 			}
 			buffer.append(String.format("%s [label=\"Set\"];\n", set.hashCode()));
-			g.accept(this, set.left);
+			Node.accept(this, set.left);
 			drawEdge(set.hashCode(), set.left.hashCode());
-			g.accept(this, set.right);
+			Node.accept(this, set.right);
 			drawEdge(set.hashCode(), set.right.hashCode());
 		}
 		return buffer;
@@ -80,7 +106,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
 		this.id(rule.left);
-		g.accept(this, rule.right);
+		Node.accept(this, rule.right);
 		drawEdge(rule.left.hashCode(), rule.right.hashCode());
 		return buffer;
 	}

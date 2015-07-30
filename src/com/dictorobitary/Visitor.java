@@ -1,7 +1,4 @@
-package languageV2.traversal;
-
-import languageV2.Language;
-import languageV2.Node;
+package com.dictorobitary;
 
 /**
  * Traverse a language specification.
@@ -16,17 +13,34 @@ import languageV2.Node;
  */
 public interface Visitor<T> {
 	/**
-	 * Visit symbol: <code>c</code>
+	 * Visit any symbol: <code>.</code>
+	 */
+	T any(Node<?,?> language);
+	/**
+	 * Visit symbol range: <code>[from-to]</code>
 	 */
 	T symbol(Node<Character,Character> language);
+	/**
+	 * Visit empty list: <code>&epsilon;</code>
+	 */
+	T empty(Node<?,?> language);
 	/**
 	 * Visit a list of languages: <code>abc...</code>
 	 */
 	T list(Node<Node<?,?>,Node<?,?>> language);
 	/**
+	 * Visit a loop: <code>a*</code>
+	 * @param language
+	 */
+	T loop(Node<Node<?, ?>, Node<?, ?>> language);
+	/**
+	 * Visit empty set: <code>&#8709;</code>
+	 */
+	T reject(Node<?,?> language);
+	/**
 	 * Visit a set of languages <code>a|b|c|...</code>
 	 */
-	T set(Node<Node<?,?>,Node<?,?>> set);
+	T set(Node<Node<?,?>,Node<?,?>> language);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
@@ -61,7 +75,7 @@ public interface Visitor<T> {
 	 * @param the current result
 	 * @return the result
 	 */
-	T reduce(T accumulator, T current);
+	public T reduce(T accumulator, T current);
 	/**
 	 * Pre-traversal method.
 	 */
