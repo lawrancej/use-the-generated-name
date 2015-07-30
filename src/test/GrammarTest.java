@@ -160,7 +160,7 @@ public class GrammarTest {
 
 		languages = new Language[] { 
 				asbs, parens, page148, cox,
-				cox2, brainfuck, leftRecursion, mathExpression, regex, /*grammar,*/ ebnf, rpn, rpn2,
+				cox2, brainfuck, leftRecursion, mathExpression, regex, /*grammar,*/ ebnf, // rpn, rpn2,
 		};
 		regularLanguages = new Language[] {
 				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak, asbs2,
