@@ -272,7 +272,7 @@ public class GrammarTest {
 	public void fuzz(Language language, int times) {
 		System.out.format("Fuzzing grammar '%s'\n", language.name);
 		for (int i = 0; i < times; i++) {
-			String s = language.get.generator.compute(10,4).toString();
+			String s = language.get.generator.compute(10,3).toString();
 			characters += s.length();
 			boolean result = language.get.matches(s);
 			if (!result) {
