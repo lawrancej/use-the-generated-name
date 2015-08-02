@@ -1,12 +1,9 @@
-package test;
+package com.dictorobitary;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.dictorobitary.Language;
-import com.dictorobitary.Node;
 
 public class GrammarTest {
 	static long characters = 0;
