@@ -4,7 +4,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+@RunWith(JUnit4.class)
 public class GrammarTest {
 	static long characters = 0;
 	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs, asbs2,
