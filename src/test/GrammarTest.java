@@ -13,7 +13,6 @@ public class GrammarTest {
 	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs, asbs2,
 	parens, endsWithB, identifier, page148, mathExpression, grammar, ebnf, cox,
 	cox2, symbol, rpn, rpn2, regex, brainfuck, leftRecursion;
-
 	static Language[] regularLanguages;
 	static Language[] languages;
 	@BeforeClass
@@ -123,16 +122,15 @@ public class GrammarTest {
 			rule("B",option(symbol('b'), id("B")));
 			// Q -> q | epsilon
 			rule("Q",option(symbol('q')));
+			// get.debug = true;
 		}};
 		leftRecursion = new Language("left recursion") {{
 			rule("L",option(id("L"),symbol('x')));
 		}};
-		
 		// Regular expressions
 		asbs2 = new Language("a*b*") {{
 			define(many(symbol('a')),many(symbol('b')));
 		}};
-
 		symbol = new Language("symbol") {{
 			define(symbol('s'));
 		}};
@@ -169,6 +167,15 @@ public class GrammarTest {
 		};
 		after = System.nanoTime();
 		System.out.format("Setup time: %.2f milliseconds\n", (after - before)/1000000.0);
+	}
+	public void debug(Language language, String s, boolean matches) {
+		language.get.debug = true;
+		if (matches) {
+			Assert.assertTrue(language.get.matches(s));
+		} else {
+			Assert.assertFalse(language.get.matches(s));
+		}
+		language.get.debug = false;
 	}
 
 	@Test
@@ -266,7 +273,7 @@ public class GrammarTest {
 	public void fuzz(Language language, int times) {
 		System.out.format("Fuzzing grammar '%s'\n", language.name);
 		for (int i = 0; i < times; i++) {
-			String s = language.get.generator.compute().toString();
+			String s = language.get.generator.compute(10,4).toString();
 			characters += s.length();
 			boolean result = language.get.matches(s);
 			if (!result) {
@@ -402,7 +409,7 @@ public class GrammarTest {
 		Assert.assertTrue(page148.get.matches("abd"));
 		Assert.assertFalse(page148.get.matches("qcb"));
 		Assert.assertFalse(page148.get.matches("adb"));
-		Assert.assertTrue(page148.get.matches("acdc"));
+		debug(page148, "acdc", true);
 		Assert.assertFalse(page148.get.matches("acdb"));
 		Assert.assertFalse(page148.get.matches("adcb"));
 		Assert.assertFalse(page148.get.matches("qb"));
@@ -428,7 +435,7 @@ public class GrammarTest {
 		Assert.assertTrue(regex.get.matches("a"));
 		Assert.assertTrue(regex.get.matches("a|b"));
 		Assert.assertTrue(regex.get.matches("a|b**"));
-		Assert.assertTrue(regex.get.matches("(hello)|(world)"));
+		debug(regex, "(hello)|(world)", true);
 		characters += 24;
 	}
 
