@@ -18,96 +18,86 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	}
 	private Set<Node<?,?>> nodes = new HashSet<Node<?,?>>();
 	private Set<String> edges = new HashSet<String>();
-	private void drawEdge(Object from, int to) {
-		String arrow = String.format("%s -> %s;\n", from, to);
+	private String label(Node<?,?> language) {
+		return "node" + Long.toHexString(language.id);
+	}
+	private String label(long id) {
+		return "node" + Long.toHexString(id);
+	}
+	private boolean drawNode(String name, Node<?,?> language) {
+		if (!nodes.contains(language)) {
+			nodes.add(language);
+			buffer.append(String.format("%s [label=\"%s\"];\n", label(language), name));
+			return true;
+		}
+		return false;
+	}
+	private void drawEdge(Object from, long to) {
+		String arrow = String.format("%s -> %s;\n", from, label(to));
 		if (!edges.contains(arrow)) {
 			edges.add(arrow);
 			buffer.append(arrow);
 		}
 	}
 	public StringBuffer any(Node<?, ?> language) {
-		if (!nodes.contains(language)) {
-			nodes.add(language);
-			buffer.append(String.format("%s [label=\"Any\"];\n", language.hashCode()));
-		}
+		drawNode("Any", language);
 		return buffer;
 	}
 	public StringBuffer symbol(Node<Character,Character> language) {
-		if (!nodes.contains(language)) {
-			nodes.add(language);
-			if (language.left == language.right) {
-				buffer.append(String.format("%s [label=\"'%c'\"];\n", language.hashCode(), language.left));
-			} else {
-				buffer.append(String.format("%s [label=\"'%c'..'%c'\"];\n", language.hashCode(), language.left, language.right));
-			}
+		if (language.left == language.right) {
+			drawNode(String.format("'%c'", language.left), language);
+		} else {
+			drawNode(String.format("'%c'..'%c'", language.left, language.right), language);
 		}
 		return buffer;
 	}
 	@Override
 	public StringBuffer empty(Node<?, ?> language) {
-		if (!nodes.contains(language)) {
-			nodes.add(language);
-			buffer.append(String.format("%s [label=\"&epsilon;\"];\n", language.hashCode()));
-		}
+		drawNode("&epsilon;", language);
 		return buffer;
 	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
-		if (!nodes.contains(list)) {
-			nodes.add(list);
-			buffer.append(String.format("%s [label=\"{List|{<left> L|<right> R}}\"];\n", list.hashCode()));
+		if(drawNode("{List|{<left> L|<right> R}}", list)) {
 			Node.accept(this, list.left);
-			drawEdge(list.hashCode() + ":left", list.left.hashCode());
+			drawEdge(label(list) + ":left", list.left.id);
 			Node.accept(this, list.right);
-			drawEdge(list.hashCode() + ":right", list.right.hashCode());
+			drawEdge(label(list) + ":right", list.right.id);
 		}
 		return buffer;
 	}
 	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> language) {
-		if (!nodes.contains(language)) {
-			nodes.add(language);
-			buffer.append(String.format("%s [label=\"Loop\"];\n", language.hashCode()));
+		if (drawNode("Loop", language)) {
 			Node.accept(this, language.left);
-			drawEdge(language.hashCode(), language.left.hashCode());
+			drawEdge(label(language), language.left.id);
 		}
 		return buffer;
 	}
 	public StringBuffer reject(Node<?, ?> language) {
-		if (!nodes.contains(language)) {
-			nodes.add(language);
-			buffer.append(String.format("%s [label=\"&#8709;\"];\n", language.hashCode()));
-		}
+		drawNode("Reject", language);
 		return buffer;
 	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
-		if (!nodes.contains(set)) {
-			nodes.add(set);
-			if (set == Language.reject) {
-				buffer.append(String.format("%s [label=\"Reject\"];\n", set.hashCode()));
-				return buffer;
-			}
-			buffer.append(String.format("%s [label=\"Set\"];\n", set.hashCode()));
+		if (drawNode("Set", set)) {
 			Node.accept(this, set.left);
-			drawEdge(set.hashCode(), set.left.hashCode());
+			drawEdge(label(set), set.left.id);
 			Node.accept(this, set.right);
-			drawEdge(set.hashCode(), set.right.hashCode());
+			drawEdge(label(set), set.right.id);
 		}
 		return buffer;
 	}
 	public StringBuffer id(Node<String,Void> id) {
-		if (!nodes.contains(id)) {
-			nodes.add(id);
-			if (id.left == null) {
-				buffer.append(String.format("%s [label=\"Id\"];\n", id.hashCode()));
-			} else {
-				buffer.append(String.format("%s [label=\"Id '%s'\"];\n", id.hashCode(), id.left));
-			}
+		if (id.left == null) {
+			drawNode("Id", id);
+		}
+		else {
+			drawNode(String.format("Id '%s'", id.left), id);
 		}
 		return buffer;
 	}
 	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
 		this.id(rule.left);
 		Node.accept(this, rule.right);
-		drawEdge(rule.left.hashCode(), rule.right.hashCode());
+		drawEdge(label(rule.left), rule.right.id);
 		return buffer;
 	}
 	public StringBuffer bottom() {
