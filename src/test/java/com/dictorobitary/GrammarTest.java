@@ -11,7 +11,7 @@ public class GrammarTest {
 	static long characters = 0;
 	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs, asbs2,
 	parens, endsWithB, identifier, page148, mathExpression, grammar, ebnf, cox,
-	cox2, symbol, rpn, rpn2, regex, brainfuck, leftRecursion;
+	cox2, symbol, rpn, rpn2, regex, brainfuck, leftRecursion, coxOriginal;
 	static Language[] regularLanguages;
 	static Language[] languages;
 	@BeforeClass
@@ -126,6 +126,11 @@ public class GrammarTest {
 		leftRecursion = new Language("left recursion") {{
 			rule("L",option(id("L"),symbol('x')));
 		}};
+		coxOriginal = new Language("cox, original") {{
+			rule("S", id("T"));
+			rule("T", or(list(id("T"), symbol('+'), id("T")),id("N")));
+			rule("N", symbol('1'));
+		}};
 		// Regular expressions
 		asbs2 = new Language("a*b*") {{
 			define(many(symbol('a')),many(symbol('b')));
@@ -158,7 +163,7 @@ public class GrammarTest {
 
 		languages = new Language[] { 
 				asbs, parens, page148, cox,
-				cox2, brainfuck, leftRecursion, mathExpression, regex, ebnf, // rpn, rpn2, grammar,
+				cox2, coxOriginal, brainfuck, leftRecursion, mathExpression, regex, ebnf, // rpn, rpn2, grammar,
 		};
 		regularLanguages = new Language[] {
 				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak, asbs2,
@@ -313,7 +318,7 @@ public class GrammarTest {
 	
 	@Test
 	public void fuzzPage148() {
-		fuzz(page148, 100000);
+		fuzz(page148, 1000);
 	}
 
 	//	@Test
@@ -408,7 +413,8 @@ public class GrammarTest {
 		Assert.assertTrue(page148.get.matches("abd"));
 		Assert.assertFalse(page148.get.matches("qcb"));
 		Assert.assertFalse(page148.get.matches("adb"));
-		debug(page148, "acdc", true);
+//		debug(page148, "acdc", true);
+		Assert.assertTrue(page148.get.matches("acdc"));
 		Assert.assertFalse(page148.get.matches("acdb"));
 		Assert.assertFalse(page148.get.matches("adcb"));
 		Assert.assertFalse(page148.get.matches("qb"));
