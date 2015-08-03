@@ -61,21 +61,25 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 		}
 	}
 	public Node<?,?> id(Node<String,Void> id) {
-		// By this point, we've seen the identifier on the rhs before.
-		// If the identifier derives a non-empty set, return the identifier
-		if (ids.containsKey(id)) {
-			return ids.get(id);
-		}
-		// Handle left-recursion: return DcId if we're visiting Id -> Id
-		if (todo.visiting(id)) {
-			return getReplacement(id);
+		if (todo.visited(id)) {
+			// By this point, we've seen the identifier on the rhs before.
+			// If the identifier derives a non-empty set, return the identifier
+			if (ids.containsKey(id)) {
+				return ids.get(id);
+			}
+			// Handle left-recursion: return DcId if we're visiting Id -> Id
+			if (todo.visiting(id)) {
+				// Technically, this is all we have to do
+				// Everything else is an optimization
+				return getReplacement(id);
+			}
+			// Otherwise, return the empty set
+			return bottom();
 		}
 		// Visit rule Id -> rhs, if we haven't already visited it.
-		if (!todo.visited(id)) {
+		else {
 			return g.acceptRule(this, id);
 		}
-		// Otherwise, return the empty set
-		return bottom();
 	}
 	public Node<?,?> rule(Node<Node<String,Void>, Node<?,?>> rule) {
 		// By this point, we've seen the identifier on the rhs before.

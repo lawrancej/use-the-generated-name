@@ -34,15 +34,13 @@ public class Token extends AbstractVisitor<Boolean> {
 		return Node.accept(this, language.left) && Node.accept(this, language.right);
 	}
 	public Boolean id(Node<String, Void> id) {
-		if (tokens.contains(id)) return true;
-		
-		// Recursive rules aren't tokens
-		if (getWorkList().visiting(id)) return false;
-		
 		// If we saw this rule already, it's not a token
 		if (todo.visited(id)) {
 			return false;
 		} else {
+			if (tokens.contains(id)) return true;
+			// Recursive rules aren't tokens
+			if (getWorkList().visiting(id)) return false;
 			boolean result = g.acceptRule(this, id);
 			if (result) {
 				tokens.add(id);

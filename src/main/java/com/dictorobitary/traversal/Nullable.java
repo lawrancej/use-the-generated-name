@@ -41,10 +41,10 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		return Node.accept(this, set.left) || Node.accept(this, set.right);
 	}
 	public Boolean id(Node<String,Void> id) {
-		if (nulls.contains(id)) return true;
 		if (todo.visited(id)) {
 			return nulls.contains(id);
 		} else {
+			if (nulls.contains(id)) return true;
 			boolean result = g.acceptRule(this, id);
 			if (result) {
 				nulls.add(id);
