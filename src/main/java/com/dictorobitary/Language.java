@@ -74,6 +74,7 @@ public class Language {
 		// re = er = r
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
+		// We shift left over a bit (literally) to guarantee ab != ba, and to guarantee aa != bb
 		long key = (left.id << (long)1) ^ right.id;
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
 	}
@@ -132,6 +133,7 @@ public class Language {
 			Node<?,?> r = (Node<?,?>) right;
 			if (r.left == left || r.right == left) return r;
 		}
+		// a|b = b|a
 		long key = left.id ^ right.id;
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 	}
