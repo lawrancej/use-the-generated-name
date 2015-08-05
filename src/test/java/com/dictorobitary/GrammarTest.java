@@ -9,7 +9,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class GrammarTest {
 	static long characters = 0;
-	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs, asbs2,
+	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs, asbs2, repetition, reverse,
 	parens, endsWithB, identifier, page148, mathExpression, grammar, ebnf, cox,
 	cox2, symbol, rpn, rpn2, regex, brainfuck, leftRecursion, coxOriginal;
 	static Language[] regularLanguages;
@@ -160,6 +160,14 @@ public class GrammarTest {
 			// [A-Za-z][A-Za-z0-9]*
 			define(or(range('A','Z'), range('a','z')), many(or(range('A','Z'), range('a','z'), range('0', '9'))));
 		}};
+		repetition = new Language("repetition") {{
+			// aa|bb
+			define(or(list(symbol('a'),symbol('a')), list(symbol('b'),symbol('b'))));
+		}};
+		reverse = new Language("reverse") {{
+			// ab|ba
+			define(or(list(symbol('a'),symbol('b')), list(symbol('b'),symbol('a'))));
+		}};
 
 		languages = new Language[] { 
 				asbs, parens, page148, cox,
@@ -167,7 +175,7 @@ public class GrammarTest {
 		};
 		regularLanguages = new Language[] {
 				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak, asbs2,
-				identifier
+				identifier, repetition, reverse
 		};
 		after = System.nanoTime();
 		System.out.format("Setup time: %.2f milliseconds\n", (after - before)/1000000.0);
@@ -442,6 +450,20 @@ public class GrammarTest {
 		Assert.assertTrue(regex.get.matches("a|b**"));
 		debug(regex, "(hello)|(world)", true);
 		characters += 24;
+	}
+	
+	@Test
+	public void testRepetition() {
+		Assert.assertTrue(repetition.get.matches("aa"));
+		Assert.assertTrue(repetition.get.matches("bb"));
+		Assert.assertFalse(repetition.get.matches("ab"));
+	}
+	@Test
+	public void testReverse() {
+		Assert.assertFalse(reverse.get.matches("aa"));
+		Assert.assertFalse(reverse.get.matches("bb"));
+		Assert.assertTrue(reverse.get.matches("ab"));
+		Assert.assertTrue(reverse.get.matches("ba"));
 	}
 
 	@After

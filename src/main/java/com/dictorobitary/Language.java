@@ -74,10 +74,8 @@ public class Language {
 		// re = er = r
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
-		// FIXME: this is fast, but a bit dodgy
-		long key = left.id ^ right.id;
+		long key = (left.id << (long)1) ^ right.id;
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
-//		return Node.create(Node.Tag.LIST, left, right);
 	}
 	private Node<?,?> list(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -136,7 +134,6 @@ public class Language {
 		}
 		long key = left.id ^ right.id;
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
-//		return Node.create(Node.Tag.SET, left, right);
 	}
 	private Node<?,?> or(Node<?,?>[] nodes, int i) {
 		if (i >= nodes.length) {
@@ -185,7 +182,6 @@ public class Language {
 		if (language == empty || language == reject) { return empty; }
 		if (language.tag == Node.Tag.LOOP) return language;
 		return Node.createCached(loopCache, language.id, Node.Tag.LOOP, language, any);
-//		return Node.create(Node.Tag.LOOP, language, any);
 	}
 	/**
 	 * Matches zero or more occurrences of language, separated by separator.
@@ -310,16 +306,18 @@ public class Language {
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
+		// FIXME: this logic belongs in derivative, not in language.
+		// We can't return a different identifier, because we don't know if it hasn't already been used elsewhere
+		// or, what if we tracked usages of an identifier in language?
+		// then, if the language has been
 /*		if (reverse.containsKey(right.id)) {
 			Node<String,Void> storedId = reverse.get(right.id);
-			if (rules.containsKey(id.id)) {
-				return id;
-			} else {
+			if (rules.containsKey(storedId.id) && !rules.containsKey(key)) {
 				return storedId;
 			}
-		}
-*/
+		} */
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
+		assert node.left == id;
 //		reverse.put(right.id, id);
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
