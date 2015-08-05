@@ -1,5 +1,7 @@
 package com.dictorobitary;
 
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -8,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class GrammarTest {
+	static Random rand = new Random();
 	static long characters = 0;
 	static Language fooBarFrak, helloWorld, aaaa, many1any, ab, asbs, asbs2, repetition, reverse,
 	parens, endsWithB, identifier, page148, mathExpression, grammar, ebnf, cox,
@@ -180,14 +183,39 @@ public class GrammarTest {
 		after = System.nanoTime();
 		System.out.format("Setup time: %.2f milliseconds\n", (after - before)/1000000.0);
 	}
+	public void test(Language language, String s, boolean expected) {
+		characters += s.length();
+		boolean result = language.get.matches(s);
+		if (expected != result) {
+			System.out.format("WTF for %s on string %s\n", language.name, s);
+			System.out.println(language.get.gv.compute());
+		}
+		if (expected) {
+			Assert.assertTrue(result);
+		} else {
+			Assert.assertFalse(result);
+		}
+	}
+	public long timedTest(Language language, String s, boolean expected) {
+		long before, after;
+		before = System.nanoTime();
+		test(language, s, expected);
+		after = System.nanoTime();
+		return (after - before);
+	}
 	public void debug(Language language, String s, boolean matches) {
 		language.get.debug = true;
-		if (matches) {
-			Assert.assertTrue(language.get.matches(s));
-		} else {
-			Assert.assertFalse(language.get.matches(s));
-		}
+		test(language, s, matches);
 		language.get.debug = false;
+	}
+	
+	// Generate a random string
+	public String randomString(int length) {
+		StringBuilder buffer = new StringBuilder();
+		for (int i = 0; i < length; i++) {
+			buffer.append((char)(rand.nextInt(127)+1));
+		}
+		return buffer.toString();
 	}
 
 	@Test
@@ -198,67 +226,52 @@ public class GrammarTest {
 		Assert.assertFalse(mathExpression.get.token.compute(mathExpression.id("term")));
 		Assert.assertFalse(mathExpression.get.token.compute(mathExpression.id("factor")));
 	}
-
 	@Test
 	public void testMathExpression() {
 		for (int i = 0; i < 100; i++) {
-			Assert.assertTrue(mathExpression.get.matches("(((81/08)*4+5*1))/43+28"));
-			characters += 23;
-			Assert.assertTrue(mathExpression.get.matches("01/(((68-12*18))*37)"));
-			characters += 20;
-			Assert.assertTrue(mathExpression.get.matches("4*(72+(16*7+50)/2)"));
-			characters += 18;
-			Assert.assertTrue(mathExpression.get.matches("(8/72)/(43*6+0/8)"));
-			characters += 17;
-			Assert.assertTrue(mathExpression.get.matches("(0/(7*07+22)-(5))"));
-			characters += 17;
-			Assert.assertTrue(mathExpression.get.matches("48*((3+43*2)/80)"));
-			characters += 16;
-			Assert.assertTrue(mathExpression.get.matches("(58*05+34*86)/4"));
-			characters += 15;
-			Assert.assertTrue(mathExpression.get.matches("05/(38/15)-2*11"));
-			characters += 15;
-			Assert.assertTrue(mathExpression.get.matches("(0/0-81)*63-5"));
-			characters += 13;
-			Assert.assertTrue(mathExpression.get.matches("(14-4)*2-4/7"));
-			characters += 12;
-			Assert.assertTrue(mathExpression.get.matches("1+((5/78+7))"));
-			characters += 12;
-			Assert.assertTrue(mathExpression.get.matches("(48)-5*6"));
-			characters += 8;
-			Assert.assertTrue(mathExpression.get.matches("68-50/87"));
-			characters += 8;
+			test(mathExpression, "(((81/08)*4+5*1))/43+28", true);
+			test(mathExpression, "01/(((68-12*18))*37)", true);
+			test(mathExpression,"4*(72+(16*7+50)/2)", true);
+			test(mathExpression, "(8/72)/(43*6+0/8)", true);
+			test(mathExpression, "(0/(7*07+22)-(5))", true);
+			test(mathExpression, "48*((3+43*2)/80)", true);
+			test(mathExpression, "(58*05+34*86)/4", true);
+			test(mathExpression, "05/(38/15)-2*11", true);
+			test(mathExpression, "(0/0-81)*63-5", true);
+			test(mathExpression, "(14-4)*2-4/7", true);
+			test(mathExpression, "1+((5/78+7))", true);
+			test(mathExpression, "(48)-5*6", true);
+			test(mathExpression, "68-50/87", true);
 		}
 	}
 	
 	@Test
 	public void testRegexMatching() {
 		Assert.assertFalse(symbol.get.nullable.compute());
-		Assert.assertFalse(symbol.get.matches("e"));
-		Assert.assertTrue(symbol.get.matches("s"));
-		Assert.assertTrue(symbol.get.matches("s"));
-		Assert.assertFalse(identifier.get.matches("4chan"));
-		Assert.assertFalse(identifier.get.matches("2pac"));
-		Assert.assertTrue(identifier.get.matches("x"));
-		Assert.assertTrue(identifier.get.matches("xyzzy3"));
-		Assert.assertTrue(many1any.get.matches("abcdefg"));
-		Assert.assertFalse(many1any.get.matches(""));
-		Assert.assertFalse(aaaa.get.matches("abcdefg"));
-		Assert.assertTrue(aaaa.get.matches("aaaa"));
-		Assert.assertTrue(aaaa.get.matches(""));
-		Assert.assertTrue(aaaa.get.matches("aabbabab"));
-		Assert.assertTrue(ab.get.matches("ab"));
-		Assert.assertFalse(ab.get.matches("aaaa"));
-		Assert.assertFalse(ab.get.matches(""));
-		Assert.assertFalse(ab.get.matches("aabbabab"));
-		Assert.assertTrue(endsWithB.get.matches("jebb"));
-		Assert.assertFalse(endsWithB.get.matches("jabba"));
-		Assert.assertTrue(helloWorld.get.matches("hello world"));
-		Assert.assertFalse(helloWorld.get.matches("hello"));
-		Assert.assertTrue(fooBarFrak.get.matches("foo"));
-		Assert.assertTrue(fooBarFrak.get.matches("foofoobar"));
-		Assert.assertFalse(fooBarFrak.get.matches("foobaz"));
-		characters += 102;
+		test(symbol, "e", false);
+		test(symbol, "s", true);
+		test(symbol, "s", true);
+		test(identifier, "4chan", false);
+		test(identifier, "2pac", false);
+		test(identifier, "x", true);
+		test(identifier, "xyzzy3", true);
+		test(many1any, "abcdefg", true);
+		test(many1any, "", false);
+		test(aaaa, "abcdefg", false);
+		test(aaaa, "aaaa", true);
+		test(aaaa, "", true);
+		test(aaaa, "aabbabab", true);
+		test(ab, "ab", true);
+		test(ab, "aaaa", false);
+		test(ab, "", false);
+		test(ab, "aabbabab", false);
+		test(endsWithB, "jebb", true);
+		test(endsWithB, "jabba", false);
+		test(helloWorld, "hello world", true);
+		test(helloWorld, "hello", false);
+		test(fooBarFrak, "foo", true);
+		test(fooBarFrak, "foofoobar", true);
+		test(fooBarFrak, "foobaz", false);
 	}
 
 	@Test
@@ -310,6 +323,25 @@ public class GrammarTest {
 		}
 	}
 
+	// We assume that randomly generated strings are not in the language.
+	@Test
+	public void testRandomStrings() {
+		for (Language language : regularLanguages) {
+			if (language != many1any && language != endsWithB) {
+				for (int i = 0; i < 50; i++) {
+					test(language, randomString(50), false);
+				}
+			}
+		}
+		for (Language language : languages) {
+			if (language != regex) {
+				for (int i = 0; i < 50; i++) {
+					test(language, randomString(50), false);
+				}
+			}
+		}
+	}
+	
 	@Test
 	public void fuzzGrammars() {
 		for (Language language : languages) {
@@ -359,37 +391,25 @@ public class GrammarTest {
 
 	@Test
 	public void testCox() {
-		Assert.assertTrue(cox.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
-		characters += 101;
-		Assert.assertFalse(cox.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
-		characters += 103;
+		test(cox, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1", true);
+		test(cox, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1", false);
 	}
 
 	@Test
 	public void testCox2() {
-		long before, after;
-		before = System.nanoTime();
-		Assert.assertTrue(cox2.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
-		after = System.nanoTime();
-		System.out.println(after - before);
-		characters += 101;
-		before = System.nanoTime();
-		Assert.assertFalse(cox2.get.matches("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1"));
-		after = System.nanoTime();
-		System.out.println(after - before);
-		characters += 103;
+		System.out.println(timedTest(cox2, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1", true));
+		System.out.println(timedTest(cox2, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1", false));
 	}
 
 	@Test
 	public void testMany() {
-		Assert.assertTrue(asbs.get.matches("ab"));
-		Assert.assertTrue(asbs.get.matches(""));
-		Assert.assertTrue(asbs.get.matches("b"));
-		Assert.assertFalse(asbs.get.matches("c"));
-		Assert.assertTrue(asbs.get.matches("aaaaaabbbb"));
-		Assert.assertTrue(asbs.get.matches("aaaaaaaaaaaaaaaaa"));
-		Assert.assertFalse(asbs.get.matches("aaaaaaaaabaaaaaaaa"));
-		characters += 50;
+		test(asbs, "ab", true);
+		test(asbs, "", true);
+		test(asbs, "b", true);
+		test(asbs, "c", false);
+		test(asbs, "aaaaaabbbb", true);
+		test(asbs, "aaaaaaaaaaaaaaaaa", true);
+		test(asbs, "aaaaaaaaabaaaaaaaa", false);
 	}
 
 	@Test
@@ -448,7 +468,8 @@ public class GrammarTest {
 		Assert.assertTrue(regex.get.matches("a"));
 		Assert.assertTrue(regex.get.matches("a|b"));
 		Assert.assertTrue(regex.get.matches("a|b**"));
-		debug(regex, "(hello)|(world)", true);
+//		debug(regex, "(hello)|(world)", true);
+		debug(regex,"(a)|(b)", true);
 		characters += 24;
 	}
 	

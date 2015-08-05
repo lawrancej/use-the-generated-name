@@ -317,10 +317,11 @@ public class Language {
 			if (rules.containsKey(storedId.id) && !rules.containsKey(key)) {
 				return storedId;
 			}
-		} */
+		}
+		reverse.put(right.id, id);
+		*/
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
 		assert node.left == id;
-//		reverse.put(right.id, id);
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
 			definition = id;
