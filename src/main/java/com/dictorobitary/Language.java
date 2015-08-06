@@ -133,6 +133,12 @@ public class Language {
 			Node<?,?> r = (Node<?,?>) right;
 			if (r.left == left || r.right == left) return r;
 		}
+		// Ensure a canonical order for sets
+		Node<?,?> tmp = left;
+		if (left.id > right.id) {
+			left = right;
+			right = tmp;
+		}
 		long key = (left.id << 32) ^ right.id;
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 	}
