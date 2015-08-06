@@ -313,18 +313,14 @@ public class Language {
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
-		// FIXME: this logic belongs in derivative, not in language.
-		// We can't return a different identifier, because we don't know if it hasn't already been used elsewhere
-		// or, what if we tracked usages of an identifier in language?
-		// then, if the language has been
-/*		if (reverse.containsKey(right.id)) {
+		if (reverse.containsKey(right.id)) {
 			Node<String,Void> storedId = reverse.get(right.id);
 			if (rules.containsKey(storedId.id) && !rules.containsKey(key)) {
 				return storedId;
 			}
 		}
 		reverse.put(right.id, id);
-		*/
+		
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
 		assert node.left == id;
 		// If the language is undefined, make this the starting identifier

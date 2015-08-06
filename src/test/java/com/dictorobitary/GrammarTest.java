@@ -441,7 +441,7 @@ public class GrammarTest {
 		Assert.assertTrue(page148.get.matches("abd"));
 		Assert.assertFalse(page148.get.matches("qcb"));
 		Assert.assertFalse(page148.get.matches("adb"));
-//		debug(page148, "acdc", true);
+		test(page148, "acdc", true);
 		Assert.assertTrue(page148.get.matches("acdc"));
 		Assert.assertFalse(page148.get.matches("acdb"));
 		Assert.assertFalse(page148.get.matches("adcb"));
@@ -468,8 +468,8 @@ public class GrammarTest {
 		Assert.assertTrue(regex.get.matches("a"));
 		Assert.assertTrue(regex.get.matches("a|b"));
 		Assert.assertTrue(regex.get.matches("a|b**"));
-//		debug(regex, "(hello)|(world)", true);
-		debug(regex,"(a)|(b)", true);
+		test(regex, "(hello)|(world)", true);
+		test(regex,"(a)|(b)", true);
 		characters += 24;
 	}
 	
