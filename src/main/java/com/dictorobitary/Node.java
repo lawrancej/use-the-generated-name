@@ -1,7 +1,6 @@
 package com.dictorobitary;
 
 import java.util.Map;
-import java.util.Random;
 
 /**
  * A node in grammar graph data structure.
@@ -13,7 +12,6 @@ import java.util.Random;
  */
 @SuppressWarnings("unchecked")
 final public class Node<L,R> {
-	private static final Random rand = new Random();
 	public enum Tag {
 		SYMBOL,	LIST, SET, ID, RULE, ACTION, LOOP
 	}
@@ -21,9 +19,10 @@ final public class Node<L,R> {
 	public final Tag tag;
 	public final L left;
 	public final R right;
-	public static long allocations = 0;
+	public static long allocations = 1;
 	private Node(Tag type, L left, R right) {
-		this.id = rand.nextLong();
+//		this.id = rand.nextLong();
+		this.id = allocations;
 		this.tag = type;
 		this.left = left;
 		this.right = right;
