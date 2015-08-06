@@ -237,10 +237,8 @@ public class Language {
 		ids.add(result);
 		return result;
 	}
-	
 	/** The language definition. The root of all traversal. */
 	private Node<?,?> definition = reject;
-	
 	/**
 	 * Get the language definition
 	 * @return the root/start node in the language data structure.
@@ -248,7 +246,6 @@ public class Language {
 	public Node<?,?> definition() {
 		return definition;
 	}
-	
 	/** Tokenization separator */
 	private Node<?,?> separator = empty;
 	
@@ -303,13 +300,13 @@ public class Language {
 		right = getRHS(right);
 		// If the right rejects, or Id -> Id literally, remove the identifier and reject
 		if (right == reject || id == right) {
-//			return undefine(id);
-			return reject;
+			return undefine(id);
+//			return reject;
 		}
 		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
 		long key = id.id;
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-//			undefine(id);
+			undefine(id);
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
@@ -320,7 +317,6 @@ public class Language {
 			}
 		}
 		reverse.put(right.id, id);
-		
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
 		assert node.left == id;
 		// If the language is undefined, make this the starting identifier
