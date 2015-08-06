@@ -208,7 +208,6 @@ public class GrammarTest {
 		test(language, s, matches);
 		language.get.debug = false;
 	}
-	
 	// Generate a random string
 	public String randomString(int length) {
 		StringBuilder buffer = new StringBuilder();
@@ -217,7 +216,6 @@ public class GrammarTest {
 		}
 		return buffer.toString();
 	}
-
 	@Test
 	public void testToken() {
 		Assert.assertFalse(mathExpression.get.token.compute());
@@ -244,7 +242,6 @@ public class GrammarTest {
 			test(mathExpression, "68-50/87", true);
 		}
 	}
-	
 	@Test
 	public void testRegexMatching() {
 		Assert.assertFalse(symbol.get.nullable.compute());
@@ -273,43 +270,30 @@ public class GrammarTest {
 		test(fooBarFrak, "foofoobar", true);
 		test(fooBarFrak, "foobaz", false);
 	}
-
 	@Test
 	public void twoPlusTwo() {
 		repeat(mathExpression, "2+2", 10000);
 	}
-	
 	@Test
 	public void repeatCox() {
 		repeat(cox, "1+1+1", 10000);
 	}
-	
 	@Test
 	public void repeatStuff() {
 		repeat(aaaa, "abba", 10000);
 	}
 	@Test
 	public void repeatStuffAgain() {
-		// Rules and identifiers are broken. Regexen are not
 		repeat(asbs2, "aaabbb", 10000);
 		repeat(asbs, "aaabbb", 10000);
 	}
-
 	public void fuzz(Language language, int times) {
 		System.out.format("Fuzzing grammar '%s'\n", language.name);
 		for (int i = 0; i < times; i++) {
 			String s = language.get.generator.compute(10,3).toString();
-			characters += s.length();
-			boolean result = language.get.matches(s);
-			if (!result) {
-				// WTF?
-				System.out.format("WTF on iteration %d on string %s\n", i, s);
-				System.out.println(language.get.gv.compute());
-			}
-			Assert.assertTrue(result);
+			repeat(language, s, times);
 		}
 	}
-
 	public void repeat(Language language, String s, int times) {
 		for (int i = 0; i < times; i++) {
 			characters += s.length();
@@ -322,7 +306,6 @@ public class GrammarTest {
 			Assert.assertTrue(result);
 		}
 	}
-
 	// We assume that randomly generated strings are not in the language.
 	@Test
 	public void testRandomStrings() {
@@ -341,29 +324,24 @@ public class GrammarTest {
 			}
 		}
 	}
-	
 	@Test
 	public void fuzzGrammars() {
 		for (Language language : languages) {
-			fuzz(language, 100);
+			fuzz(language, 10);
 		}
 	}
-	
 	@Test
 	public void fuzzRegexes() {
 		for (Language language : regularLanguages) {
-			fuzz(language, 10000);
+			fuzz(language, 100);
 		}
 	}
-	
 	@Test
 	public void fuzzPage148() {
-		fuzz(page148, 1000);
+		fuzz(page148, 100);
 	}
-
 	//	@Test
 	public void testRPN2() {
-
 		Assert.assertTrue(rpn2.get.matches("2"));
 		Assert.assertTrue(rpn2.get.matches(" 2"));
 		Assert.assertTrue(rpn2.get.matches(" 20"));
@@ -376,7 +354,6 @@ public class GrammarTest {
 		Assert.assertTrue(rpn2.get.matches("2 3 3 - 3 - *"));
 		Assert.assertTrue(rpn2.get.matches("2 1 /"));
 	}
-
 	//	@Test
 	public void testRPN() {
 		Assert.assertTrue(rpn.get.matches("2"));
@@ -388,19 +365,16 @@ public class GrammarTest {
 		Assert.assertTrue(rpn.get.matches("2 3 3 - 3 - *"));
 		Assert.assertTrue(rpn.get.matches("2 1 /"));
 	}
-
 	@Test
 	public void testCox() {
 		test(cox, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1", true);
 		test(cox, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1", false);
 	}
-
 	@Test
 	public void testCox2() {
 		System.out.println(timedTest(cox2, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1", true));
 		System.out.println(timedTest(cox2, "1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1++1", false));
 	}
-
 	@Test
 	public void testMany() {
 		test(asbs, "ab", true);
@@ -411,7 +385,6 @@ public class GrammarTest {
 		test(asbs, "aaaaaaaaaaaaaaaaa", true);
 		test(asbs, "aaaaaaaaabaaaaaaaa", false);
 	}
-
 	@Test
 	public void testParens() {
 		Assert.assertFalse(parens.get.matches("("));
@@ -421,7 +394,6 @@ public class GrammarTest {
 		Assert.assertFalse(parens.get.matches(parens.get.firstSet.compute(), ")"));
 		characters += 6;
 	}
-
 	@Test
 	public void testLeftRecursion() {
 		Assert.assertTrue(leftRecursion.get.matches("xxxx"));
@@ -433,60 +405,52 @@ public class GrammarTest {
 		Assert.assertFalse(leftRecursion.get.matches("L"));
 		characters += 34;
 	}
-
 	@Test
 	public void testPage148() {
 		//		System.out.println(page148.show(page148.first(page148.id("A"))));
 		Assert.assertTrue(page148.get.nullable.compute());
-		Assert.assertTrue(page148.get.matches("abd"));
-		Assert.assertFalse(page148.get.matches("qcb"));
-		Assert.assertFalse(page148.get.matches("adb"));
+		test(page148, "abd", true);
 		test(page148, "acdc", true);
-		Assert.assertTrue(page148.get.matches("acdc"));
-		Assert.assertFalse(page148.get.matches("acdb"));
-		Assert.assertFalse(page148.get.matches("adcb"));
-		Assert.assertFalse(page148.get.matches("qb"));
-		characters += 23;
+		test(page148, "acdc", true);
+		test(page148, "qcb", false);
+		test(page148, "adb", false);
+		test(page148, "acdb", false);
+		test(page148, "adcb", false);
+		test(page148, "qb", false);
 	}
-
 	@Test
 	public void testBrainfuck() {
-		Assert.assertTrue(brainfuck.get.matches("+"));
-		Assert.assertTrue(brainfuck.get.matches("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."));
-		Assert.assertFalse(brainfuck.get.matches("+["));
-		Assert.assertFalse(brainfuck.get.matches("+[."));
-		Assert.assertFalse(brainfuck.get.matches("+[.+"));
-		Assert.assertFalse(brainfuck.get.matches("hi"));
-		Assert.assertTrue(brainfuck.get.matches("+[.+]"));
-		Assert.assertTrue(brainfuck.get.matches("+[.+]+"));
-		Assert.assertFalse(brainfuck.get.matches("boo"));
-		characters += 132;
+		test(brainfuck, "+", true);
+		test(brainfuck, "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.", true);
+		test(brainfuck, "+[.+]", true);
+		test(brainfuck, "+[.+]+", true);
+		test(brainfuck, "+[", false);
+		test(brainfuck, "+[.", false);
+		test(brainfuck, "+[.+", false);
+		test(brainfuck, "hi", false);
+		test(brainfuck, "boo", false);
 	}
-
 	@Test
 	public void testRegexGrammar() {
-		Assert.assertTrue(regex.get.matches("a"));
-		Assert.assertTrue(regex.get.matches("a|b"));
-		Assert.assertTrue(regex.get.matches("a|b**"));
+		test(regex, "a", true);
+		test(regex, "a|b", true);
+		test(regex, "a|b**", true);
 		test(regex, "(hello)|(world)", true);
 		test(regex,"(a)|(b)", true);
-		characters += 24;
 	}
-	
 	@Test
 	public void testRepetition() {
-		Assert.assertTrue(repetition.get.matches("aa"));
-		Assert.assertTrue(repetition.get.matches("bb"));
-		Assert.assertFalse(repetition.get.matches("ab"));
+		test(repetition, "aa", true);
+		test(repetition, "bb", true);
+		test(repetition, "ab", false);
 	}
 	@Test
 	public void testReverse() {
-		Assert.assertFalse(reverse.get.matches("aa"));
-		Assert.assertFalse(reverse.get.matches("bb"));
-		Assert.assertTrue(reverse.get.matches("ab"));
-		Assert.assertTrue(reverse.get.matches("ba"));
+		test(reverse, "aa", false);
+		test(reverse, "bb", false);
+		test(reverse,"ab", true);
+		test(reverse,"ba", true);
 	}
-
 	@After
 	public void summary() {
 		// 3528 total
