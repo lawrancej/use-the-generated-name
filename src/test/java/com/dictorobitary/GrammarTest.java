@@ -174,7 +174,7 @@ public class GrammarTest {
 
 		languages = new Language[] { 
 				asbs, parens, page148, cox,
-				cox2, coxOriginal, brainfuck, leftRecursion, mathExpression, regex, ebnf, // rpn, rpn2, grammar,
+				cox2,  brainfuck, leftRecursion, mathExpression, regex, ebnf, coxOriginal, // rpn, rpn2, grammar,
 		};
 		regularLanguages = new Language[] {
 				symbol, ab, helloWorld, many1any, aaaa, endsWithB, fooBarFrak, asbs2,
@@ -273,6 +273,10 @@ public class GrammarTest {
 	@Test
 	public void twoPlusTwo() {
 		repeat(mathExpression, "2+2", 10000);
+	}
+	// @Test
+	public void debugCox() {
+		debug(coxOriginal, "1+1", true);
 	}
 	@Test
 	public void repeatCox() {

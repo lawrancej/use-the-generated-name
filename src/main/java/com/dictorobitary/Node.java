@@ -13,7 +13,8 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 final public class Node<L,R> {
 	public enum Tag {
-		SYMBOL,	LIST, SET, ID, RULE, ACTION, LOOP
+		SYMBOL,	LIST, SET, ID, RULE, LOOP,
+		TOKEN, ACTION, RESULT, SKIP
 	}
 	public final long id;
 	public final Tag tag;
@@ -50,7 +51,7 @@ final public class Node<L,R> {
 		return new Node<Left,Right>(type, left, right);
 	}
 	/**
-	 * Accept visitor into a language.
+	 * Accept a visitor.
 	 * 
 	 * @param visitor
 	 * @param language

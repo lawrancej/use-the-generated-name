@@ -53,12 +53,17 @@ public class Language {
 	}
 	
 	private Map<Long, Node<Node<?,?>,Node<?,?>>> listCache = new HashMap<Long, Node<Node<?,?>,Node<?,?>>>();
+	private boolean skipDefinedIdentifiers = false;
 	// Skip through defined identifiers
 	private Node<?,?> getRHS(Node<?,?> language) {
-//		long key = language.id;
-//		if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
-//			return rules.get(key).right;
-//		}
+		if (skipDefinedIdentifiers ) {
+			long key = language.id;
+			if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
+				Node<Node<String,Void>,Node<?,?>> result = rules.get(key);
+	/*			return result.right; */
+				return rules.get(key).right;
+			}
+		}
 		return language;
 	}
 	// See: http://cs.brown.edu/people/jes/book/pdfs/ModelsOfComputation.pdf
@@ -300,13 +305,13 @@ public class Language {
 		right = getRHS(right);
 		// If the right rejects, or Id -> Id literally, remove the identifier and reject
 		if (right == reject || id == right) {
-			return undefine(id);
-//			return reject;
+//			return undefine(id);
+			return reject;
 		}
-		// If the right hand side is a defined identifier, don't create a rule, just return the existing identifier
+		// If the right hand side is just an undefined identifier, don't create a rule, just return the existing identifier
 		long key = id.id;
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
-			undefine(id);
+//			undefine(id);
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
