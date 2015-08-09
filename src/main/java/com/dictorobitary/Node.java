@@ -20,7 +20,7 @@ final public class Node<L,R> {
 	public final Tag tag;
 	public final L left;
 	public final R right;
-	public static int allocations = 1;
+	public static int allocations = 0;
 	private Node(Tag type, L left, R right) {
 //		this.id = rand.nextLong();
 		this.id = allocations;
