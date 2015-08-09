@@ -57,11 +57,10 @@ public class Language {
 	// Skip through defined identifiers
 	private Node<?,?> getRHS(Node<?,?> language) {
 		if (skipDefinedIdentifiers ) {
-			long key = language.id;
+			int key = language.id;
 			if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
 				Node<Node<String,Void>,Node<?,?>> result = rules.get(key);
-	/*			return result.right; */
-				return rules.get(key).right;
+				return result.right;
 			}
 		}
 		return language;
@@ -80,7 +79,7 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// We shift left to guarantee ab != ba, and to guarantee aa != bb
-		long key = (left.id << 32) ^ right.id;
+		long key = ((long)left.id << 32) ^ right.id;
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
 	}
 	private Node<?,?> list(Node<?,?>[] nodes, int i) {
@@ -144,7 +143,7 @@ public class Language {
 			left = right;
 			right = tmp;
 		}
-		long key = (left.id << 32) ^ right.id;
+		long key = ((long)left.id << 32) ^ right.id;
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 	}
 	private Node<?,?> or(Node<?,?>[] nodes, int i) {
@@ -181,7 +180,7 @@ public class Language {
 		return or(empty, list(sequence));
 	}
 	
-	private Map<Long, Node<Node<?,?>,Node<?,?>>> loopCache = new HashMap<Long, Node<Node<?,?>,Node<?,?>>>();
+	private Map<Integer, Node<Node<?,?>,Node<?,?>>> loopCache = new HashMap<Integer, Node<Node<?,?>,Node<?,?>>>();
 	/**
 	 * Match a sequence zero or more times.
 	 * 
@@ -254,9 +253,9 @@ public class Language {
 	/** Tokenization separator */
 	private Node<?,?> separator = empty;
 	
-	Map<Long, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Long, Node<Node<String,Void>, Node<?,?>>>();
+	Map<Integer, Node<Node<String,Void>, Node<?,?>>> rules = new HashMap<Integer, Node<Node<String,Void>, Node<?,?>>>();
 	
-	Map<Long, Node<String,Void>> reverse = new HashMap<Long, Node<String,Void>>();
+	Map<Integer, Node<String,Void>> reverse = new HashMap<Integer, Node<String,Void>>();
 	private Node<?,?> undefine(Node<String,Void> id) {
 		ids.remove(id);
 		rules.remove(id.id);
@@ -309,7 +308,7 @@ public class Language {
 			return reject;
 		}
 		// If the right hand side is just an undefined identifier, don't create a rule, just return the existing identifier
-		long key = id.id;
+		int key = id.id;
 		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
 //			undefine(id);
 			return right;

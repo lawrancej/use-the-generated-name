@@ -16,11 +16,11 @@ final public class Node<L,R> {
 		SYMBOL,	LIST, SET, ID, RULE, LOOP,
 		TOKEN, ACTION, RESULT, SKIP
 	}
-	public final long id;
+	public final int id;
 	public final Tag tag;
 	public final L left;
 	public final R right;
-	public static long allocations = 1;
+	public static int allocations = 1;
 	private Node(Tag type, L left, R right) {
 //		this.id = rand.nextLong();
 		this.id = allocations;
