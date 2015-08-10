@@ -63,7 +63,7 @@ public class Nullable extends AbstractVisitor<Boolean> {
 		return current;
 	}
 	public void begin() {
-		nulls.clear();
+//		nulls.clear();
 	}
 	// Return only the first result.
 	public boolean done(Boolean accumulator) {

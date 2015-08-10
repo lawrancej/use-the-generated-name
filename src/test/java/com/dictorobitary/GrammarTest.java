@@ -274,7 +274,7 @@ public class GrammarTest {
 	public void twoPlusTwo() {
 		repeat(mathExpression, "2+2", 10000);
 	}
-	@Test
+//	@Test
 	public void debugCox() {
 		debug(coxOriginal, "1+1", true);
 	}
