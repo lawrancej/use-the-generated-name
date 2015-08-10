@@ -5,6 +5,20 @@ import java.util.Map;
 /**
  * A node in grammar graph data structure.
  * 
+ * A node will be a 64-bit structure:
+ * 4 bits for the tag
+ * 30 bits for the left
+ * 30 bits for the right
+ * the identifier is the location in the pool.
+ * 
+ * SYMBOL: left -> char, right -> char
+ * LIST: left -> node (int), right -> node (int)
+ * SET: left -> node (int), right -> node (int)
+ * ID: left -> label (index into label array), right -> bit field for properties such as nullability, whether it's a token. dirty bits? ? reduction action?
+ * RULE: left -> node (id), right -> node (rhs)
+ * LOOP: left -> node (int), right -> symbol
+ * 
+ * 
  * @author Joey Lawrance
  *
  * @param <L>
@@ -12,7 +26,7 @@ import java.util.Map;
  */
 @SuppressWarnings("unchecked")
 final public class Node<L,R> {
-//	public static long[] pool = new long[1024*1024*2];
+	public static long[] pool = new long[1024*1024*2];
 	public enum Tag {
 		SYMBOL,	LIST, SET, ID, RULE, LOOP,
 		TOKEN, ACTION, RESULT, SKIP
