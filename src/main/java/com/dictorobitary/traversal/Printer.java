@@ -14,15 +14,15 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public StringBuffer symbol(Node<Character,Character> language) {
-		if (language.left == language.right) {
+		if (language.left() == language.right()) {
 			buffer.append('\'');
-			buffer.append(language.left);
+			buffer.append(language.left());
 			buffer.append('\'');
 		} else {
 			buffer.append('[');
-			buffer.append(language.left);
+			buffer.append(language.left());
 			buffer.append('-');
-			buffer.append(language.right);
+			buffer.append(language.right());
 			buffer.append(']');
 		}
 		return buffer;
@@ -33,16 +33,16 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
 		buffer.append('(');
-		Node.accept(this, list.left);
+		Node.accept(this, list.left());
 		buffer.append(' ');
-		Node.accept(this, list.right);
+		Node.accept(this, list.right());
 		buffer.append(')');
 		return buffer;
 	}
 	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> loop) {
 		buffer.append('(');
-		Node.accept(this,loop.left);
-		if (loop.right == Language.any) {
+		Node.accept(this,loop.left());
+		if (loop.right() == Language.any) {
 			buffer.append(")*");
 		} else {
 			// FIXME
@@ -56,26 +56,26 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
 		buffer.append('(');
-		Node.accept(this, set.left);
+		Node.accept(this, set.left());
 		buffer.append('|');
-		Node.accept(this, set.right);
+		Node.accept(this, set.right());
 		buffer.append(')');
 		return buffer;
 	}
 	public StringBuffer id(Node<String,Void> id) {
 		buffer.append('<');
-		if (id.left == null) {
+		if (id.left() == null) {
 			buffer.append(id.hashCode());
 		} else {
-			buffer.append(id.left);
+			buffer.append(id.left());
 		}
 		buffer.append('>');
 		return buffer;
 	}
 	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		this.id(rule.left);
+		this.id(rule.left());
 		buffer.append(" ::= ");
-		Node.accept(this, rule.right);
+		Node.accept(this, rule.right());
 		buffer.append("\n");
 		return buffer;
 	}

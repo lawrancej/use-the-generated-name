@@ -19,26 +19,26 @@ public class FirstSet extends AbstractVisitor<Node<?,?>> {
 		return bottom();
 	}
 	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> pair) {
-		Node<?,?> result = Node.accept(this, pair.left);
-		if (g.get.nullable.compute(pair.left)) {
-			result = g.or(result, Node.accept(this, pair.right));
+		Node<?,?> result = Node.accept(this, pair.left());
+		if (g.get.nullable.compute(pair.left())) {
+			result = g.or(result, Node.accept(this, pair.right()));
 		}
 		return result;
 	}
 	public Node<?,?> loop(Node<Node<?,?>,Node<?,?>> loop) {
-		return Node.accept(this, loop.left);
+		return Node.accept(this, loop.left());
 	}
 	public Node<?, ?> reject(Node<?, ?> langauge) {
 		return bottom();
 	}
 	public Node<?,?> set(Node<Node<?,?>,Node<?,?>> set) {
-		return g.or(Node.accept(this, set.left), Node.accept(this, set.right));
+		return g.or(Node.accept(this, set.left()), Node.accept(this, set.right()));
 	}
 	public Node<?,?> id(Node<String,Void> id) {
 		return bottom();
 	}
 	public Node<?,?> rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		return Node.accept(this, rule.right);
+		return Node.accept(this, rule.right());
 	}
 	public Node<?,?> bottom() {
 		return Language.reject;

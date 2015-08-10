@@ -17,7 +17,9 @@ import java.util.Set;
 public class Language {
 	public final String name;
 	/** Construct a language specification */
-	public Language(String name) { this.name = name; }
+	public Language(String name) {
+		this.name = name;
+	}
 	/** Match any character, equivalent to regular expression dot. */
 	public static final Node<Character,Character> any = Node.create(Node.Tag.SYMBOL, null, null);
 	/** Match the empty list (empty sequence). */
@@ -57,10 +59,10 @@ public class Language {
 	// Skip through defined identifiers
 	private Node<?,?> getRHS(Node<?,?> language) {
 		if (skipDefinedIdentifiers ) {
-			int key = language.id;
-			if (language.tag == Node.Tag.ID && rules.containsKey(key)) {
+			int key = language.id();
+			if (language.tag() == Node.Tag.ID && rules.containsKey(key)) {
 				Node<Node<String,Void>,Node<?,?>> result = rules.get(key);
-				return result.right;
+				return result.right();
 			}
 		}
 		return language;
@@ -79,7 +81,7 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// We shift left to guarantee ab != ba, and to guarantee aa != bb
-		long key = ((long)left.id << 32) ^ right.id;
+		long key = ((long)left.id() << 32) ^ right.id();
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
 	}
 	private Node<?,?> list(Node<?,?>[] nodes, int i) {
@@ -129,21 +131,21 @@ public class Language {
 		// r+r = r
 		if (left == right) { return left; }
 		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
-		if (left.tag == Node.Tag.SET) {
+		if (left.tag() == Node.Tag.SET) {
 			Node<?,?> l = (Node<?,?>) left;
-			if (l.left == right || l.right == right) return l;
+			if (l.left() == right || l.right() == right) return l;
 		}
-		if (right.tag == Node.Tag.SET) {
+		if (right.tag() == Node.Tag.SET) {
 			Node<?,?> r = (Node<?,?>) right;
-			if (r.left == left || r.right == left) return r;
+			if (r.left() == left || r.right() == left) return r;
 		}
 		// Ensure a canonical order for sets
 		Node<?,?> tmp = left;
-		if (left.id > right.id) {
+		if (left.id() > right.id()) {
 			left = right;
 			right = tmp;
 		}
-		long key = ((long)left.id << 32) ^ right.id;
+		long key = ((long)left.id() << 32) ^ right.id();
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 	}
 	private Node<?,?> or(Node<?,?>[] nodes, int i) {
@@ -191,8 +193,8 @@ public class Language {
 		Node<?,?> language = list(sequence);
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
-		if (language.tag == Node.Tag.LOOP) return language;
-		return Node.createCached(loopCache, language.id, Node.Tag.LOOP, language, any);
+		if (language.tag() == Node.Tag.LOOP) return language;
+		return Node.createCached(loopCache, language.id(), Node.Tag.LOOP, language, any);
 	}
 	/**
 	 * Matches zero or more occurrences of language, separated by separator.
@@ -258,7 +260,7 @@ public class Language {
 	Map<Integer, Node<String,Void>> reverse = new HashMap<Integer, Node<String,Void>>();
 	private Node<?,?> undefine(Node<String,Void> id) {
 		ids.remove(id);
-		rules.remove(id.id);
+		rules.remove(id.id());
 		return reject;
 	}
 
@@ -308,21 +310,21 @@ public class Language {
 			return reject;
 		}
 		// If the right hand side is just an undefined identifier, don't create a rule, just return the existing identifier
-		int key = id.id;
-		if (right.tag == Node.Tag.ID && !rules.containsKey(key)) {
+		int key = id.id();
+		if (right.tag() == Node.Tag.ID && !rules.containsKey(key)) {
 //			undefine(id);
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
-		if (reverse.containsKey(right.id)) {
-			Node<String,Void> storedId = reverse.get(right.id);
-			if (rules.containsKey(storedId.id) && !rules.containsKey(key)) {
+		if (reverse.containsKey(right.id())) {
+			Node<String,Void> storedId = reverse.get(right.id());
+			if (rules.containsKey(storedId.id()) && !rules.containsKey(key)) {
 				return storedId;
 			}
 		}
-		reverse.put(right.id, id);
+		reverse.put(right.id(), id);
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
-		assert node.left == id;
+		assert node.left() == id;
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
 			definition = id;
@@ -371,8 +373,8 @@ public class Language {
 		assert id != null;
 		visitor.getWorkList().done(id);
 		// Defined identifiers
-		if (rules.containsKey(id.id)) {
-			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.id));
+		if (rules.containsKey(id.id())) {
+			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.id()));
 		}
 		// Undefined identifiers
 		return visitor.reject(reject);

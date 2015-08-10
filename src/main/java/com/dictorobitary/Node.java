@@ -12,15 +12,28 @@ import java.util.Map;
  */
 @SuppressWarnings("unchecked")
 final public class Node<L,R> {
+//	public static long[] pool = new long[1024*1024*2];
 	public enum Tag {
 		SYMBOL,	LIST, SET, ID, RULE, LOOP,
 		TOKEN, ACTION, RESULT, SKIP
 	}
-	public final int id;
-	public final Tag tag;
-	public final L left;
-	public final R right;
+	private final int id;
+	private final Tag tag;
+	private final L left;
+	private final R right;
 	public static int allocations = 0;
+	public Tag tag() {
+		return tag;
+	}
+	public L left() {
+		return left;
+	}
+	public R right() {
+		return right;
+	}
+	public int id() {
+		return id;
+	}
 	private Node(Tag type, L left, R right) {
 //		this.id = rand.nextLong();
 		this.id = allocations;
@@ -44,7 +57,7 @@ final public class Node<L,R> {
 		return this.hashCode() == other.hashCode();
 	}
 	public int hashCode() {
-		return (int)id;
+		return (int)id();
 	}
 	// Handy shortcut for the constructor call
 	public static <Left,Right> Node<Left,Right> create(Tag type, Left left, Right right) {
@@ -58,7 +71,7 @@ final public class Node<L,R> {
 	 * @return
 	 */
 	public static <T> T accept(Visitor<T> visitor, Node<?,?> language) {
-		switch(language.tag) {
+		switch(language.tag()) {
 		case ID:
 			visitor.getWorkList().todo((Node<String,Void>)language);
 			return visitor.id((Node<String,Void>)language);

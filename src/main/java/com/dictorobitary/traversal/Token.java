@@ -22,16 +22,16 @@ public class Token extends AbstractVisitor<Boolean> {
 		return true;
 	}
 	public Boolean list(Node<Node<?, ?>, Node<?, ?>> language) {
-		return Node.accept(this, language.left) && Node.accept(this, language.right);
+		return Node.accept(this, language.left()) && Node.accept(this, language.right());
 	}
 	public Boolean loop(Node<Node<?, ?>, Node<?, ?>> language) {
-		return Node.accept(this, language.left);
+		return Node.accept(this, language.left());
 	}
 	public Boolean reject(Node<?, ?> language) {
 		return true;
 	}
 	public Boolean set(Node<Node<?, ?>, Node<?, ?>> language) {
-		return Node.accept(this, language.left) && Node.accept(this, language.right);
+		return Node.accept(this, language.left()) && Node.accept(this, language.right());
 	}
 	public Boolean id(Node<String, Void> id) {
 		// If we saw this rule already, it's not a token
@@ -49,8 +49,8 @@ public class Token extends AbstractVisitor<Boolean> {
 		}
 	}
 	public Boolean rule(Node<Node<String, Void>, Node<?, ?>> rule) {
-		if (tokens.contains(rule.left)) return true;
-		return Node.accept(this, rule.right);
+		if (tokens.contains(rule.left())) return true;
+		return Node.accept(this, rule.right());
 	}
 	public Boolean bottom() {
 		return false;
