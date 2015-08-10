@@ -27,7 +27,7 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 		begin();
 		T accumulator;
 		// Visit a grammar
-		if (language.tag() == Node.Tag.ID) {
+		if (Node.tag(language) == Node.Tag.ID) {
 			getWorkList().todo((Node<String,Void>)language);
 			accumulator = bottom();
 			for (Node<String,Void> identifier : getWorkList()) {

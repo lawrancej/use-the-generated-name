@@ -14,15 +14,15 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public StringBuffer symbol(Node<Character,Character> language) {
-		if (language.left() == language.right()) {
+		if (Node.left(language) == Node.right(language)) {
 			buffer.append('\'');
-			buffer.append(language.left());
+			buffer.append(Node.left(language));
 			buffer.append('\'');
 		} else {
 			buffer.append('[');
-			buffer.append(language.left());
+			buffer.append(Node.left(language));
 			buffer.append('-');
-			buffer.append(language.right());
+			buffer.append(Node.right(language));
 			buffer.append(']');
 		}
 		return buffer;
@@ -33,16 +33,16 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
 		buffer.append('(');
-		Node.accept(this, list.left());
+		Node.accept(this, Node.left(list));
 		buffer.append(' ');
-		Node.accept(this, list.right());
+		Node.accept(this, Node.right(list));
 		buffer.append(')');
 		return buffer;
 	}
 	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> loop) {
 		buffer.append('(');
-		Node.accept(this,loop.left());
-		if (loop.right() == Language.any) {
+		Node.accept(this,Node.left(loop));
+		if (Node.right(loop) == Language.any) {
 			buffer.append(")*");
 		} else {
 			// FIXME
@@ -56,26 +56,26 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
 		buffer.append('(');
-		Node.accept(this, set.left());
+		Node.accept(this, Node.left(set));
 		buffer.append('|');
-		Node.accept(this, set.right());
+		Node.accept(this, Node.right(set));
 		buffer.append(')');
 		return buffer;
 	}
 	public StringBuffer id(Node<String,Void> id) {
 		buffer.append('<');
-		if (id.left() == null) {
+		if (Node.left(id) == null) {
 			buffer.append(id.hashCode());
 		} else {
-			buffer.append(id.left());
+			buffer.append(Node.left(id));
 		}
 		buffer.append('>');
 		return buffer;
 	}
 	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		this.id(rule.left());
+		this.id(Node.left(rule));
 		buffer.append(" ::= ");
-		Node.accept(this, rule.right());
+		Node.accept(this, Node.right(rule));
 		buffer.append("\n");
 		return buffer;
 	}

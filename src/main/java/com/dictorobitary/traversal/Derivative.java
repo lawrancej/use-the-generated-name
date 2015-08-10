@@ -19,7 +19,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	}
 	public Node<?,?> symbol(Node<Character,Character> language) {
 		// Dc(c) = e
-		if (this.c == language.left() || (this.c > language.left() && this.c <= language.right())) {
+		if (this.c == Node.left(language) || (this.c > Node.left(language) && this.c <= Node.right(language))) {
 			return Language.empty;
 		}
 		// Dc(c') = 0
@@ -31,16 +31,16 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	}
 	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> list) {
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
-		Node<?,?> result = g.list(Node.accept(this, list.left()), list.right());
-		if (g.get.nullable.compute(list.left())) {
-			return g.or(result, Node.accept(this, list.right()));
+		Node<?,?> result = g.list(Node.accept(this, Node.left(list)), Node.right(list));
+		if (g.get.nullable.compute(Node.left(list))) {
+			return g.or(result, Node.accept(this, Node.right(list)));
 		}
 		return result;
 	}
 	public Node<?, ?> loop(Node<Node<?, ?>, Node<?, ?>> language) {
 		// Dc(a*) = Dc(a)a* = Dc(aa*)
 //		return Node.accept(this, g.list(language.left, language));
-		return g.list(Node.accept(this, language.left()), language);
+		return g.list(Node.accept(this, Node.left(language)), language);
 	}
 	public Node<?, ?> reject(Node<?, ?> langauge) {
 		// Dc(0) = 0
@@ -48,7 +48,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	}
 	public Node<?,?> set(Node<Node<?,?>,Node<?,?>> set) {
 		// Dc(a+b) = Dc(a) + Dc(b)
-		return g.or(Node.accept(this, set.left()), Node.accept(this, set.right()));
+		return g.or(Node.accept(this, Node.left(set)), Node.accept(this, Node.right(set)));
 	}
 	private Node<String,Void> getReplacement(Node<String,Void> id) {
 		if (!ids.containsKey(id)) {
@@ -84,18 +84,18 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 	public Node<?,?> rule(Node<Node<String,Void>, Node<?,?>> rule) {
 		// By this point, we've seen the identifier on the rhs before.
 		// If the identifier derives a non-empty set, return the identifier
-		if (ids.containsKey(rule.left())) {
-			return ids.get(rule.left());
+		if (ids.containsKey(Node.left(rule))) {
+			return ids.get(Node.left(rule));
 		}
 		// Visit the rhs
-		Node<?,?> derivation = Node.accept(this,  rule.right());
+		Node<?,?> derivation = Node.accept(this,  Node.right(rule));
 		
 		// Don't create a rule that rejects or is empty
 		if (derivation == Language.reject || derivation == Language.empty) {
 			return derivation;
 		}
 		// Create a new rule
-		return g.rule(getReplacement(rule.left()), derivation);
+		return g.rule(getReplacement(Node.left(rule)), derivation);
 	}
 	public Node<?,?> bottom() {
 		return Language.reject;

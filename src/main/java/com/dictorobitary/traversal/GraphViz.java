@@ -19,7 +19,7 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	private Set<Node<?,?>> nodes = new HashSet<Node<?,?>>();
 	private Set<String> edges = new HashSet<String>();
 	private String label(Node<?,?> language) {
-		return "node" + Long.toHexString(language.id());
+		return "node" + Long.toHexString(Node.id(language));
 	}
 	private String label(long id) {
 		return "node" + Long.toHexString(id);
@@ -44,10 +44,10 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		return buffer;
 	}
 	public StringBuffer symbol(Node<Character,Character> language) {
-		if (language.left() == language.right()) {
-			drawNode(String.format("'%c'", language.left()), language);
+		if (Node.left(language) == Node.right(language)) {
+			drawNode(String.format("'%c'", Node.left(language)), language);
 		} else {
-			drawNode(String.format("'%c'..'%c'", language.left(), language.right()), language);
+			drawNode(String.format("'%c'..'%c'", Node.left(language), Node.right(language)), language);
 		}
 		return buffer;
 	}
@@ -58,17 +58,20 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
 		if(drawNode("{List|{<left> L|<right> R}}", list)) {
-			Node.accept(this, list.left());
-			drawEdge(label(list) + ":left", list.left().id());
-			Node.accept(this, list.right());
-			drawEdge(label(list) + ":right", list.right().id());
+			Node.accept(this, Node.left(list));
+			Node<?, ?> r = Node.left(list);
+			drawEdge(label(list) + ":left", Node.id(r));
+			Node.accept(this, Node.right(list));
+			Node<?, ?> r1 = Node.right(list);
+			drawEdge(label(list) + ":right", Node.id(r1));
 		}
 		return buffer;
 	}
 	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> language) {
 		if (drawNode("Loop", language)) {
-			Node.accept(this, language.left());
-			drawEdge(label(language), language.left().id());
+			Node.accept(this, Node.left(language));
+			Node<?, ?> r = Node.left(language);
+			drawEdge(label(language), Node.id(r));
 		}
 		return buffer;
 	}
@@ -78,26 +81,29 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	}
 	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
 		if (drawNode("Set", set)) {
-			Node.accept(this, set.left());
-			drawEdge(label(set), set.left().id());
-			Node.accept(this, set.right());
-			drawEdge(label(set), set.right().id());
+			Node.accept(this, Node.left(set));
+			Node<?, ?> r = Node.left(set);
+			drawEdge(label(set), Node.id(r));
+			Node.accept(this, Node.right(set));
+			Node<?, ?> r1 = Node.right(set);
+			drawEdge(label(set), Node.id(r1));
 		}
 		return buffer;
 	}
 	public StringBuffer id(Node<String,Void> id) {
-		if (id.left() == null) {
+		if (Node.left(id) == null) {
 			drawNode("Id", id);
 		}
 		else {
-			drawNode(String.format("Id '%s'", id.left()), id);
+			drawNode(String.format("Id '%s'", Node.left(id)), id);
 		}
 		return buffer;
 	}
 	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		this.id(rule.left());
-		Node.accept(this, rule.right());
-		drawEdge(label(rule.left()), rule.right().id());
+		this.id(Node.left(rule));
+		Node.accept(this, Node.right(rule));
+		Node<?, ?> r = Node.right(rule);
+		drawEdge(label(Node.left(rule)), Node.id(r));
 		return buffer;
 	}
 	public StringBuffer bottom() {

@@ -22,17 +22,17 @@ final public class Node<L,R> {
 	private final L left;
 	private final R right;
 	public static int allocations = 0;
-	public Tag tag() {
-		return tag;
+	public static <L,R> Tag tag(Node<L,R> language) {
+		return language.tag;
 	}
-	public L left() {
-		return left;
+	public static <L,R> L left(Node<L,R> language) {
+		return language.left;
 	}
-	public R right() {
-		return right;
+	public static <L,R> R right(Node<L,R> language) {
+		return language.right;
 	}
-	public int id() {
-		return id;
+	public static <L,R> int id(Node<L,R> language) {
+		return language.id;
 	}
 	private Node(Tag type, L left, R right) {
 //		this.id = rand.nextLong();
@@ -57,7 +57,7 @@ final public class Node<L,R> {
 		return this.hashCode() == other.hashCode();
 	}
 	public int hashCode() {
-		return (int)id();
+		return (int)id(this);
 	}
 	// Handy shortcut for the constructor call
 	public static <Left,Right> Node<Left,Right> create(Tag type, Left left, Right right) {
@@ -71,7 +71,7 @@ final public class Node<L,R> {
 	 * @return
 	 */
 	public static <T> T accept(Visitor<T> visitor, Node<?,?> language) {
-		switch(language.tag()) {
+		switch(Node.tag(language)) {
 		case ID:
 			visitor.getWorkList().todo((Node<String,Void>)language);
 			return visitor.id((Node<String,Void>)language);

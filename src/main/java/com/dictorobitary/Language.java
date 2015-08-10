@@ -59,10 +59,10 @@ public class Language {
 	// Skip through defined identifiers
 	private Node<?,?> getRHS(Node<?,?> language) {
 		if (skipDefinedIdentifiers ) {
-			int key = language.id();
-			if (language.tag() == Node.Tag.ID && rules.containsKey(key)) {
+			int key = Node.id(language);
+			if (Node.tag(language) == Node.Tag.ID && rules.containsKey(key)) {
 				Node<Node<String,Void>,Node<?,?>> result = rules.get(key);
-				return result.right();
+				return Node.right(result);
 			}
 		}
 		return language;
@@ -81,7 +81,7 @@ public class Language {
 		if (left == empty) { return right; }
 		if (right == empty) { return left; }
 		// We shift left to guarantee ab != ba, and to guarantee aa != bb
-		long key = ((long)left.id() << 32) ^ right.id();
+		long key = ((long)Node.id(left) << 32) ^ Node.id(right);
 		return Node.createCached(listCache, key, Node.Tag.LIST, left, right);
 	}
 	private Node<?,?> list(Node<?,?>[] nodes, int i) {
@@ -131,21 +131,21 @@ public class Language {
 		// r+r = r
 		if (left == right) { return left; }
 		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
-		if (left.tag() == Node.Tag.SET) {
+		if (Node.tag(left) == Node.Tag.SET) {
 			Node<?,?> l = (Node<?,?>) left;
-			if (l.left() == right || l.right() == right) return l;
+			if (Node.left(l) == right || Node.right(l) == right) return l;
 		}
-		if (right.tag() == Node.Tag.SET) {
+		if (Node.tag(right) == Node.Tag.SET) {
 			Node<?,?> r = (Node<?,?>) right;
-			if (r.left() == left || r.right() == left) return r;
+			if (Node.left(r) == left || Node.right(r) == left) return r;
 		}
 		// Ensure a canonical order for sets
 		Node<?,?> tmp = left;
-		if (left.id() > right.id()) {
+		if (Node.id(left) > Node.id(right)) {
 			left = right;
 			right = tmp;
 		}
-		long key = ((long)left.id() << 32) ^ right.id();
+		long key = ((long)Node.id(left) << 32) ^ Node.id(right);
 		return Node.createCached(setCache, key, Node.Tag.SET, left, right);
 	}
 	private Node<?,?> or(Node<?,?>[] nodes, int i) {
@@ -193,8 +193,8 @@ public class Language {
 		Node<?,?> language = list(sequence);
 		// 0* = e* = e
 		if (language == empty || language == reject) { return empty; }
-		if (language.tag() == Node.Tag.LOOP) return language;
-		return Node.createCached(loopCache, language.id(), Node.Tag.LOOP, language, any);
+		if (Node.tag(language) == Node.Tag.LOOP) return language;
+		return Node.createCached(loopCache, Node.id(language), Node.Tag.LOOP, language, any);
 	}
 	/**
 	 * Matches zero or more occurrences of language, separated by separator.
@@ -260,7 +260,7 @@ public class Language {
 	Map<Integer, Node<String,Void>> reverse = new HashMap<Integer, Node<String,Void>>();
 	private Node<?,?> undefine(Node<String,Void> id) {
 		ids.remove(id);
-		rules.remove(id.id());
+		rules.remove(Node.id(id));
 		return reject;
 	}
 
@@ -310,21 +310,21 @@ public class Language {
 			return reject;
 		}
 		// If the right hand side is just an undefined identifier, don't create a rule, just return the existing identifier
-		int key = id.id();
-		if (right.tag() == Node.Tag.ID && !rules.containsKey(key)) {
+		int key = Node.id(id);
+		if (Node.tag(right) == Node.Tag.ID && !rules.containsKey(key)) {
 //			undefine(id);
 			return right;
 		}
 		// If we defined this language already with a different identifier, return the existing identifier
-		if (reverse.containsKey(right.id())) {
-			Node<String,Void> storedId = reverse.get(right.id());
-			if (rules.containsKey(storedId.id()) && !rules.containsKey(key)) {
+		if (reverse.containsKey(Node.id(right))) {
+			Node<String,Void> storedId = reverse.get(Node.id(right));
+			if (rules.containsKey(Node.id(storedId)) && !rules.containsKey(key)) {
 				return storedId;
 			}
 		}
-		reverse.put(right.id(), id);
+		reverse.put(Node.id(right), id);
 		Node<Node<String,Void>,Node<?,?>> node = Node.createCached(rules, key, Node.Tag.RULE, id, right);
-		assert node.left() == id;
+		assert Node.left(node) == id;
 		// If the language is undefined, make this the starting identifier
 		if (definition == reject) {
 			definition = id;
@@ -373,8 +373,8 @@ public class Language {
 		assert id != null;
 		visitor.getWorkList().done(id);
 		// Defined identifiers
-		if (rules.containsKey(id.id())) {
-			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(id.id()));
+		if (rules.containsKey(Node.id(id))) {
+			return visitor.rule((Node<Node<String,Void>,Node<?,?>>)rules.get(Node.id(id)));
 		}
 		// Undefined identifiers
 		return visitor.reject(reject);

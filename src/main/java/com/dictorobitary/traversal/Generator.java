@@ -25,23 +25,23 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		return buffer.append((char)(rand.nextInt(127)+1));
 	}
 	public StringBuilder symbol(Node<Character, Character> language) {
-		if (language.left() == language.right()) {
-			return buffer.append(language.left());
+		if (Node.left(language) == Node.right(language)) {
+			return buffer.append(Node.left(language));
 		} else {
-			return buffer.append((char)(rand.nextInt(language.right() - language.left()) + language.left()));
+			return buffer.append((char)(rand.nextInt(Node.right(language) - Node.left(language)) + Node.left(language)));
 		}
 	}
 	public StringBuilder empty(Node<?, ?> language) {
 		return buffer;
 	}
 	public StringBuilder list(Node<Node<?, ?>, Node<?, ?>> language) {
-		Node.accept(this, language.left());
-		Node.accept(this, language.right());
+		Node.accept(this, Node.left(language));
+		Node.accept(this, Node.right(language));
 		return buffer;
 	}
 	public StringBuilder loop(Node<Node<?, ?>, Node<?, ?>> language) {
 		for (int iterations = rand.nextInt(loopLimit); iterations > 0; iterations--) {
-			Node.accept(this, language.left());
+			Node.accept(this, Node.left(language));
 		}
 		return buffer;
 	}
@@ -50,15 +50,15 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 	}
 	private StringBuilder flip(Node<Node<?,?>, Node<?,?>> set) {
 		if (rand.nextInt(2) == 0) {
-			Node.accept(this, set.left());
+			Node.accept(this, Node.left(set));
 		} else {
-			Node.accept(this, set.right());
+			Node.accept(this, Node.right(set));
 		}
 		return buffer;
 	}
 	public StringBuilder set(Node<Node<?, ?>, Node<?, ?>> set) {
-		boolean leftIsToken = g.get.token.compute(set.left());
-		boolean rightIsToken = g.get.token.compute(set.right());
+		boolean leftIsToken = g.get.token.compute(Node.left(set));
+		boolean rightIsToken = g.get.token.compute(Node.right(set));
 		// If neither (or both) sides are terminals, just pick a random side
 		if (leftIsToken == rightIsToken) { return flip(set); }
 		// Randomly pick the nonterminal side a limited number of times.
@@ -68,18 +68,18 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		}
 		if (!leftIsToken) {
 			if (number <= 2 && depthLimit >= 0) {
-				Node.accept(this, set.left());
+				Node.accept(this, Node.left(set));
 			}
 			else {
-				Node.accept(this, set.right());
+				Node.accept(this, Node.right(set));
 			}
 		}
 		else if (!rightIsToken) {
 			if (number <= 2 && depthLimit >= 0) {
-				Node.accept(this, set.right());
+				Node.accept(this, Node.right(set));
 			}
 			else {
-				Node.accept(this, set.left());
+				Node.accept(this, Node.left(set));
 			}
 		}
 //		System.out.format("left %s : token? %b\n", g.get.printer.compute(set.left), leftIsToken);
@@ -92,7 +92,7 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 		return buffer;
 	}
 	public StringBuilder rule(Node<Node<String, Void>, Node<?, ?>> rule) {
-		Node.accept(this, rule.right());
+		Node.accept(this, Node.right(rule));
 		return buffer;
 	}
 	public StringBuilder bottom() {
