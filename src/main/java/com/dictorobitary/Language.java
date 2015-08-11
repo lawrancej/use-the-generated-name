@@ -6,20 +6,155 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Specify a language.
+ * Specify a context-free language to parse or generate strings.
  * 
- * In OO terms, this is a Node factory.
- * This Node factory performs compaction by construction.
+ * <p>
+ * Internally, a graph data structure represents the grammar.
+ * To conserve memory and improve performance,
+ * without sacrificing the ability to parse ambiguous grammars,
+ * this class performs compaction by construction,
+ * caches graph nodes to ensure no duplicates,
+ * pre-allocates graph nodes in an array,
+ * uses fastutil type-specific maps and sets,
+ * and encodes nodes into 64-bit numbers as follows:
+ * 
+ * <table border="1">
+ * <tr>
+ * <td>Tag</td>
+ * <td>Left</td>
+ * <td>Right</td>
+ * </tr>
+ * <tr>
+ * <td>4 bits</td>
+ * <td>30 bits</td>
+ * <td>30 bits</td>
+ * </tr>
+ * </table>
+ * <p>
+ * The tag represents the node's type.
+ * <ul>
+ * <li>0 is a character class: the left and right are the Unicode code points in the range.
+ * If the left and right are identical, it's single character.
+ * Any character (regex dot) is a special preallocated character class node.
+ * <li>1 is a sequence (list), left followed by right.
+ * The left and right are internal pointers to other graph nodes.
+ * If the right points back to the list itself, it's a loop.
+ * The empty sequence (epsilon) is a special preallocated list node.
+ * <li>2 is a set (choice), left or right.
+ * The left and right are internal pointers to other graph nodes.
+ * The empty set (reject) is a special preallocated list node.
+ * <li>3 is an identifier. As such, it enables recursion,
+ * but it is overloaded to handle practical concerns such as tokenization,
+ * reduction actions, result sets, and so forth. 
+ * Two identifiers are preallocated: the result set root, and the language root.
+ * The left is a small bit field that stores whether the identifier is nullable, skippable, modifiable,
+ * a terminal, a token, a result root (eps*)
+ * The right is an internal pointer to another graph node.
+ * </ul>
+ * 
+ * Actions (reductions) are attached to the grammar's identifiers externally to allow re-use of a grammar
+ * but with different reduction actions.
+ * 
+ * Labels are attached to the grammar's identifiers externally to allow printing a grammar in a friendly manner.
  * 
  * @author Joseph Lawrance
  *
  */
 public class Language {
 	public final String name;
+	public long[] pool;
+	public int pointer;
 	/** Construct a language specification */
 	public Language(String name) {
 		this.name = name;
+		pool = new long[1024*1024*2];
+		pool[0] = 0x000000; // any
+		pool[1] = 0x100000; // empty list
+		pool[2] = 0x200000; // reject
+		pool[3] = 0x300000; // language root
+		pool[4] = 0x300000; // result identifier
+		pointer = 2;
 	}
+	public static enum Tag {
+		SYMBOL,	LIST, SET, ID, RULE, LOOP,
+		TOKEN, ACTION, RESULT, SKIP
+	}
+	public Tag tag(int language) {
+		byte tag = (byte) ((pool[language] & 0xf00000) >> 60);
+		switch (tag) {
+		case 0x0: return Tag.SYMBOL;
+		case 0x1: return Tag.LIST;
+		case 0x2: return Tag.SET;
+		case 0x3: return Tag.ID;
+		case 0x4: return Tag.RULE;
+		case 0x5: return Tag.LOOP;
+		case 0x6: return Tag.TOKEN;
+		case 0x7: return Tag.ACTION;
+		case 0x8: return Tag.RESULT;
+		case 0x9: return Tag.SKIP;
+		default: return Tag.SKIP;
+		}
+	}
+	public static int left(int language) {
+		return (int) ((pool[language] & 0x0ffc00) >> 30);
+	}
+	public static int right(int language) {
+		return (int) (pool[language] & 0x0003ff);
+	}
+	public static int id(int language) {
+		return language;
+	}
+	public static int getCached(Map<Long, Integer> cache, long key) {
+		return cache.get(key);
+	}
+	public static long createCached(Map<Long, Integer> cache, long key, Tag type, int left, int right) {
+		if (!cache.containsKey(key)) {
+			int result = Node.create(type, left, right);
+			cache.put(key, result);
+			return result;
+		}
+		return cache.get(key);
+	}
+	// Handy shortcut for the constructor call
+	public static int create(Tag type, int left, int right) {
+		long object = ((type.ordinal() << 60) | (left << 30) | (right));
+		pool[++allocations] = object;
+		return allocations;
+	}
+	/**
+	 * Accept a visitor.
+	 * 
+	 * @param visitor
+	 * @param language
+	 * @return
+	 */
+	public static <T> T accept(Visitor<T> visitor, int language) {
+		switch(Node.tag(language)) {
+		case ID:
+			visitor.getWorkList().todo(language);
+			return visitor.id(language);
+		case LIST:
+			if (language == Language.empty) {
+				return visitor.empty(language);
+			}
+			return visitor.list(language);
+		case SET:
+			if (language == Language.reject) {
+				return visitor.reject(language);
+			}
+			return visitor.set(language);
+		case SYMBOL:
+			if (language == Language.any) {
+				return visitor.any(language);
+			}
+			return visitor.symbol(language);
+		case LOOP:
+			return visitor.loop(language);
+		default:
+			return null;
+		}
+	}
+
 	/** Match any character, equivalent to regular expression dot. */
 	public static final Node<Character,Character> any = Node.create(Node.Tag.SYMBOL, null, null);
 	/** Match the empty list (empty sequence). */

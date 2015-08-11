@@ -15,48 +15,48 @@ public interface Visitor<T> {
 	/**
 	 * Visit any symbol: <code>.</code>
 	 */
-	T any(Node<?,?> language);
+	T any(int language);
 	/**
 	 * Visit symbol range: <code>[from-to]</code>
 	 */
-	T symbol(Node<Character,Character> language);
+	T symbol(int language);
 	/**
 	 * Visit empty list: <code>&epsilon;</code>
 	 */
-	T empty(Node<?,?> language);
+	T empty(int language);
 	/**
 	 * Visit a list of languages: <code>abc...</code>
 	 */
-	T list(Node<Node<?,?>,Node<?,?>> language);
+	T list(int language);
 	/**
 	 * Visit a loop: <code>a*</code>
 	 * @param language
 	 */
-	T loop(Node<Node<?, ?>, Node<?, ?>> language);
+	T loop(int language);
 	/**
 	 * Visit empty set: <code>&#8709;</code>
 	 */
-	T reject(Node<?,?> language);
+	T reject(int language);
 	/**
 	 * Visit a set of languages <code>a|b|c|...</code>
 	 */
-	T set(Node<Node<?,?>,Node<?,?>> language);
+	T set(int language);
 	/**
 	 * Get the worklist of visited identifiers.
 	 * @return the work list.
 	 */
-	WorkQueue<Node<String,Void>> getWorkList();
+	WorkQueue<Integer> getWorkList();
 	/**
 	 * Visit an identifier (on the right hand side).
 	 * @param id The identifier
 	 */
-	T id(Node<String,Void> id);
+	T id(int id);
 	/**
 	 * Visit a rule of the form `id -> rhs`
 	 * @param id The identifier
 	 * @param rhs The identifier's right hand side
 	 */
-	T rule(Node<Node<String,Void>,Node<?,?>> rule);
+	T rule(int rule);
 	/**
 	 * The default result.
 	 * 
