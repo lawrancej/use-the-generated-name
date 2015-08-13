@@ -2,47 +2,46 @@ package com.dictorobitary.traversal;
 
 import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
-import com.dictorobitary.Node;
 
 public class Printer extends AbstractVisitor<StringBuffer> {
 	public Printer(Language g) {
 		super(g);
 	}
 	private StringBuffer buffer = new StringBuffer();
-	public StringBuffer any(Node<?, ?> language) {
+	public StringBuffer any(int language) {
 		buffer.append("<any character>");
 		return buffer;
 	}
-	public StringBuffer symbol(Node<Character,Character> language) {
-		if (Node.left(language) == Node.right(language)) {
+	public StringBuffer symbol(int language) {
+		if (g.left(language) == g.right(language)) {
 			buffer.append('\'');
-			buffer.append(Node.left(language));
+			buffer.append(g.left(language));
 			buffer.append('\'');
 		} else {
 			buffer.append('[');
-			buffer.append(Node.left(language));
+			buffer.append(g.left(language));
 			buffer.append('-');
-			buffer.append(Node.right(language));
+			buffer.append(g.right(language));
 			buffer.append(']');
 		}
 		return buffer;
 	}
-	public StringBuffer empty(Node<?, ?> language) {
+	public StringBuffer empty(int language) {
 		buffer.append("\u03b5");
 		return buffer;
 	}
-	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
+	public StringBuffer list(int list) {
 		buffer.append('(');
-		Node.accept(this, Node.left(list));
+		g.accept(this, g.left(list));
 		buffer.append(' ');
-		Node.accept(this, Node.right(list));
+		g.accept(this, g.right(list));
 		buffer.append(')');
 		return buffer;
 	}
-	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> loop) {
+	public StringBuffer loop(int loop) {
 		buffer.append('(');
-		Node.accept(this,Node.left(loop));
-		if (Node.right(loop) == Language.any) {
+		g.accept(this,g.left(loop));
+		if (g.right(loop) == g.any) {
 			buffer.append(")*");
 		} else {
 			// FIXME
@@ -50,32 +49,32 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		}
 		return buffer;
 	}
-	public StringBuffer reject(Node<?, ?> language) {
+	public StringBuffer reject(int language) {
 		buffer.append("\u2205");
 		return buffer;
 	}
-	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
+	public StringBuffer set(int set) {
 		buffer.append('(');
-		Node.accept(this, Node.left(set));
+		g.accept(this, g.left(set));
 		buffer.append('|');
-		Node.accept(this, Node.right(set));
+		g.accept(this, g.right(set));
 		buffer.append(')');
 		return buffer;
 	}
-	public StringBuffer id(Node<String,Void> id) {
+	public StringBuffer id(int id) {
 		buffer.append('<');
-		if (Node.left(id) == null) {
-			buffer.append(id.hashCode());
+		if (g.left(id) == 0) {
+			buffer.append(id);
 		} else {
-			buffer.append(Node.left(id));
+			buffer.append(g.left(id));
 		}
 		buffer.append('>');
 		return buffer;
 	}
-	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		this.id(Node.left(rule));
+	public StringBuffer rule(int rule) {
+		this.id(g.left(rule));
 		buffer.append(" ::= ");
-		Node.accept(this, Node.right(rule));
+		g.accept(this, g.right(rule));
 		buffer.append("\n");
 		return buffer;
 	}

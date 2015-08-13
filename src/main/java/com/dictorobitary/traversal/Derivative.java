@@ -5,54 +5,53 @@ import java.util.Map;
 
 import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
-import com.dictorobitary.Node;
 
-public class Derivative extends AbstractVisitor<Node<?,?>> {
+public class Derivative extends AbstractVisitor<Integer> {
 	public Character c;
-	private Map<Node<String,Void>, Node<String,Void>> ids = new LinkedHashMap<Node<String,Void>, Node<String,Void>>();
+	private Map<Integer, Integer> ids = new LinkedHashMap<Integer, Integer>();
 	public Derivative(Language g) {
 		super(g);
 	}
-	public Node<?, ?> any(Node<?, ?> language) {
+	public Integer any(int language) {
 		// D(.) = e
-		return Language.empty;
+		return g.empty;
 	}
-	public Node<?,?> symbol(Node<Character,Character> language) {
+	public Integer symbol(int language) {
 		// Dc(c) = e
-		if (this.c == Node.left(language) || (this.c > Node.left(language) && this.c <= Node.right(language))) {
-			return Language.empty;
+		if (this.c == g.left(language) || (this.c > g.left(language) && this.c <= g.right(language))) {
+			return g.empty;
 		}
 		// Dc(c') = 0
 		return bottom();
 	}
-	public Node<?, ?> empty(Node<?, ?> language) {
+	public Integer empty(int language) {
 		// Dc(e) = 0
 		return bottom();
 	}
-	public Node<?,?> list(Node<Node<?,?>,Node<?,?>> list) {
+	public Integer list(int list) {
 		// Dc(ab) = Dc(a)b + nullable(a)Dc(b)
-		Node<?,?> result = g.list(Node.accept(this, Node.left(list)), Node.right(list));
-		if (g.get.nullable.compute(Node.left(list))) {
-			return g.or(result, Node.accept(this, Node.right(list)));
+		int result = g.list(g.accept(this, g.left(list)), g.right(list));
+		if (g.get.nullable.compute(g.left(list))) {
+			return g.or(result, g.accept(this, g.right(list)));
 		}
 		return result;
 	}
-	public Node<?, ?> loop(Node<Node<?, ?>, Node<?, ?>> language) {
+	public Integer loop(int language) {
 		// Dc(a*) = Dc(a)a* = Dc(aa*)
-//		return Node.accept(this, g.list(language.left, language));
-		return g.list(Node.accept(this, Node.left(language)), language);
+//		return g.accept(this, g.list(g.left, language));
+		return g.list(g.accept(this, g.left(language)), language);
 	}
-	public Node<?, ?> reject(Node<?, ?> langauge) {
+	public Integer reject(int langauge) {
 		// Dc(0) = 0
 		return bottom();
 	}
-	public Node<?,?> set(Node<Node<?,?>,Node<?,?>> set) {
+	public Integer set(int set) {
 		// Dc(a+b) = Dc(a) + Dc(b)
-		return g.or(Node.accept(this, Node.left(set)), Node.accept(this, Node.right(set)));
+		return g.or(g.accept(this, g.left(set)), g.accept(this, g.right(set)));
 	}
-	private Node<String,Void> getReplacement(Node<String,Void> id) {
+	private int getReplacement(int id) {
 		if (!ids.containsKey(id)) {
-			Node<String,Void> replacement = g.id();
+			int replacement = g.id();
 			ids.put(id, replacement);
 			return replacement;
 		}
@@ -60,7 +59,7 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 			return ids.get(id);
 		}
 	}
-	public Node<?,?> id(Node<String,Void> id) {
+	public Integer id(int id) {
 		if (todo.visited(id)) {
 			// By this point, we've seen the identifier on the rhs before.
 			// If the identifier derives a non-empty set, return the identifier
@@ -81,30 +80,30 @@ public class Derivative extends AbstractVisitor<Node<?,?>> {
 			return g.acceptRule(this, id);
 		}
 	}
-	public Node<?,?> rule(Node<Node<String,Void>, Node<?,?>> rule) {
+	public Integer rule(int rule) {
 		// By this point, we've seen the identifier on the rhs before.
 		// If the identifier derives a non-empty set, return the identifier
-		if (ids.containsKey(Node.left(rule))) {
-			return ids.get(Node.left(rule));
+		if (ids.containsKey(g.left(rule))) {
+			return ids.get(g.left(rule));
 		}
 		// Visit the rhs
-		Node<?,?> derivation = Node.accept(this,  Node.right(rule));
+		int derivation = g.accept(this,  g.right(rule));
 		
 		// Don't create a rule that rejects or is empty
-		if (derivation == Language.reject || derivation == Language.empty) {
+		if (derivation == g.reject || derivation == g.empty) {
 			return derivation;
 		}
 		// Create a new rule
-		return g.rule(getReplacement(Node.left(rule)), derivation);
+		return g.rule(getReplacement(g.left(rule)), derivation);
 	}
-	public Node<?,?> bottom() {
-		return Language.reject;
+	public Integer bottom() {
+		return g.reject;
 	}
-	public Node<?,?> reduce(Node<?,?> accumulator, Node<?,?> current) {
+	public Integer reduce(Integer accumulator, Integer current) {
 		if (accumulator == bottom()) return current;
 		else return accumulator;
 	}
-	public boolean done(Node<?,?> accumulator) {
+	public boolean done(Integer accumulator) {
 		return true;
 	}
 	public void begin() {

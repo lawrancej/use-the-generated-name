@@ -5,35 +5,34 @@ import java.util.Set;
 
 import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
-import com.dictorobitary.Node;
 
 public class Token extends AbstractVisitor<Boolean> {
-	Set<Node<String,Void>> tokens = new HashSet<Node<String,Void>>();
+	Set<Integer> tokens = new HashSet<Integer>();
 	public Token(Language g) {
 		super(g);
 	}
-	public Boolean any(Node<?, ?> language) {
+	public Boolean any(int language) {
 		return true;
 	}
-	public Boolean symbol(Node<Character, Character> language) {
+	public Boolean symbol(int language) {
 		return true;
 	}
-	public Boolean empty(Node<?, ?> language) {
+	public Boolean empty(int language) {
 		return true;
 	}
-	public Boolean list(Node<Node<?, ?>, Node<?, ?>> language) {
-		return Node.accept(this, Node.left(language)) && Node.accept(this, Node.right(language));
+	public Boolean list(int language) {
+		return g.accept(this, g.left(language)) && g.accept(this, g.right(language));
 	}
-	public Boolean loop(Node<Node<?, ?>, Node<?, ?>> language) {
-		return Node.accept(this, Node.left(language));
+	public Boolean loop(int language) {
+		return g.accept(this, g.left(language));
 	}
-	public Boolean reject(Node<?, ?> language) {
+	public Boolean reject(int language) {
 		return true;
 	}
-	public Boolean set(Node<Node<?, ?>, Node<?, ?>> language) {
-		return Node.accept(this, Node.left(language)) && Node.accept(this, Node.right(language));
+	public Boolean set(int language) {
+		return g.accept(this, g.left(language)) && g.accept(this, g.right(language));
 	}
-	public Boolean id(Node<String, Void> id) {
+	public Boolean id(int id) {
 		// If we saw this rule already, it's not a token
 		if (todo.visited(id)) {
 			return false;
@@ -48,9 +47,9 @@ public class Token extends AbstractVisitor<Boolean> {
 			return result;
 		}
 	}
-	public Boolean rule(Node<Node<String, Void>, Node<?, ?>> rule) {
-		if (tokens.contains(Node.left(rule))) return true;
-		return Node.accept(this, Node.right(rule));
+	public Boolean rule(int rule) {
+		if (tokens.contains(g.left(rule))) return true;
+		return g.accept(this, g.right(rule));
 	}
 	public Boolean bottom() {
 		return false;

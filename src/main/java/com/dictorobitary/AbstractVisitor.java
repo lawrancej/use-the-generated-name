@@ -2,12 +2,12 @@ package com.dictorobitary;
 
 
 public abstract class AbstractVisitor<T> implements Visitor<T> {
-	public final WorkQueue<Node<String,Void>> todo = new WorkList<Node<String,Void>>();
+	public final WorkQueue<Integer> todo = new WorkList<Integer>();
 	public final Language g;
 	public AbstractVisitor(Language g) {
 		this.g = g;
 	}
-	public WorkQueue<Node<String,Void>> getWorkList() {
+	public WorkQueue<Integer> getWorkList() {
 		return todo;
 	}
 	public void begin() {}
@@ -20,17 +20,15 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 	public T compute() {
 		return compute(g.definition());
 	}
-	@SuppressWarnings("unchecked")
-	public T compute(Node<?,?> language) {
-		assert language != null;
+	public T compute(int language) {
 		getWorkList().clear();
 		begin();
 		T accumulator;
 		// Visit a grammar
-		if (Node.tag(language) == Node.Tag.ID) {
-			getWorkList().todo((Node<String,Void>)language);
+		if (g.tag(language) == Language.ID) {
+			getWorkList().todo(language);
 			accumulator = bottom();
-			for (Node<String,Void> identifier : getWorkList()) {
+			for (int identifier : getWorkList()) {
 				accumulator = reduce(accumulator, g.acceptRule(this, identifier));
 				if (done(accumulator)) {
 					return end(accumulator);
@@ -39,7 +37,7 @@ public abstract class AbstractVisitor<T> implements Visitor<T> {
 		}
 		// Visit a regex
 		else {
-			accumulator = Node.accept(this, language);
+			accumulator = g.accept(this, language);
 		}
 		return end(accumulator);
 	}

@@ -29,11 +29,11 @@ public class GrammarTest {
 			rule("S",option(id("S"),symbol('('),id("S"),symbol(')')));
 		}};
 		mathExpression = new Language("math") {{
-			Node<String,Void> expression = id("expression");
-			Node<String,Void> term = id("term");
-			Node<String,Void> factor = id("factor");
-			Node<String,Void> digit = id("digit");
-			Node<String,Void> digits = id("digits");
+			int expression = id("expression");
+			int term = id("term");
+			int factor = id("factor");
+			int digit = id("digit");
+			int digits = id("digits");
 			rule(expression, term, many(or(symbol('+'), symbol('-')), term));
 			rule(term, factor, many(or(symbol('*'), symbol('/')), factor));
 			rule(factor, or(digits, list(symbol('('), expression, symbol(')'))));
@@ -52,7 +52,7 @@ public class GrammarTest {
 			rule("letter", or(range('A','Z'), range('a','z')));
 		}};
 		ebnf = new Language("ebnf") {{
-			Node<String,Void> expression = id("expression");
+			int expression = id("expression");
 			rule("syntax", many(id("production")));
 			rule("production", id("identifier"), symbol('='), expression, symbol('.'));
 			rule(expression, id("term"), many(symbol('|'), id("term")));
@@ -71,24 +71,24 @@ public class GrammarTest {
 			rule("S", or(list(id("S"), symbol('+'), id("S")), symbol('1')));
 		}};
 		cox2 = new Language("cox, again") {{
-			Node<String,Void> s = id();
+			int s = id();
 			rule(s, or(list(s, symbol('+'), s), symbol('1')));
 		}};
 		rpn = new Language("rpn") {{
-			separator(many(symbol(' ')));
-			Node<String,Void> expression = id("expression");
-			Node<String,Void> number = id("number");
+//			separator(many(symbol(' ')));
+			int expression = id("expression");
+			int number = id("number");
 			rule (expression, or(number, list(expression, expression, oneOf("+-/*"))));
 			token (number, many1(range('0','9')));
 		}};
 		rpn2 = new Language("rpn, again") {{
-			separator(many(symbol(' ')));
-			Node<String,Void> expression = id("expression");
-			Node<String,Void> plus = id("plus");
-			Node<String,Void> minus = id("minus");
-			Node<String,Void> div = id("div");
-			Node<String,Void> times = id("times");
-			Node<String, Void> number = id("number");
+//			separator(many(symbol(' ')));
+			int expression = id("expression");
+			int plus = id("plus");
+			int minus = id("minus");
+			int div = id("div");
+			int times = id("times");
+			int number = id("number");
 			rule (expression, or(number, plus, minus, div, times));
 			rule (plus, expression, expression, symbol('+'));
 			rule (minus, expression, expression, symbol('-'));
@@ -458,6 +458,6 @@ public class GrammarTest {
 	@After
 	public void summary() {
 		// 3528 total
-		System.out.format("Allocated %d nodes after matching %d characters\n", Node.allocations, characters);
+//		System.out.format("Allocated %d nodes after matching %d characters\n", allocations, characters);
 	}
 }

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.dictorobitary.AbstractVisitor;
 import com.dictorobitary.Language;
-import com.dictorobitary.Node;
 
 /**
  * Debug grammar through GraphViz output and also query the size of the graph.
@@ -16,15 +15,15 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 	public GraphViz(Language g) {
 		super(g);
 	}
-	private Set<Node<?,?>> nodes = new HashSet<Node<?,?>>();
+	private Set<Integer> nodes = new HashSet<Integer>();
 	private Set<String> edges = new HashSet<String>();
-	private String label(Node<?,?> language) {
-		return "node" + Long.toHexString(Node.id(language));
+	private String label(int language) {
+		return "node" + Integer.toHexString(language);
 	}
 	private String label(long id) {
 		return "node" + Long.toHexString(id);
 	}
-	private boolean drawNode(String name, Node<?,?> language) {
+	private boolean drawNode(String name, int language) {
 		if (!nodes.contains(language)) {
 			nodes.add(language);
 			buffer.append(String.format("%s [label=\"%s\"];\n", label(language), name));
@@ -39,71 +38,71 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 			buffer.append(arrow);
 		}
 	}
-	public StringBuffer any(Node<?, ?> language) {
+	public StringBuffer any(int language) {
 		drawNode("Any", language);
 		return buffer;
 	}
-	public StringBuffer symbol(Node<Character,Character> language) {
-		if (Node.left(language) == Node.right(language)) {
-			drawNode(String.format("'%c'", Node.left(language)), language);
+	public StringBuffer symbol(int language) {
+		if (g.left(language) == g.right(language)) {
+			drawNode(String.format("'%c'", g.left(language)), language);
 		} else {
-			drawNode(String.format("'%c'..'%c'", Node.left(language), Node.right(language)), language);
+			drawNode(String.format("'%c'..'%c'", g.left(language), g.right(language)), language);
 		}
 		return buffer;
 	}
 	@Override
-	public StringBuffer empty(Node<?, ?> language) {
+	public StringBuffer empty(int language) {
 		drawNode("&epsilon;", language);
 		return buffer;
 	}
-	public StringBuffer list(Node<Node<?,?>,Node<?,?>> list) {
+	public StringBuffer list(int list) {
 		if(drawNode("{List|{<left> L|<right> R}}", list)) {
-			Node.accept(this, Node.left(list));
-			Node<?, ?> r = Node.left(list);
-			drawEdge(label(list) + ":left", Node.id(r));
-			Node.accept(this, Node.right(list));
-			Node<?, ?> r1 = Node.right(list);
-			drawEdge(label(list) + ":right", Node.id(r1));
+			g.accept(this, g.left(list));
+			int r = g.left(list);
+			drawEdge(label(list) + ":left", r);
+			g.accept(this, g.right(list));
+			int r1 = g.right(list);
+			drawEdge(label(list) + ":right", r1);
 		}
 		return buffer;
 	}
-	public StringBuffer loop(Node<Node<?,?>,Node<?,?>> language) {
+	public StringBuffer loop(int language) {
 		if (drawNode("Loop", language)) {
-			Node.accept(this, Node.left(language));
-			Node<?, ?> r = Node.left(language);
-			drawEdge(label(language), Node.id(r));
+			g.accept(this, g.left(language));
+			int r = g.left(language);
+			drawEdge(label(language), r);
 		}
 		return buffer;
 	}
-	public StringBuffer reject(Node<?, ?> language) {
+	public StringBuffer reject(int language) {
 		drawNode("Reject", language);
 		return buffer;
 	}
-	public StringBuffer set(Node<Node<?,?>,Node<?,?>> set) {
+	public StringBuffer set(int set) {
 		if (drawNode("Set", set)) {
-			Node.accept(this, Node.left(set));
-			Node<?, ?> r = Node.left(set);
-			drawEdge(label(set), Node.id(r));
-			Node.accept(this, Node.right(set));
-			Node<?, ?> r1 = Node.right(set);
-			drawEdge(label(set), Node.id(r1));
+			g.accept(this, g.left(set));
+			int r = g.left(set);
+			drawEdge(label(set), r);
+			g.accept(this, g.right(set));
+			int r1 = g.right(set);
+			drawEdge(label(set), r1);
 		}
 		return buffer;
 	}
-	public StringBuffer id(Node<String,Void> id) {
-		if (Node.left(id) == null) {
+	public StringBuffer id(int id) {
+		if (g.left(id) == 0) {
 			drawNode("Id", id);
 		}
 		else {
-			drawNode(String.format("Id '%s'", Node.left(id)), id);
+			drawNode(String.format("Id '%s'", g.left(id)), id);
 		}
 		return buffer;
 	}
-	public StringBuffer rule(Node<Node<String,Void>,Node<?,?>> rule) {
-		this.id(Node.left(rule));
-		Node.accept(this, Node.right(rule));
-		Node<?, ?> r = Node.right(rule);
-		drawEdge(label(Node.left(rule)), Node.id(r));
+	public StringBuffer rule(int rule) {
+		this.id(g.left(rule));
+		g.accept(this, g.right(rule));
+		int r = g.right(rule);
+		drawEdge(label(g.left(rule)), r);
 		return buffer;
 	}
 	public StringBuffer bottom() {

@@ -28,9 +28,9 @@ final public class Compute {
 		token = new Token(g);
 	}
 	public boolean debug = false;
-	public boolean matches(Node<?,?> language, CharSequence s) {
+	public boolean matches(int language, CharSequence s) {
 		boolean result;
-		Node<?,?> before = language;
+		int before = language;
 		if (debug) {
 			System.out.println(gv.compute());
 			System.out.format("Nodes %d, edges %d\n", gv.nodes(), gv.edges());
@@ -40,7 +40,7 @@ final public class Compute {
 			derivative.c = s.charAt(i);
 			before = language;
 			language = derivative.compute(language);
-			if (language == Language.reject) {
+			if (language == g.reject) {
 				System.out.format("Syntax error at character '%c', index %d in string: %s\n", s.charAt(i), i, s);
 				if (debug) {
 					System.out.println(gv.compute(before));
