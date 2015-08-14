@@ -14,7 +14,10 @@ public class Token extends AbstractVisitor<Boolean> {
 	public Boolean any(int language) {
 		return true;
 	}
-	public Boolean symbol(int language) {
+	public Boolean symbol(int language, char symbol) {
+		return true;
+	}
+	public Boolean range(int language, char from, char to) {
 		return true;
 	}
 	public Boolean empty(int language) {

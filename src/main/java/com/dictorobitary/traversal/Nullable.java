@@ -20,7 +20,10 @@ public class Nullable extends AbstractVisitor<Boolean> {
 	public Boolean any(int language) {
 		return false;
 	}
-	public Boolean symbol(int c) {
+	public Boolean symbol(int c, char symbol) {
+		return false;
+	}
+	public Boolean range(int c, char from, char to) {
 		return false;
 	}
 	public Boolean empty(int language) {

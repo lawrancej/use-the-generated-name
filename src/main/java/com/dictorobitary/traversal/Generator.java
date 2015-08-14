@@ -23,12 +23,11 @@ public class Generator extends AbstractVisitor<StringBuilder> {
 	public StringBuilder any(int language) {
 		return buffer.append((char)(rand.nextInt(127)+1));
 	}
-	public StringBuilder symbol(int language) {
-		if (g.left(language) == g.right(language)) {
-			return buffer.append(g.left(language));
-		} else {
-			return buffer.append((char)(rand.nextInt(g.right(language) - g.left(language)) + g.left(language)));
-		}
+	public StringBuilder symbol(int language, char symbol) {
+		return buffer.append(symbol);
+	}
+	public StringBuilder range(int language, char from, char to) {
+		return buffer.append((char)(rand.nextInt(to - from) + from));
 	}
 	public StringBuilder empty(int language) {
 		return buffer;

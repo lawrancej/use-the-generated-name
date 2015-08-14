@@ -17,9 +17,13 @@ public interface Visitor<T> {
 	 */
 	T any(int language);
 	/**
+	 * Visit symbol: <code>[symbol]</code>
+	 */
+	T symbol(int language, char symbol);
+	/**
 	 * Visit symbol range: <code>[from-to]</code>
 	 */
-	T symbol(int language);
+	T range(int language, char from, char to);
 	/**
 	 * Visit empty list: <code>&epsilon;</code>
 	 */

@@ -12,18 +12,18 @@ public class Printer extends AbstractVisitor<StringBuffer> {
 		buffer.append("<any character>");
 		return buffer;
 	}
-	public StringBuffer symbol(int language) {
-		if (g.left(language) == g.right(language)) {
-			buffer.append('\'');
-			buffer.append(g.left(language));
-			buffer.append('\'');
-		} else {
-			buffer.append('[');
-			buffer.append(g.left(language));
-			buffer.append('-');
-			buffer.append(g.right(language));
-			buffer.append(']');
-		}
+	public StringBuffer symbol(int language, char symbol) {
+		buffer.append('\'');
+		buffer.append(symbol);
+		buffer.append('\'');
+		return buffer;
+	}
+	public StringBuffer range(int language, char from, char to) {
+		buffer.append('[');
+		buffer.append(from);
+		buffer.append('-');
+		buffer.append(to);
+		buffer.append(']');
 		return buffer;
 	}
 	public StringBuffer empty(int language) {

@@ -16,12 +16,18 @@ public class Derivative extends AbstractVisitor<Integer> {
 		// D(.) = e
 		return g.empty;
 	}
-	public Integer symbol(int language) {
+	public Integer symbol(int language, char symbol) {
 		// Dc(c) = e
-		if (this.c == g.left(language) || (this.c > g.left(language) && this.c <= g.right(language))) {
+		if (this.c == symbol) {
 			return g.empty;
 		}
 		// Dc(c') = 0
+		return bottom();
+	}
+	public Integer range(int language, char from, char to) {
+		if (this.c > from && this.c <= to) {
+			return g.empty;
+		}
 		return bottom();
 	}
 	public Integer empty(int language) {

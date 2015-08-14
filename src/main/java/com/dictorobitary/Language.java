@@ -122,11 +122,10 @@ public class Language {
 	}
 	// "Construct" a graph node
 	private int create(byte tag, int left, int right) {
-		++pointer;
 		this.tag[pointer] = tag;
 		this.left[pointer] = left;
 		this.right[pointer] = right;
-		return pointer;
+		return pointer++;
 	}
 
 	public byte tag(int language) {
@@ -149,6 +148,8 @@ public class Language {
 	 * @return
 	 */
 	public <T> T accept(Visitor<T> visitor, int language) {
+		int left = left(language);
+		int right = right(language);
 		switch(tag(language)) {
 		case ID:
 			visitor.getWorkList().todo(language);
@@ -166,8 +167,11 @@ public class Language {
 		case SYMBOL:
 			if (language == any) {
 				return visitor.any(language);
+			} else if (left == right) {
+				return visitor.symbol(language, (char) left);
+			} else {
+				return visitor.range(language, (char)left, (char) right);
 			}
-			return visitor.symbol(language);
 		case LOOP:
 			return visitor.loop(language);
 		default:
@@ -199,7 +203,7 @@ public class Language {
 			from = to;
 			to = tmp;
 		}
-		long key = (from << 16) ^ to;
+		long key = (from << 32) | to;
 		return createCached(rangeCache, key, SYMBOL, from,to);
 	}
 	
@@ -279,10 +283,14 @@ public class Language {
 		if (left == right) { return left; }
 		// r+(s+r) = (r+s)+r = r+(r+s) = (s+r)+r = r+s
 		if (tag(left) == SET) {
-			if (left(left) == right || right(left) == right) return left;
+			if (left(left) == right || right(left) == right) {
+				return left;
+			}
 		}
 		if (tag(right) == SET) {
-			if (left(right) == left || right(right) == left) return right;
+			if (left(right) == left || right(right) == left) {
+				return right;
+			}
 		}
 		// Ensure a canonical order for sets
 		int tmp = left;
@@ -337,8 +345,12 @@ public class Language {
 	public int many(int... sequence) {
 		int language = list(sequence);
 		// 0* = e* = e
-		if (language == empty || language == reject) { return empty; }
-		if (tag(language) == LOOP) return language;
+		if (language == empty || language == reject) {
+			return empty;
+		}
+		if (tag(language) == LOOP) {
+			return language;
+		}
 		return createCached(loopCache, language, LOOP, language, any);
 	}
 	/**

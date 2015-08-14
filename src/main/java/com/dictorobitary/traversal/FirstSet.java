@@ -11,7 +11,10 @@ public class FirstSet extends AbstractVisitor<Integer> {
 	public Integer any(int language) {
 		return language;
 	}
-	public Integer symbol(int language) {
+	public Integer symbol(int language, char symbol) {
+		return language;
+	}
+	public Integer range(int language, char from, char to) {
 		return language;
 	}
 	public Integer empty(int language) {

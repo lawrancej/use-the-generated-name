@@ -42,12 +42,12 @@ public class GraphViz extends AbstractVisitor<StringBuffer> {
 		drawNode("Any", language);
 		return buffer;
 	}
-	public StringBuffer symbol(int language) {
-		if (g.left(language) == g.right(language)) {
-			drawNode(String.format("'%c'", g.left(language)), language);
-		} else {
-			drawNode(String.format("'%c'..'%c'", g.left(language), g.right(language)), language);
-		}
+	public StringBuffer symbol(int language, char symbol) {
+		drawNode(String.format("'%c'", g.left(language)), language);
+		return buffer;
+	}
+	public StringBuffer range(int language, char from, char to) {
+		drawNode(String.format("'%c'..'%c'", from, to), language);
 		return buffer;
 	}
 	@Override
